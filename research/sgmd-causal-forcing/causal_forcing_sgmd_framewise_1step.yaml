@@ -1,0 +1,58 @@
+generator_ckpt: /workspace/ckpts/stage2_causal_ode.pt # Stage-2 ODE init (generator_ema-only checkpoint is handled by the loader)
+generator_fsdp_wrap_strategy: size
+real_score_fsdp_wrap_strategy: size
+fake_score_fsdp_wrap_strategy: size
+real_name: Wan2.1-T2V-14B
+text_encoder_fsdp_wrap_strategy: size
+denoising_step_list:
+- 1000
+denoising_step_list_first_chunk: #  Causal Forcing++ with 1/2 steps applies the first-frame 4-step technique proposed by [ASD](https://github.com/BigAandSmallq/SAD). We thank ASD for its contribution.
+- 1000
+- 750
+- 500
+- 250
+warp_denoising_step: true # need to remove - 0 in denoising_step_list if warp_denoising_step is true
+ts_schedule: false
+num_train_timestep: 1000
+timestep_shift: 5.0
+guidance_scale: 3.0
+denoising_loss_type: flow
+mixed_precision: true
+seed: 42 # nonzero => reproducible (seed 0 means randomize)
+wandb_host: https://api.wandb.ai
+wandb_key: ""
+wandb_entity: ""
+wandb_project: ""
+sharding_strategy: full # single-node pilot (2xH100); the paper's 8-GPU multi-node runs use hybrid_full
+text_encoder_cpu_offload: true # fp32 umt5-xxl (~23GB) stays in host RAM; frees ~11.5GB/GPU at world size 2
+lr: 1.0e-06 # SGMD paper: 1e-6 for both networks (DMD config used 2e-6 / 4e-7)
+lr_critic: 1.0e-06
+beta1: 0.0
+beta2: 0.999
+beta1_critic: 0.0
+beta2_critic: 0.999
+batch_size: 1
+ema_weight: 0.99
+ema_start_step: 100000000 # pilot saves raw generator weights at every checkpoint (EMA disabled)
+total_batch_size: 8
+log_iters: 25 # save/log every 25 steps; with dfake_gen_update_ratio 1, steps == generator updates
+max_steps: 100 # stop after 100 generator updates; checkpoints at 25/50/75/100 (the 0-update checkpoint is the Stage-2 init itself)
+negative_prompt: '色调艳丽，过曝，静态，细节模糊不清，字幕，风格，作品，画作，画面，静止，整体发灰，最差质量，低质量，JPEG压缩残留，丑陋的，残缺的，多余的手指，画得不好的手部，画得不好的脸部，畸形的，毁容的，形态畸形的肢体，手指融合，静止不动的画面，杂乱的背景，三条腿，背景人很多，倒着走'
+dfake_gen_update_ratio: 1 # SGMD paper: 1:1 fake:generator updates (DMD used 5)
+image_or_video_shape:
+- 1
+- 21
+- 16
+- 60
+- 104
+distribution_loss: sgmd
+sgmd_lambda: 0.1 # lambda for L_NR (generator) and L_RC (fake score); paper default/best 0.1
+trainer: score_distillation
+gradient_checkpointing: true
+num_frame_per_block: 1
+load_raw_video: false
+model_kwargs:
+  timestep_shift: 5.0
+data_path: prompts/demos.txt # vidprom file is not shipped; demos.txt = 100 motion-heavy prompts
+
+real_score_cpu_offload: true # frozen 14B: params live in host RAM, streamed in per step (frees ~28GB/GPU)

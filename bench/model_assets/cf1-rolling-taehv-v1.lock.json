@@ -1,0 +1,87 @@
+{
+  "schema_version": 1,
+  "stack_id": "cf1-rolling-taehv-v1",
+  "source": {
+    "repository": "https://github.com/thu-ml/Causal-Forcing.git",
+    "commit": "8db419e341e5fc52542c0b2c4542728420ddfb4a"
+  },
+  "assets": [
+    {
+      "id": "default-config",
+      "relative_path": "configs/default_config.yaml",
+      "size_bytes": 403,
+      "sha256": "18303f1bacbfbebaa02893cc8e106941753f21a7d1a7109519a90762375ee772",
+      "source": "thu-ml/Causal-Forcing@8db419e341e5fc52542c0b2c4542728420ddfb4a:configs/default_config.yaml"
+    },
+    {
+      "id": "cf1-config",
+      "relative_path": "configs/causal_forcing_dmd_framewise_1step.yaml",
+      "size_bytes": 1791,
+      "sha256": "0b1e43656ba4b0544e85b047be46a79b156d683bfb06eaf99c8817826967623d",
+      "source": "thu-ml/Causal-Forcing@8db419e341e5fc52542c0b2c4542728420ddfb4a:configs/causal_forcing_dmd_framewise_1step.yaml"
+    },
+    {
+      "id": "taehv-source",
+      "relative_path": "demo_utils/taehv.py",
+      "size_bytes": 14157,
+      "sha256": "865b1dd0516682c02352bd76bce2ad0472588330ea9fab30ca0895630f263244",
+      "source": "thu-ml/Causal-Forcing@8db419e341e5fc52542c0b2c4542728420ddfb4a:demo_utils/taehv.py"
+    },
+    {
+      "id": "taehv-weight",
+      "relative_path": "checkpoints/taew2_1.pth",
+      "size_bytes": 22678901,
+      "sha256": "d26151e76cdc2c9424bef988de874b33d9a53f30ef3060cd556c429c469c797e",
+      "source": "madebyollin/taehv@1a88a7dcafa06f46866661c0d687654aafa5521b:taew2_1.pth"
+    },
+    {
+      "id": "cf1-generator",
+      "relative_path": "checkpoints/causal-forcing++/framewise-1step.pt",
+      "size_bytes": 5676220819,
+      "sha256": "bdb1b475fc88d528f510158a0990cd457f02c661b527ceb11ca9e4728533e2d0",
+      "source": "zhuhz22/Causal-Forcing@a6a8f0e3bbdea1044fc6fef09c9cb9f648bf1bc3:causal-forcing++/framewise-1step.pt"
+    },
+    {
+      "id": "wan-config",
+      "relative_path": "wan_models/Wan2.1-T2V-1.3B/config.json",
+      "size_bytes": 249,
+      "sha256": "ab37994c43740513f94b3ba6233a784035a67b43c8cde83c8f31aa90468c67ce",
+      "source": "Wan-AI/Wan2.1-T2V-1.3B@37ec512624d61f7aa208f7ea8140a131f93afc9a:config.json"
+    },
+    {
+      "id": "wan-text-encoder",
+      "relative_path": "wan_models/Wan2.1-T2V-1.3B/models_t5_umt5-xxl-enc-bf16.pth",
+      "size_bytes": 11361920418,
+      "sha256": "7cace0da2b446bbbbc57d031ab6cf163a3d59b366da94e5afe36745b746fd81d",
+      "source": "Wan-AI/Wan2.1-T2V-1.3B@37ec512624d61f7aa208f7ea8140a131f93afc9a:models_t5_umt5-xxl-enc-bf16.pth"
+    },
+    {
+      "id": "wan-special-tokens",
+      "relative_path": "wan_models/Wan2.1-T2V-1.3B/google/umt5-xxl/special_tokens_map.json",
+      "size_bytes": 6623,
+      "sha256": "7b8a9f5040adb67b5805abdfd42c1f8d0f3d0e711f10726580eb3789cd0ad61d",
+      "source": "Wan-AI/Wan2.1-T2V-1.3B@37ec512624d61f7aa208f7ea8140a131f93afc9a:google/umt5-xxl/special_tokens_map.json"
+    },
+    {
+      "id": "wan-spiece",
+      "relative_path": "wan_models/Wan2.1-T2V-1.3B/google/umt5-xxl/spiece.model",
+      "size_bytes": 4548313,
+      "sha256": "e3909a67b780650b35cf529ac782ad2b6b26e6d1f849d3fbb6a872905f452458",
+      "source": "Wan-AI/Wan2.1-T2V-1.3B@37ec512624d61f7aa208f7ea8140a131f93afc9a:google/umt5-xxl/spiece.model"
+    },
+    {
+      "id": "wan-tokenizer",
+      "relative_path": "wan_models/Wan2.1-T2V-1.3B/google/umt5-xxl/tokenizer.json",
+      "size_bytes": 16837417,
+      "sha256": "6e197b4d3dbd71da14b4eb255f4fa91c9c1f2068b20a2de2472967ca3d22602b",
+      "source": "Wan-AI/Wan2.1-T2V-1.3B@37ec512624d61f7aa208f7ea8140a131f93afc9a:google/umt5-xxl/tokenizer.json"
+    },
+    {
+      "id": "wan-tokenizer-config",
+      "relative_path": "wan_models/Wan2.1-T2V-1.3B/google/umt5-xxl/tokenizer_config.json",
+      "size_bytes": 61728,
+      "sha256": "ed9a3a8b0faa71a70a32847e0435fe036e6e112d4df4edb7bb48a921e344dc05",
+      "source": "Wan-AI/Wan2.1-T2V-1.3B@37ec512624d61f7aa208f7ea8140a131f93afc9a:google/umt5-xxl/tokenizer_config.json"
+    }
+  ]
+}

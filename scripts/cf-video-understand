@@ -1,0 +1,123 @@
+#!/usr/bin/env python3
+"""Preflight or explicitly upload one CF++1 development video to both judges."""
+
+from __future__ import annotations
+
+import argparse
+import json
+import math
+import sys
+from pathlib import Path
+
+PROJECT_ROOT = Path(__file__).resolve().parents[1]
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
+
+from bench.cf_video_artifact import ArtifactAssemblyError  # noqa: E402
+from bench.development_video_judge import (  # noqa: E402
+    BUILTIN_TRANSPORT_IDENTITIES,
+    preflight_development_video_understanding,
+    run_development_video_understanding,
+)
+from bench.gemini_video_judge import load_gemini_api_key, post_gemini  # noqa: E402
+from bench.quality_sweep import ProtocolError  # noqa: E402
+from bench.video_judge import load_twelvelabs_api_key, post_pegasus  # noqa: E402
+
+
+def _positive_finite_seconds(value: str) -> float:
+    try:
+        parsed = float(value)
+    except ValueError as exc:
+        raise argparse.ArgumentTypeError("timeout must be a number") from exc
+    if not math.isfinite(parsed) or parsed <= 0:
+        raise argparse.ArgumentTypeError("timeout must be finite and greater than zero")
+    return parsed
+
+
+def build_parser() -> argparse.ArgumentParser:
+    parser = argparse.ArgumentParser(description=__doc__)
+    subparsers = parser.add_subparsers(dest="command", required=True)
+    for name, help_text in (
+        ("preflight", "validate the artifact and both requests without credentials or upload"),
+        ("upload", "cross the explicit paid boundary with resumable provider state"),
+    ):
+        command = subparsers.add_parser(name, help=help_text)
+        command.add_argument("--artifact", required=True, help="artifact manifest.json")
+        command.add_argument("--prompt", required=True, help="exact generation prompt")
+        command.add_argument(
+            "--rubric",
+            default=str(PROJECT_ROOT / "bench" / "quality" / "rubric-v1.md"),
+        )
+    upload = subparsers.choices["upload"]
+    upload.add_argument("--output", required=True, help="durable understanding directory")
+    upload.add_argument("--dotenv", default=str(PROJECT_ROOT / ".env"))
+    upload.add_argument(
+        "--timeout-seconds",
+        type=_positive_finite_seconds,
+        default=300.0,
+        help="positive per-blocking-HTTP-operation timeout (not a wall-clock deadline)",
+    )
+    upload.add_argument(
+        "--retry-uncertain",
+        action="append",
+        default=[],
+        choices=("google", "twelvelabs"),
+        help="explicitly permit one provider with an ambiguous prior outcome to retry",
+    )
+    return parser
+
+
+def main(argv: list[str] | None = None) -> int:
+    args = build_parser().parse_args(argv)
+    try:
+        if args.command == "preflight":
+            report = preflight_development_video_understanding(
+                args.artifact,
+                original_prompt=args.prompt,
+                rubric_path=args.rubric,
+            )
+        else:
+            # Keys are loaded lazily inside the transport closures, after both
+            # requests and every existing provider state have been validated.
+            gemini_key: str | None = None
+            twelvelabs_key: str | None = None
+
+            def google_transport(request: dict) -> dict:
+                nonlocal gemini_key
+                if gemini_key is None:
+                    gemini_key = load_gemini_api_key(args.dotenv)
+                return post_gemini(
+                    request,
+                    api_key=gemini_key,
+                    timeout_seconds=args.timeout_seconds,
+                )
+
+            def twelvelabs_transport(request: dict) -> dict:
+                nonlocal twelvelabs_key
+                if twelvelabs_key is None:
+                    twelvelabs_key = load_twelvelabs_api_key(args.dotenv)
+                return post_pegasus(
+                    request,
+                    api_key=twelvelabs_key,
+                    timeout_seconds=args.timeout_seconds,
+                )
+
+            report = run_development_video_understanding(
+                args.artifact,
+                original_prompt=args.prompt,
+                rubric_path=args.rubric,
+                output_dir=args.output,
+                google_transport=google_transport,
+                twelvelabs_transport=twelvelabs_transport,
+                retry_uncertain=args.retry_uncertain,
+                transport_identities=BUILTIN_TRANSPORT_IDENTITIES,
+            )
+        print(json.dumps(report, indent=2, sort_keys=True))
+        return 0
+    except (ProtocolError, ArtifactAssemblyError) as exc:
+        print(f"error: {exc}", file=sys.stderr)
+        return 2
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

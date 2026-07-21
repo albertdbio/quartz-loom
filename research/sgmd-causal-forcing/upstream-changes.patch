@@ -1,0 +1,78 @@
+diff --git a/model/__init__.py b/model/__init__.py
+index eab680b..1463712 100755
+--- a/model/__init__.py
++++ b/model/__init__.py
+@@ -2,6 +2,7 @@ from .diffusion import CausalDiffusion
+ from .causvid import CausVid
+ from .dmd import DMD
+ from .gan import GAN
++from .sgmd import SGMD
+ from .sid import SiD
+ from .ode_regression import ODERegression
+ from .naive_consistency import NaiveConsistency
+@@ -11,6 +12,7 @@ __all__ = [
+     "CausVid",
+     "DMD",
+     "GAN",
++    "SGMD",
+     "SiD",
+     "ODERegression",
+     "NaiveConsistency"
+diff --git a/trainer/distillation.py b/trainer/distillation.py
+index 33b1881..dce5351 100755
+--- a/trainer/distillation.py
++++ b/trainer/distillation.py
+@@ -6,7 +6,7 @@ from utils.distributed import EMA_FSDP, fsdp_wrap, fsdp_state_dict, launch_distr
+ from utils.misc import set_seed
+ import torch.distributed as dist
+ from omegaconf import OmegaConf
+-from model import DMD
++from model import DMD, SGMD
+ import torch
+ import wandb
+ import time
+@@ -56,6 +56,8 @@ class Trainer:
+         # Step 2: Initialize the model and optimizer
+         if config.distribution_loss == "dmd":
+             self.model = DMD(config, device=self.device)
++        elif config.distribution_loss == "sgmd":
++            self.model = SGMD(config, device=self.device)
+         else:
+             raise ValueError("Invalid distribution matching loss")
+ 
+@@ -75,7 +77,7 @@ class Trainer:
+             sharding_strategy=config.sharding_strategy,
+             mixed_precision=config.mixed_precision,
+             wrap_strategy=config.real_score_fsdp_wrap_strategy,
+-            cpu_offload=False
++            cpu_offload=getattr(config, "real_score_cpu_offload", False)
+         )
+ 
+         self.model.fake_score = fsdp_wrap(
+@@ -360,6 +362,15 @@ class Trainer:
+                     }
+                 )
+ 
++                if TRAIN_GENERATOR:
++                    for extra_key in ("sgmd_fisher_loss", "sgmd_nr_loss"):
++                        if extra_key in generator_log_dict:
++                            wandb_loss_dict[extra_key] = generator_log_dict[extra_key].mean().item()
++                # Always emit step metrics to stdout so runs with --disable-wandb
++                # (e.g. the SGMD pilot) remain monitorable for NaN/divergence.
++                print(f"[step {self.step:04d}] " + " ".join(
++                    f"{k}={v:.4g}" for k, v in wandb_loss_dict.items()), flush=True)
++
+                 if not self.disable_wandb:
+                     wandb.log(wandb_loss_dict, step=self.step)
+ 
+@@ -377,3 +388,10 @@ class Trainer:
+                     if not self.disable_wandb:
+                         wandb.log({"per iteration time": current_time - self.previous_time}, step=self.step)
+                     self.previous_time = current_time
++
++            # Optional stop condition; without max_steps in the config the loop
++            # runs forever, matching the original behavior.
++            if self.step >= self.config.get("max_steps", float("inf")):
++                if self.is_main_process:
++                    print(f"Reached max_steps {self.config.max_steps}, stopping training.")
++                break

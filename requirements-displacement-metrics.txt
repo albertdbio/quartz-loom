@@ -1,0 +1,10 @@
+# Dedicated environment for the displacement and coherence measurement tools.
+# Keep separate from the upstream runtime, which currently pins NumPy 1.x.
+torch==2.13.0
+torchvision==0.28.0
+numpy==2.5.1
+opencv-python-headless==5.0.0.93
+scipy==1.18.0
+pillow==12.3.0
+imageio==2.37.3
+imageio-ffmpeg==0.6.0

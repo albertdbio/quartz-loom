@@ -1,0 +1,95 @@
+{
+  "authorizes_performance_claim": false,
+  "authorizes_quality_claim": false,
+  "camera": {
+    "background_track_count": 109,
+    "median_global_motion_px": 178.5083770751953,
+    "median_homography_inlier_fraction": 0.27631578947368424,
+    "median_homography_reprojection_error_px": 1.285088062286377
+  },
+  "decision_threshold": 5.0,
+  "displaced_vs_collapsed": false,
+  "displacement_score": 1.911727,
+  "foreground": {
+    "camera_compensated_trajectory_span_fraction_width": 0.6434650421142578,
+    "camera_compensated_trajectory_span_px": 535.3629150390625,
+    "centroid_endpoint_displacement_fraction_width": 0.6111336854787973,
+    "centroid_endpoint_displacement_px": 508.4632263183594,
+    "max_centroid_excursion_fraction_width": 0.6111336854787973,
+    "max_centroid_excursion_px": 508.4632263183594,
+    "median_net_displacement_fraction_width": 0.610097334935115,
+    "median_net_displacement_px": 507.6009826660156,
+    "persistent_track_count": 8,
+    "screen_space_trajectory_span_fraction_width": 0.30259198408860427,
+    "screen_space_trajectory_span_px": 251.75653076171875,
+    "selected_track_count": 21,
+    "track_survival": 0.9351851851851852,
+    "trajectory_path_length_px": 2069.14794921875,
+    "trajectory_span_fraction_width": 0.30259198408860427,
+    "trajectory_span_px": 251.75653076171875,
+    "trajectory_straightness": 0.24573555820903975,
+    "translation_consensus": 0.8279809976219896
+  },
+  "kind": "coherent-displacement-metrics",
+  "models": {
+    "appearance": "facebookresearch/dinov2:dinov2_vits14",
+    "appearance_device": "mps",
+    "camera_compensation": "background-ransac-homography-v1",
+    "flow": "opencv-farneback-warp-v1",
+    "tracker": "facebookresearch/co-tracker:cotracker3_offline",
+    "tracker_device": "mps"
+  },
+  "morph_guardrail": {
+    "appearance_guard": 0.0,
+    "dino_guard": 0.0,
+    "dinov2_feature_similarity_median": 0.570530354976654,
+    "dinov2_feature_similarity_p10": 0.4749850332736969,
+    "flow_translation_coherence": 0.3451040810451791,
+    "flow_warp_residual": 0.026668905862607062,
+    "raw_flow_mean_px": 2.9265941977500916,
+    "warp_guard": 0.8333193383587059
+  },
+  "purpose": "development-displacement-measurement",
+  "schema_version": 1,
+  "score_components": {
+    "appearance_guard": 0.0,
+    "coherence_guard": 0.8799520228915522,
+    "displacement_extent": 0.8403526711021406
+  },
+  "source": {
+    "frame_count": 81,
+    "guardrail_frame_indices": [
+      0,
+      1,
+      10,
+      11,
+      20,
+      21,
+      30,
+      31,
+      40,
+      41,
+      50,
+      51,
+      60,
+      61,
+      70,
+      71,
+      80
+    ],
+    "height": 480,
+    "path": "/Users/electric/Documents/areas_of_focus/decart-research/sgmd-fnorm-20260721/clips/step_000040/Locked-off wide side view of a single adult in a blue jacket walking from the far left edge to the f.mp4",
+    "sampled_frame_indices": [
+      0,
+      10,
+      20,
+      30,
+      40,
+      50,
+      60,
+      70,
+      80
+    ],
+    "width": 832
+  }
+}

@@ -1,0 +1,171 @@
+{
+  "schema_version": 1,
+  "metric": "coherent-displacement-metrics-v1",
+  "tracker": "facebookresearch/co-tracker:cotracker3_offline",
+  "appearance": "facebookresearch/dinov2:dinov2_vits14",
+  "clip_contract": {
+    "frame_count": 81,
+    "height": 480,
+    "width": 832
+  },
+  "calibration": {
+    "blind_score": "median of three independent 0-10 motion reviews",
+    "decision_threshold": 5.0,
+    "spearman_rho": 0.6081773651856639,
+    "spearman_pvalue": 0.062105999080905916,
+    "kendall_tau_b": 0.4941662111074008,
+    "kendall_pvalue": 0.062262148495646916,
+    "sample_count": 11,
+    "independent_content_count": 10,
+    "label_weighted_correlation": {
+      "spearman_rho": 0.7012249999491674,
+      "spearman_pvalue": 0.016202384931814477,
+      "kendall_tau_b": 0.5719051591439669,
+      "kendall_pvalue": 0.022955775627363773
+    },
+    "intentional_duplicate": {
+      "blind_ids": [
+        "m07",
+        "k14"
+      ],
+      "byte_identical": true,
+      "reason": "Cell-A ring-OFF ball reuses the retained D1 rolling-TAEHV render; keep both labels in the 11-item table but count the content once for inferential correlation."
+    }
+  },
+  "rows": [
+    {
+      "blind_id": "m07",
+      "label": "ring-off-ball",
+      "relative_path": "cell-a-off/ball/clip.mp4",
+      "blind_score": 5,
+      "metric_score": 3.889719,
+      "span_fraction": 0.21609207300039437,
+      "survival": 0.982363315696649,
+      "displaced": false
+    },
+    {
+      "blind_id": "q31",
+      "label": "ring-on-ball",
+      "relative_path": "cell-a-on/ball/clip.mp4",
+      "blind_score": 4,
+      "metric_score": 0.0,
+      "span_fraction": 0.009081761997479659,
+      "survival": 1.0,
+      "displaced": false
+    },
+    {
+      "blind_id": "v18",
+      "label": "ring-off-walker",
+      "relative_path": "cell-a-off/walker/clip.mp4",
+      "blind_score": 3,
+      "metric_score": 0.050011,
+      "span_fraction": 0.048802335322128,
+      "survival": 0.9567901234567902,
+      "displaced": false
+    },
+    {
+      "blind_id": "c44",
+      "label": "ring-on-walker",
+      "relative_path": "cell-a-on/walker/clip.mp4",
+      "blind_score": 3,
+      "metric_score": 0.004881,
+      "span_fraction": 0.020145611121104315,
+      "survival": 1.0,
+      "displaced": false
+    },
+    {
+      "blind_id": "p62",
+      "label": "ring-off-rolling-object",
+      "relative_path": "cell-a-off/rolling-object/clip.mp4",
+      "blind_score": 4,
+      "metric_score": 0.211627,
+      "span_fraction": 0.056675915534679704,
+      "survival": 0.9800117577895355,
+      "displaced": false
+    },
+    {
+      "blind_id": "h09",
+      "label": "ring-on-rolling-object",
+      "relative_path": "cell-a-on/rolling-object/clip.mp4",
+      "blind_score": 2,
+      "metric_score": 0.0,
+      "span_fraction": 0.012754389872917762,
+      "survival": 0.9794238683127572,
+      "displaced": false
+    },
+    {
+      "blind_id": "x27",
+      "label": "ring-off-vehicle",
+      "relative_path": "cell-a-off/vehicle/clip.mp4",
+      "blind_score": 1,
+      "metric_score": 0.0,
+      "span_fraction": 0.006685490218492655,
+      "survival": 0.9772079772079773,
+      "displaced": false
+    },
+    {
+      "blind_id": "b53",
+      "label": "ring-on-vehicle",
+      "relative_path": "cell-a-on/vehicle/clip.mp4",
+      "blind_score": 1,
+      "metric_score": 0.071057,
+      "span_fraction": 0.04026725200506357,
+      "survival": 0.9835390946502057,
+      "displaced": false
+    },
+    {
+      "blind_id": "k14",
+      "label": "cell-b-d1-rolling-taehv",
+      "relative_path": "cell-b/d1-rolling-taehv/clip.mp4",
+      "blind_score": 5,
+      "metric_score": 3.889719,
+      "span_fraction": 0.21609207300039437,
+      "survival": 0.982363315696649,
+      "displaced": false
+    },
+    {
+      "blind_id": "s80",
+      "label": "cell-b-d2-reset",
+      "relative_path": "cell-b/d2-reset-every-block/clip.mp4",
+      "blind_score": 3,
+      "metric_score": 2.115336,
+      "span_fraction": 0.20569861852205718,
+      "survival": 0.9017957351290684,
+      "displaced": false
+    },
+    {
+      "blind_id": "r36",
+      "label": "cell-c-d0-wan",
+      "relative_path": "cell-c-wan/clip.mp4",
+      "blind_score": 5,
+      "metric_score": 4.000687,
+      "span_fraction": 0.21746285145099348,
+      "survival": 0.9747474747474747,
+      "displaced": false
+    }
+  ],
+  "regressions": {
+    "same_latent_decoder": {
+      "rolling_blind_id": "k14",
+      "wan_blind_id": "r36",
+      "score_tolerance": 0.5,
+      "span_fraction_tolerance": 0.01,
+      "observed_score_delta": 0.11096800000000018,
+      "observed_span_fraction_delta": 0.0013707784505991027
+    },
+    "ring": {
+      "blind_worse_pairs": [
+        {
+          "off_blind_id": "m07",
+          "on_blind_id": "q31"
+        },
+        {
+          "off_blind_id": "p62",
+          "on_blind_id": "h09"
+        }
+      ],
+      "off_mean": 1.03783925,
+      "on_mean": 0.018984499999999998
+    }
+  }
+}

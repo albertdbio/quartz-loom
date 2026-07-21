@@ -1,0 +1,544 @@
+{
+  "clip_contract": {
+    "fps": 16,
+    "frame_count": 81,
+    "height": 480,
+    "width": 832
+  },
+  "condition_order": [
+    "final_1step",
+    "final_2step",
+    "cd_4step",
+    "ode_4step",
+    "cd_1step",
+    "ode_1step"
+  ],
+  "condition_summary": [
+    {
+      "condition": "final_1step",
+      "degrades_over_time_count": 0,
+      "expected_tier": "most_coherent",
+      "maximum_score": 10.0,
+      "mean_score": 9.631239,
+      "minimum_score": 8.783284
+    },
+    {
+      "condition": "final_2step",
+      "degrades_over_time_count": 0,
+      "expected_tier": "most_coherent",
+      "maximum_score": 10.0,
+      "mean_score": 9.961025,
+      "minimum_score": 9.8441
+    },
+    {
+      "condition": "cd_4step",
+      "degrades_over_time_count": 1,
+      "expected_tier": "mid",
+      "maximum_score": 10.0,
+      "mean_score": 7.30236,
+      "minimum_score": 0.0
+    },
+    {
+      "condition": "ode_4step",
+      "degrades_over_time_count": 2,
+      "expected_tier": "mid",
+      "maximum_score": 10.0,
+      "mean_score": 4.044224,
+      "minimum_score": 0.0
+    },
+    {
+      "condition": "cd_1step",
+      "degrades_over_time_count": 2,
+      "expected_tier": "low",
+      "maximum_score": 7.753737,
+      "mean_score": 1.938434,
+      "minimum_score": 0.0
+    },
+    {
+      "condition": "ode_1step",
+      "degrades_over_time_count": 1,
+      "expected_tier": "low",
+      "maximum_score": 0.0,
+      "mean_score": 0.0,
+      "minimum_score": 0.0
+    }
+  ],
+  "expected_ordering_checks": {
+    "condition_tier_separation": {
+      "expected": "each final condition > each four-step condition > each one-step condition",
+      "passed": true
+    },
+    "group_mean_order": {
+      "expected": "finals > four-step > one-step",
+      "finals_mean": 9.796132,
+      "four_step_mean": 5.673292,
+      "one_step_mean": 0.969217,
+      "passed": true
+    },
+    "sgmd_ball_very_low_relative_to_vehicle": {
+      "ball_score": 0.0,
+      "expected": "ball < vehicle",
+      "passed": true,
+      "vehicle_score": 7.553927
+    },
+    "sgmd_vehicle_degrades_over_time": {
+      "actual": true,
+      "expected": true,
+      "passed": true
+    }
+  },
+  "expected_tiers": [
+    {
+      "conditions": [
+        "final_1step",
+        "final_2step"
+      ],
+      "tier": "most_coherent"
+    },
+    {
+      "conditions": [
+        "cd_4step",
+        "ode_4step"
+      ],
+      "tier": "mid"
+    },
+    {
+      "conditions": [
+        "cd_1step",
+        "ode_1step"
+      ],
+      "tier": "low"
+    }
+  ],
+  "metric": "video-coherence-metrics-v1",
+  "models": {
+    "appearance": "facebookresearch/dinov2:dinov2_vits14",
+    "flow": "torchvision:raft_small:C_T_V2:half-resolution",
+    "spatial": "patch-pointillist-and-structure-reference-v2"
+  },
+  "ordering_violations": [],
+  "prompt_order": [
+    "ball",
+    "barrel",
+    "walker",
+    "vehicle"
+  ],
+  "rows": [
+    {
+      "coherence_score": 9.74167,
+      "condition": "final_1step",
+      "degrades_over_time": false,
+      "prompt": "ball",
+      "relative_path": "final_1step/Locked-off wide shot of a single bright red rubber ball over a plain gray floor. The ball starts hig.mp4",
+      "result_json": "clips/fork_grid/final_1step/ball.json",
+      "segment_scores": {
+        "early": 9.960631,
+        "late": 9.727653,
+        "middle": 9.832315
+      },
+      "source_group": "fork_grid",
+      "spatial_score": 9.491609,
+      "temporal_score": 9.998319
+    },
+    {
+      "coherence_score": 10.0,
+      "condition": "final_1step",
+      "degrades_over_time": false,
+      "prompt": "barrel",
+      "relative_path": "final_1step/Locked-off wide shot of a single small wooden barrel rolling from the upper-left side of a gentle ra.mp4",
+      "result_json": "clips/fork_grid/final_1step/barrel.json",
+      "segment_scores": {
+        "early": 10.0,
+        "late": 10.0,
+        "middle": 10.0
+      },
+      "source_group": "fork_grid",
+      "spatial_score": 10.0,
+      "temporal_score": 10.0
+    },
+    {
+      "coherence_score": 8.783284,
+      "condition": "final_1step",
+      "degrades_over_time": false,
+      "prompt": "walker",
+      "relative_path": "final_1step/Locked-off wide side view of a single adult in a blue jacket walking from the far left edge to the f.mp4",
+      "result_json": "clips/fork_grid/final_1step/walker.json",
+      "segment_scores": {
+        "early": 9.92026,
+        "late": 8.572127,
+        "middle": 9.104295
+      },
+      "source_group": "fork_grid",
+      "spatial_score": 7.714607,
+      "temporal_score": 10.0
+    },
+    {
+      "coherence_score": 10.0,
+      "condition": "final_1step",
+      "degrades_over_time": false,
+      "prompt": "vehicle",
+      "relative_path": "final_1step/Locked-off wide street view. A single yellow compact car enters at the far left, drives steadily acr.mp4",
+      "result_json": "clips/fork_grid/final_1step/vehicle.json",
+      "segment_scores": {
+        "early": 10.0,
+        "late": 10.0,
+        "middle": 10.0
+      },
+      "source_group": "fork_grid",
+      "spatial_score": 10.0,
+      "temporal_score": 10.0
+    },
+    {
+      "coherence_score": 10.0,
+      "condition": "final_2step",
+      "degrades_over_time": false,
+      "prompt": "ball",
+      "relative_path": "final_2step/Locked-off wide shot of a single bright red rubber ball over a plain gray floor. The ball starts hig.mp4",
+      "result_json": "clips/fork_grid/final_2step/ball.json",
+      "segment_scores": {
+        "early": 10.0,
+        "late": 10.0,
+        "middle": 10.0
+      },
+      "source_group": "fork_grid",
+      "spatial_score": 10.0,
+      "temporal_score": 10.0
+    },
+    {
+      "coherence_score": 9.8441,
+      "condition": "final_2step",
+      "degrades_over_time": false,
+      "prompt": "barrel",
+      "relative_path": "final_2step/Locked-off wide shot of a single small wooden barrel rolling from the upper-left side of a gentle ra.mp4",
+      "result_json": "clips/fork_grid/final_2step/barrel.json",
+      "segment_scores": {
+        "early": 10.0,
+        "late": 9.727068,
+        "middle": 9.96103
+      },
+      "source_group": "fork_grid",
+      "spatial_score": 9.690631,
+      "temporal_score": 10.0
+    },
+    {
+      "coherence_score": 10.0,
+      "condition": "final_2step",
+      "degrades_over_time": false,
+      "prompt": "walker",
+      "relative_path": "final_2step/Locked-off wide side view of a single adult in a blue jacket walking from the far left edge to the f.mp4",
+      "result_json": "clips/fork_grid/final_2step/walker.json",
+      "segment_scores": {
+        "early": 10.0,
+        "late": 10.0,
+        "middle": 10.0
+      },
+      "source_group": "fork_grid",
+      "spatial_score": 10.0,
+      "temporal_score": 10.0
+    },
+    {
+      "coherence_score": 10.0,
+      "condition": "final_2step",
+      "degrades_over_time": false,
+      "prompt": "vehicle",
+      "relative_path": "final_2step/Locked-off wide street view. A single yellow compact car enters at the far left, drives steadily acr.mp4",
+      "result_json": "clips/fork_grid/final_2step/vehicle.json",
+      "segment_scores": {
+        "early": 10.0,
+        "late": 10.0,
+        "middle": 10.0
+      },
+      "source_group": "fork_grid",
+      "spatial_score": 10.0,
+      "temporal_score": 10.0
+    },
+    {
+      "coherence_score": 0.0,
+      "condition": "cd_4step",
+      "degrades_over_time": true,
+      "prompt": "ball",
+      "relative_path": "cd_4step/Locked-off wide shot of a single bright red rubber ball over a plain gray floor. The ball starts hig.mp4",
+      "result_json": "clips/fork_grid/cd_4step/ball.json",
+      "segment_scores": {
+        "early": 10.0,
+        "late": 0.0,
+        "middle": 0.0
+      },
+      "source_group": "fork_grid",
+      "spatial_score": 0.0,
+      "temporal_score": 10.0
+    },
+    {
+      "coherence_score": 9.841885,
+      "condition": "cd_4step",
+      "degrades_over_time": false,
+      "prompt": "barrel",
+      "relative_path": "cd_4step/Locked-off wide shot of a single small wooden barrel rolling from the upper-left side of a gentle ra.mp4",
+      "result_json": "clips/fork_grid/cd_4step/barrel.json",
+      "segment_scores": {
+        "early": 10.0,
+        "late": 10.0,
+        "middle": 9.800243
+      },
+      "source_group": "fork_grid",
+      "spatial_score": 9.686271,
+      "temporal_score": 10.0
+    },
+    {
+      "coherence_score": 10.0,
+      "condition": "cd_4step",
+      "degrades_over_time": false,
+      "prompt": "walker",
+      "relative_path": "cd_4step/Locked-off wide side view of a single adult in a blue jacket walking from the far left edge to the f.mp4",
+      "result_json": "clips/fork_grid/cd_4step/walker.json",
+      "segment_scores": {
+        "early": 10.0,
+        "late": 10.0,
+        "middle": 10.0
+      },
+      "source_group": "fork_grid",
+      "spatial_score": 10.0,
+      "temporal_score": 10.0
+    },
+    {
+      "coherence_score": 9.367557,
+      "condition": "cd_4step",
+      "degrades_over_time": false,
+      "prompt": "vehicle",
+      "relative_path": "cd_4step/Locked-off wide street view. A single yellow compact car enters at the far left, drives steadily acr.mp4",
+      "result_json": "clips/fork_grid/cd_4step/vehicle.json",
+      "segment_scores": {
+        "early": 9.34051,
+        "late": 9.799117,
+        "middle": 9.367557
+      },
+      "source_group": "fork_grid",
+      "spatial_score": 8.775112,
+      "temporal_score": 10.0
+    },
+    {
+      "coherence_score": 10.0,
+      "condition": "ode_4step",
+      "degrades_over_time": false,
+      "prompt": "ball",
+      "relative_path": "ode_4step/Locked-off wide shot of a single bright red rubber ball over a plain gray floor. The ball starts hig.mp4",
+      "result_json": "clips/fork_grid/ode_4step/ball.json",
+      "segment_scores": {
+        "early": 10.0,
+        "late": 10.0,
+        "middle": 10.0
+      },
+      "source_group": "fork_grid",
+      "spatial_score": 10.0,
+      "temporal_score": 10.0
+    },
+    {
+      "coherence_score": 0.0,
+      "condition": "ode_4step",
+      "degrades_over_time": false,
+      "prompt": "barrel",
+      "relative_path": "ode_4step/Locked-off wide shot of a single small wooden barrel rolling from the upper-left side of a gentle ra.mp4",
+      "result_json": "clips/fork_grid/ode_4step/barrel.json",
+      "segment_scores": {
+        "early": 0.0,
+        "late": 0.0,
+        "middle": 0.0
+      },
+      "source_group": "fork_grid",
+      "spatial_score": 0.0,
+      "temporal_score": 10.0
+    },
+    {
+      "coherence_score": 6.176896,
+      "condition": "ode_4step",
+      "degrades_over_time": true,
+      "prompt": "walker",
+      "relative_path": "ode_4step/Locked-off wide side view of a single adult in a blue jacket walking from the far left edge to the f.mp4",
+      "result_json": "clips/fork_grid/ode_4step/walker.json",
+      "segment_scores": {
+        "early": 9.385746,
+        "late": 4.235995,
+        "middle": 9.461512
+      },
+      "source_group": "fork_grid",
+      "spatial_score": 3.815405,
+      "temporal_score": 10.0
+    },
+    {
+      "coherence_score": 0.0,
+      "condition": "ode_4step",
+      "degrades_over_time": true,
+      "prompt": "vehicle",
+      "relative_path": "ode_4step/Locked-off wide street view. A single yellow compact car enters at the far left, drives steadily acr.mp4",
+      "result_json": "clips/fork_grid/ode_4step/vehicle.json",
+      "segment_scores": {
+        "early": 10.0,
+        "late": 0.0,
+        "middle": 0.0
+      },
+      "source_group": "fork_grid",
+      "spatial_score": 0.0,
+      "temporal_score": 10.0
+    },
+    {
+      "coherence_score": 0.0,
+      "condition": "cd_1step",
+      "degrades_over_time": false,
+      "prompt": "ball",
+      "relative_path": "cd_1step/Locked-off wide shot of a single bright red rubber ball over a plain gray floor. The ball starts hig.mp4",
+      "result_json": "clips/fork_grid/cd_1step/ball.json",
+      "segment_scores": {
+        "early": 0.0,
+        "late": 0.0,
+        "middle": 0.0
+      },
+      "source_group": "fork_grid",
+      "spatial_score": 0.0,
+      "temporal_score": 10.0
+    },
+    {
+      "coherence_score": 0.0,
+      "condition": "cd_1step",
+      "degrades_over_time": false,
+      "prompt": "barrel",
+      "relative_path": "cd_1step/Locked-off wide shot of a single small wooden barrel rolling from the upper-left side of a gentle ra.mp4",
+      "result_json": "clips/fork_grid/cd_1step/barrel.json",
+      "segment_scores": {
+        "early": 0.0,
+        "late": 0.0,
+        "middle": 0.0
+      },
+      "source_group": "fork_grid",
+      "spatial_score": 0.0,
+      "temporal_score": 9.661094
+    },
+    {
+      "coherence_score": 0.0,
+      "condition": "cd_1step",
+      "degrades_over_time": true,
+      "prompt": "walker",
+      "relative_path": "cd_1step/Locked-off wide side view of a single adult in a blue jacket walking from the far left edge to the f.mp4",
+      "result_json": "clips/fork_grid/cd_1step/walker.json",
+      "segment_scores": {
+        "early": 8.255573,
+        "late": 0.0,
+        "middle": 0.0
+      },
+      "source_group": "fork_grid",
+      "spatial_score": 0.0,
+      "temporal_score": 9.800178
+    },
+    {
+      "coherence_score": 7.753737,
+      "condition": "cd_1step",
+      "degrades_over_time": true,
+      "prompt": "vehicle",
+      "relative_path": "cd_1step/Locked-off wide street view. A single yellow compact car enters at the far left, drives steadily acr.mp4",
+      "result_json": "clips/fork_grid/cd_1step/vehicle.json",
+      "segment_scores": {
+        "early": 10.0,
+        "late": 7.265735,
+        "middle": 10.0
+      },
+      "source_group": "fork_grid",
+      "spatial_score": 6.012043,
+      "temporal_score": 10.0
+    },
+    {
+      "coherence_score": 0.0,
+      "condition": "ode_1step",
+      "degrades_over_time": false,
+      "prompt": "ball",
+      "relative_path": "ode_1step/Locked-off wide shot of a single bright red rubber ball over a plain gray floor. The ball starts hig.mp4",
+      "result_json": "clips/fork_grid/ode_1step/ball.json",
+      "segment_scores": {
+        "early": 0.0,
+        "late": 10.0,
+        "middle": 0.0
+      },
+      "source_group": "fork_grid",
+      "spatial_score": 0.0,
+      "temporal_score": 10.0
+    },
+    {
+      "coherence_score": 0.0,
+      "condition": "ode_1step",
+      "degrades_over_time": false,
+      "prompt": "barrel",
+      "relative_path": "ode_1step/Locked-off wide shot of a single small wooden barrel rolling from the upper-left side of a gentle ra.mp4",
+      "result_json": "clips/fork_grid/ode_1step/barrel.json",
+      "segment_scores": {
+        "early": 0.0,
+        "late": 0.0,
+        "middle": 0.0
+      },
+      "source_group": "fork_grid",
+      "spatial_score": 0.0,
+      "temporal_score": 7.061976
+    },
+    {
+      "coherence_score": 0.0,
+      "condition": "ode_1step",
+      "degrades_over_time": false,
+      "prompt": "walker",
+      "relative_path": "ode_1step/Locked-off wide side view of a single adult in a blue jacket walking from the far left edge to the f.mp4",
+      "result_json": "clips/fork_grid/ode_1step/walker.json",
+      "segment_scores": {
+        "early": 0.0,
+        "late": 0.0,
+        "middle": 0.0
+      },
+      "source_group": "fork_grid",
+      "spatial_score": 0.0,
+      "temporal_score": 8.83511
+    },
+    {
+      "coherence_score": 0.0,
+      "condition": "ode_1step",
+      "degrades_over_time": true,
+      "prompt": "vehicle",
+      "relative_path": "ode_1step/Locked-off wide street view. A single yellow compact car enters at the far left, drives steadily acr.mp4",
+      "result_json": "clips/fork_grid/ode_1step/vehicle.json",
+      "segment_scores": {
+        "early": 9.889447,
+        "late": 0.0,
+        "middle": 0.0
+      },
+      "source_group": "fork_grid",
+      "spatial_score": 0.0,
+      "temporal_score": 10.0
+    },
+    {
+      "coherence_score": 0.0,
+      "condition": "step_000025",
+      "degrades_over_time": false,
+      "prompt": "ball",
+      "relative_path": "step_000025/Locked-off wide shot of a single bright red rubber ball over a plain gray floor. The ball starts hig.mp4",
+      "result_json": "clips/sgmd_pilot/step_000025/ball.json",
+      "segment_scores": {
+        "early": 0.0,
+        "late": 0.0,
+        "middle": 0.0
+      },
+      "source_group": "sgmd_pilot",
+      "spatial_score": 0.0,
+      "temporal_score": 7.121341
+    },
+    {
+      "coherence_score": 7.553927,
+      "condition": "step_000025",
+      "degrades_over_time": true,
+      "prompt": "vehicle",
+      "relative_path": "step_000025/Locked-off wide street view. A single yellow compact car enters at the far left, drives steadily acr.mp4",
+      "result_json": "clips/sgmd_pilot/step_000025/vehicle.json",
+      "segment_scores": {
+        "early": 10.0,
+        "late": 6.935005,
+        "middle": 8.763047
+      },
+      "source_group": "sgmd_pilot",
+      "spatial_score": 5.719032,
+      "temporal_score": 9.97753
+    }
+  ]
+}

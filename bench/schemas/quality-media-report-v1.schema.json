@@ -1,0 +1,84 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "quality-media-report-v1.schema.json",
+  "title": "Hash-bound quality media audit report v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "ok",
+    "protocol_sha256",
+    "manifest_sha256",
+    "media_contract",
+    "records",
+    "report_sha256"
+  ],
+  "properties": {
+    "ok": {"const": true},
+    "protocol_sha256": {"$ref": "#/$defs/sha256"},
+    "manifest_sha256": {"$ref": "#/$defs/sha256"},
+    "media_contract": {"$ref": "#/$defs/mediaContract"},
+    "records": {
+      "type": "array",
+      "minItems": 1,
+      "items": {"$ref": "#/$defs/mediaRecord"}
+    },
+    "report_sha256": {"$ref": "#/$defs/sha256"}
+  },
+  "$defs": {
+    "sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+    "mediaContract": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "width",
+        "height",
+        "fps",
+        "decoded_frames",
+        "duration_tolerance_frames",
+        "codec",
+        "pixel_format"
+      ],
+      "properties": {
+        "width": {"const": 832},
+        "height": {"const": 480},
+        "fps": {"const": 16},
+        "decoded_frames": {"enum": [81, 961]},
+        "duration_tolerance_frames": {"type": "integer", "minimum": 0},
+        "codec": {"const": "h264"},
+        "pixel_format": {"const": "yuv420p"}
+      }
+    },
+    "mediaRecord": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "artifact_id",
+        "source_file",
+        "media_sha256",
+        "width",
+        "height",
+        "fps",
+        "decoded_frames",
+        "duration_s",
+        "codec",
+        "pixel_format",
+        "video_streams",
+        "audio_streams"
+      ],
+      "properties": {
+        "artifact_id": {"type": "string", "minLength": 1},
+        "source_file": {"type": "string", "minLength": 1},
+        "media_sha256": {"$ref": "#/$defs/sha256"},
+        "width": {"const": 832},
+        "height": {"const": 480},
+        "fps": {"const": 16},
+        "decoded_frames": {"enum": [81, 961]},
+        "duration_s": {"type": "number", "exclusiveMinimum": 0},
+        "codec": {"const": "h264"},
+        "pixel_format": {"const": "yuv420p"},
+        "video_streams": {"const": 1},
+        "audio_streams": {"const": 0}
+      }
+    }
+  }
+}

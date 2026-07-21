@@ -1,0 +1,6 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "framework": null,
+  "installCommand": "pnpm install --frozen-lockfile",
+  "buildCommand": "grep -q 'preset: \"node-server\"' vite.config.ts && trap 'unlink .v.ts' EXIT && sed 's/preset: \"node-server\"/preset: \"vercel\"/' vite.config.ts > .v.ts && pnpm exec vite build --config .v.ts"
+}

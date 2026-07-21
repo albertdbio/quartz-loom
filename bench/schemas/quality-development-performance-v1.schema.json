@@ -1,0 +1,83 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "quality-development-performance-v1.schema.json",
+  "title": "Quality development performance evidence v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "status",
+    "protocol_sha256",
+    "round_a_manifest_sha256",
+    "round_b_manifest_sha256",
+    "round_a_trials",
+    "round_b_trials",
+    "evidence_sha256"
+  ],
+  "properties": {
+    "schema_version": {"const": 1},
+    "status": {"const": "complete"},
+    "protocol_sha256": {"$ref": "#/$defs/sha256"},
+    "round_a_manifest_sha256": {"$ref": "#/$defs/sha256"},
+    "round_b_manifest_sha256": {"$ref": "#/$defs/sha256"},
+    "round_a_trials": {
+      "type": "array",
+      "minItems": 2,
+      "items": {"$ref": "#/$defs/trial"}
+    },
+    "round_b_trials": {
+      "type": "array",
+      "minItems": 6,
+      "items": {"$ref": "#/$defs/trial"}
+    },
+    "evidence_sha256": {"$ref": "#/$defs/sha256"}
+  },
+  "$defs": {
+    "sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+    "positiveNumber": {"type": "number", "exclusiveMinimum": 0},
+    "trial": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "trial_id",
+        "artifact_id",
+        "run_id",
+        "system_id",
+        "prompt_id",
+        "seed",
+        "media_sha256",
+        "config_sha256",
+        "wall_started_ns",
+        "wall_finished_ns",
+        "rgb_ready_ns",
+        "e2e_fps",
+        "first_visible_rgb_s",
+        "p95_effective_frame_interval_ms",
+        "forwards",
+        "decoded_frames"
+      ],
+      "properties": {
+        "trial_id": {"type": "string", "minLength": 1},
+        "artifact_id": {"type": "string", "minLength": 1},
+        "run_id": {"type": "string", "minLength": 1},
+        "system_id": {"type": "string", "minLength": 1},
+        "prompt_id": {"type": "string", "minLength": 1},
+        "seed": {"type": "integer"},
+        "media_sha256": {"$ref": "#/$defs/sha256"},
+        "config_sha256": {"$ref": "#/$defs/sha256"},
+        "wall_started_ns": {"type": "integer", "minimum": 0},
+        "wall_finished_ns": {"type": "integer", "minimum": 1},
+        "rgb_ready_ns": {
+          "type": "array",
+          "minItems": 2,
+          "items": {"type": "integer", "minimum": 0}
+        },
+        "e2e_fps": {"$ref": "#/$defs/positiveNumber"},
+        "first_visible_rgb_s": {"$ref": "#/$defs/positiveNumber"},
+        "p95_effective_frame_interval_ms": {"$ref": "#/$defs/positiveNumber"},
+        "forwards": {"type": "integer", "minimum": 1},
+        "decoded_frames": {"type": "integer", "minimum": 2}
+      }
+    }
+  }
+}

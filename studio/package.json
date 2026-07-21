@@ -1,0 +1,36 @@
+{
+  "name": "studio",
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": ">=22.5"
+  },
+  "scripts": {
+    "dev": "vite dev",
+    "build": "vite build",
+    "start": "node .output/server/index.mjs",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "@decartai/sdk": "^0.1.14",
+    "@solidjs/router": "^0.16.1",
+    "@solidjs/start": "2.0.0-alpha.3",
+    "dompurify": "^3.4.11",
+    "dotenv": "^17.2.1",
+    "effect": "4.0.0-beta.93",
+    "jose": "^6.2.3",
+    "livekit-server-sdk": "^2.16.0",
+    "marked": "^18.0.6",
+    "solid-js": "^1.9.13"
+  },
+  "devDependencies": {
+    "@solidjs/vite-plugin-nitro-2": "0.3.0",
+    "@types/dompurify": "^3.2.0",
+    "@types/node": "^24.0.0",
+    "typescript": "^6.0.3",
+    "vite": "^7.3.1",
+    "vitest": "^4.1.9"
+  },
+  "packageManager": "pnpm@10.17.1"
+}

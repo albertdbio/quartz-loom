@@ -1,0 +1,454 @@
+{
+  "schema_version": 1,
+  "protocol_id": "cf1-quality-repair-v1",
+  "status": "draft",
+  "hypothesis": "A zero-extra-forward inference repair can raise CF++ 1-step full-video quality while preserving the measured one-H100 performance contract.",
+  "baseline": {
+    "system_id": "cf1-baseline",
+    "repository": "thu-ml/Causal-Forcing",
+    "commit": "8db419e341e5fc52542c0b2c4542728420ddfb4a",
+    "source_diff_sha256": "UNRESOLVED",
+    "config_sha256": "UNRESOLVED",
+    "checkpoint": "zhuhz22/Causal-Forcing@a6a8f0e3bbdea1044fc6fef09c9cb9f648bf1bc3:causal-forcing++/framewise-1step.pt",
+    "checkpoint_sha256": "bdb1b475fc88d528f510158a0990cd457f02c661b527ceb11ca9e4728533e2d0",
+    "weights": "generator_ema",
+    "precision": {
+      "dit": "bfloat16",
+      "decoder": "float16"
+    },
+    "decoder": "madebyollin/taehv taew2_1.pth, rolling three-latent context; block 0 trims 3 RGB frames, later blocks trim prior_context_latents*4; separate CUDA stream",
+    "decoder_mode": "rolling-three-latent",
+    "decoder_sha256": "d26151e76cdc2c9424bef988de874b33d9a53f30ef3060cd556c429c469c797e",
+    "runner": "bench/reference/h100_stream_overlap_gate_recovered.py",
+    "runner_sha256": "760ea6767d7c7eb99311628db76a5b84c8da7151361b004baccec7d91d99ec37",
+    "runner_status": "historical-only",
+    "num_latent_frames": 21,
+    "num_frame_per_block": 1,
+    "denoising_step_list": [1000],
+    "denoising_step_list_first_chunk": [1000, 750, 500, 250],
+    "warp_denoising_step": true,
+    "timestep_shift": 5.0,
+    "context_noise": 0,
+    "forwards": 45,
+    "measured_artifact": "bench/results/h100_cf1_taehv_overlap_metrics.json",
+    "measured_artifact_sha256": "323672219263c151bf0b370f660ceb939cf49e9320ba241f7d902a65484a5cb8",
+    "measured_warm_e2e_fps": 31.03935060215141,
+    "measured_first_visible_rgb_s": 0.24243821716308595,
+    "historical_latency_caveat": "The field name measured_first_visible_rgb_s records a post-TAEHV CUDA event, not CPU payload readiness or browser presentation; the historical runner copied pixels to CPU only after the complete rollout.",
+    "measured_p95_effective_frame_interval_ms": 37.61761474609374,
+    "historical_quality_caveat": "The three-prompt cf1_p*.mp4 suite was decoded with one full batch TAEHV call, not the rolling streaming decoder; it is development evidence only and does not close the exact-stack gate."
+  },
+  "reference_systems": {
+    "sf4-reference": {
+      "repository": "gdhe17/Self-Forcing",
+      "commit": "33593df3e81fa3ec10239271dd2c100facac6de1",
+      "source_diff_sha256": "UNRESOLVED",
+      "checkpoint": "gdhe17/Self-Forcing@UNRESOLVED:checkpoints/self_forcing_dmd.pt",
+      "checkpoint_sha256": "UNRESOLVED",
+      "decoder": "Stock Wan2.1 VAE from the pinned Self-Forcing environment",
+      "decoder_mode": "stock-wan",
+      "decoder_sha256": "UNRESOLVED",
+      "runner": "historical SF4 generation script recovered from the session database",
+      "runner_sha256": "45dea6b31b8c1e10b33076cd89d69a26c2ed4da6ce80bb0260326c17083f73eb",
+      "runner_status": "historical-only",
+      "config_sha256": "UNRESOLVED",
+      "weights": "generator_ema",
+      "forwards": 35,
+      "historical_manifest": "bench/results/sf4_manifest.json",
+      "historical_manifest_sha256": "dabd211872795cd93a1d2d80f06c3e22e69c64f6bac28415de99c4b3b3cae194",
+      "historical_caveat": "Only the source commit, recovered runner, and three old development media files are locally pinned. Exact checkpoint revision/hash, config hashes, and Wan decoder revision/hash must be recovered or regenerated before freeze."
+    }
+  },
+  "repair_candidates": [
+    {
+      "system_id": "cf1-shift-4",
+      "config_sha256": "UNRESOLVED",
+      "changes": {
+        "model_kwargs.timestep_shift": 4.0,
+        "root_timestep_shift": 4.0
+      },
+      "rationale": "The pinned causal pipeline constructs its inference scheduler from model_kwargs.timestep_shift; guidance_scale and negative_prompt are not read on this path."
+    },
+    {
+      "system_id": "cf1-shift-6",
+      "config_sha256": "UNRESOLVED",
+      "changes": {
+        "model_kwargs.timestep_shift": 6.0,
+        "root_timestep_shift": 6.0
+      },
+      "rationale": "Symmetric adjacent scheduler perturbation around the released value 5.0, with no added model call."
+    },
+    {
+      "system_id": "cf1-noise-095",
+      "config_sha256": "UNRESOLVED",
+      "changes": {
+        "initial_noise_scale": 0.95
+      },
+      "rationale": "Small registered input-noise perturbation that preserves step count and runtime."
+    },
+    {
+      "system_id": "cf1-noise-105",
+      "config_sha256": "UNRESOLVED",
+      "changes": {
+        "initial_noise_scale": 1.05
+      },
+      "rationale": "Symmetric input-noise control; the exact pre-scaled tensor hash and scalar are both recorded."
+    },
+    {
+      "system_id": "cf1-stability-suffix-v1",
+      "config_sha256": "UNRESOLVED",
+      "changes": {
+        "prompt_suffix": " Single continuous shot. Preserve subject identity, anatomy, object geometry, and background throughout; render smooth physically coherent motion with stable camera continuity."
+      },
+      "rationale": "Deterministic prompt conditioning supported by the released text path, evaluated for adherence against the original prompt."
+    }
+  ],
+  "excluded_controls": [
+    "guidance_scale and negative_prompt: present in the training config but unused by CausalInferencePipeline",
+    "extra denoising steps or CF++ 2-step: contradicted by current quality/performance evidence",
+    "TAEHV, overlap, precision, compile, resolution, and context-trim changes: outside this quality-only sweep",
+    "seed search or best-of-N: changes the latency/product contract and invites cherry-picking"
+  ],
+  "development": {
+    "prompt_ids": [
+      "dev-animal-fox",
+      "dev-human-raincoat",
+      "dev-rigid-motorcycle",
+      "dev-interaction-tea",
+      "dev-camera-train",
+      "dev-material-wok"
+    ],
+    "systems": [
+      "cf1-baseline",
+      "cf1-shift-4",
+      "cf1-shift-6",
+      "cf1-noise-095",
+      "cf1-noise-105",
+      "cf1-stability-suffix-v1"
+    ],
+    "round_a_seed_indexes": [0],
+    "round_b_seed_indexes": [0, 1],
+    "round_a_seeds_per_prompt": 1,
+    "round_b_seeds_per_prompt": 2,
+    "selection_min_delta": 0.75,
+    "temporal_motion_min_delta": 0.75,
+    "max_single_prompt_drop": 1.0,
+    "minimum_screening_fps": 29.5,
+    "max_finalists": 2,
+    "round_b": {
+      "evaluate": "Re-evaluate at most two Round-A survivors on both registered seeds and advance exactly one finalist. No post-hoc combination is permitted unless it is added as a registered candidate before protocol freeze.",
+      "required_channel_mean": 7.0,
+      "minimum_delta_vs_baseline": 1.0,
+      "minimum_item_score": 5.0,
+      "minimum_each_warm_trial_fps": 29.0,
+      "maximum_first_visible_rgb_s": 0.267,
+      "maximum_p95_effective_frame_interval_ms": 39.5
+    },
+    "no_survivor_rule": "Stop inference tuning. Draft a bounded training/self-rollout repair proposal; do not broaden the knob grid."
+  },
+  "confirmatory": {
+    "prompt_ids": [
+      "hold-human-cable",
+      "hold-human-violin",
+      "hold-animal-dog",
+      "hold-animal-horse",
+      "hold-rigid-skateboard",
+      "hold-rigid-train",
+      "hold-interaction-birds",
+      "hold-interaction-basketball",
+      "hold-camera-lighthouse",
+      "hold-camera-skier",
+      "hold-material-water",
+      "hold-material-fabric"
+    ],
+    "systems": [
+      "cf1-baseline",
+      "$selection_lock.finalist_system_id",
+      "sf4-reference"
+    ],
+    "selection_lock_schema": "bench/schemas/quality-selection-lock-v1.schema.json",
+    "seeds_per_prompt": 2,
+    "lock_rule": "The finalist and all generation/evaluation code are frozen before any confirmatory video is generated.",
+    "long_horizon_prompt_ids": [
+      "sentinel-forest-runner",
+      "sentinel-city-motorcycle"
+    ],
+    "long_horizon_systems": ["$selection_lock.finalist_system_id"],
+    "long_horizon_latent_frames": 241,
+    "long_horizon_rgb_frames": 961
+  },
+  "prompts": [
+    {
+      "id": "dev-animal-fox",
+      "split": "development",
+      "stratum": "quadruped_locomotion",
+      "text": "A lone red fox runs through a snowy pine forest at sunrise, cinematic tracking shot, realistic fur, stable anatomy.",
+      "seeds": [20260719, 20261719]
+    },
+    {
+      "id": "dev-human-raincoat",
+      "split": "development",
+      "stratum": "human_face_hands",
+      "text": "A woman in a yellow raincoat walks toward the camera through a neon-lit Tokyo street after rain, natural face and hands, cinematic realism.",
+      "seeds": [20260720, 20261720]
+    },
+    {
+      "id": "dev-rigid-motorcycle",
+      "split": "development",
+      "stratum": "rigid_mechanics",
+      "text": "A vintage red motorcycle speeds along a winding coastal highway at golden hour, low tracking camera, stable wheels and mechanical details.",
+      "seeds": [20260721, 20261721]
+    },
+    {
+      "id": "dev-interaction-tea",
+      "split": "development",
+      "stratum": "multi_subject_interaction",
+      "text": "On a Moroccan rooftop, a woman in a turquoise kaftan pours mint tea from a silver pot into a small glass, then passes the glass to a seated friend as the camera holds on their hands.",
+      "seeds": [20260722, 20261722]
+    },
+    {
+      "id": "dev-camera-train",
+      "split": "development",
+      "stratum": "camera_scene_geometry",
+      "text": "A red passenger train crosses a high stone viaduct in the Swiss Alps while the camera tracks alongside, preserving the arches, carriages, and snowy mountain geometry.",
+      "seeds": [20260723, 20261723]
+    },
+    {
+      "id": "dev-material-wok",
+      "split": "development",
+      "stratum": "deformable_fluids_particles",
+      "text": "A street chef flips noodles in a steel wok, flame flaring and steam curling upward, then sprinkles herbs as the camera pushes close to the food and fast hands.",
+      "seeds": [20260724, 20261724]
+    },
+    {
+      "id": "hold-human-cable",
+      "split": "confirmatory",
+      "stratum": "human_face_hands",
+      "text": "Inside a robotics lab, an engineer plugs a cable into a humanoid arm, checks two diagnostic lights, and presses a start button while the camera circles slowly.",
+      "seeds": [20260801, 20260802]
+    },
+    {
+      "id": "hold-human-violin",
+      "split": "confirmatory",
+      "stratum": "human_face_hands",
+      "text": "A violinist in a dark coat plays a quick phrase on a lantern-lit winter street, with clear bow contact, stable fingers, and a natural face as snow falls.",
+      "seeds": [20260803, 20260804]
+    },
+    {
+      "id": "hold-animal-dog",
+      "split": "confirmatory",
+      "stratum": "quadruped_locomotion",
+      "text": "A golden retriever runs beside a shallow forest stream and leaps over a fallen log, landing naturally and continuing toward the camera in one shot.",
+      "seeds": [20260805, 20260806]
+    },
+    {
+      "id": "hold-animal-horse",
+      "split": "confirmatory",
+      "stratum": "quadruped_locomotion",
+      "text": "A chestnut horse gallops across a green field at dawn while a side-tracking camera keeps its body, legs, mane, and shadow coherent.",
+      "seeds": [20260807, 20260808]
+    },
+    {
+      "id": "hold-rigid-skateboard",
+      "split": "confirmatory",
+      "stratum": "rigid_mechanics",
+      "text": "A skateboarder rolls through a sunny concrete park, lands one clean kickflip, and rides away as the low camera tracks the board, trucks, and spinning wheels.",
+      "seeds": [20260809, 20260810]
+    },
+    {
+      "id": "hold-rigid-train",
+      "split": "confirmatory",
+      "stratum": "rigid_mechanics",
+      "text": "A black steam locomotive pulls six red carriages across a curved bridge, its wheels and connecting rods moving consistently as smoke trails backward.",
+      "seeds": [20260811, 20260812]
+    },
+    {
+      "id": "hold-interaction-birds",
+      "split": "confirmatory",
+      "stratum": "multi_subject_interaction",
+      "text": "A mother bird feeds three chicks in a nest, placing food into one open beak while the other chicks move naturally and remain distinct.",
+      "seeds": [20260813, 20260814]
+    },
+    {
+      "id": "hold-interaction-basketball",
+      "split": "confirmatory",
+      "stratum": "multi_subject_interaction",
+      "text": "Two basketball players run down an outdoor court, exchange one chest pass, and continue toward the hoop while remaining distinct through the crossing motion.",
+      "seeds": [20260815, 20260816]
+    },
+    {
+      "id": "hold-camera-lighthouse",
+      "split": "confirmatory",
+      "stratum": "camera_scene_geometry",
+      "text": "A drone makes a smooth half-orbit around a white lighthouse on a rocky island while waves break below and the tower and horizon remain geometrically stable.",
+      "seeds": [20260817, 20260818]
+    },
+    {
+      "id": "hold-camera-skier",
+      "split": "confirmatory",
+      "stratum": "camera_scene_geometry",
+      "text": "A skier in a crimson jacket carves a wide S-turn through powder as a low camera follows, keeping the mountain ridge and tree line continuous.",
+      "seeds": [20260819, 20260820]
+    },
+    {
+      "id": "hold-material-water",
+      "split": "confirmatory",
+      "stratum": "deformable_fluids_particles",
+      "text": "A bartender pours clear sparkling water from a glass bottle into a tumbler with ice, showing a continuous stream, bubbles, splashes, and stable hands.",
+      "seeds": [20260821, 20260822]
+    },
+    {
+      "id": "hold-material-fabric",
+      "split": "confirmatory",
+      "stratum": "deformable_fluids_particles",
+      "text": "A dancer turns once on a windy rooftop while a long red silk scarf curls around her body and settles naturally without changing shape or color.",
+      "seeds": [20260823, 20260824]
+    },
+    {
+      "id": "sentinel-forest-runner",
+      "split": "sentinel",
+      "stratum": "quadruped_locomotion",
+      "text": "A red fox runs along a winding forest trail in one continuous tracking shot, occasionally looking toward the camera while its identity and gait remain stable.",
+      "seeds": [20260825]
+    },
+    {
+      "id": "sentinel-city-motorcycle",
+      "split": "sentinel",
+      "stratum": "rigid_mechanics",
+      "text": "A rider on a red motorcycle travels continuously through a rainy city at night while the camera follows from the side and the rider, wheels, reflections, and street geometry remain stable.",
+      "seeds": [20260826]
+    }
+  ],
+  "media_contract": {
+    "width": 832,
+    "height": 480,
+    "fps": 16,
+    "decoded_frames": 81,
+    "duration_tolerance_frames": 1,
+    "codec": "h264",
+    "pixel_format": "yuv420p"
+  },
+  "long_horizon_media_contract": {
+    "width": 832,
+    "height": 480,
+    "fps": 16,
+    "decoded_frames": 961,
+    "duration_tolerance_frames": 1,
+    "codec": "h264",
+    "pixel_format": "yuv420p"
+  },
+  "evaluation": {
+    "blind_seed": 20260719,
+    "blinding_secret_policy": "After the protocol is frozen, generate exactly 32 random bytes into an untracked operator-only file. Use keyed blinding and record only the secret SHA-256 in the unblinding key; never expose the secret, source filenames, or system IDs to judges.",
+    "rubric": "bench/quality/rubric-v1.md",
+    "rubric_sha256": "c71e0420ded2196b2af3662f40ad240704fe64fd3171884a8c6005f648f1dd6c",
+    "dimensions": {
+      "prompt_adherence": 0.2,
+      "spatial_fidelity": 0.2,
+      "identity_consistency": 0.2,
+      "motion_naturalness": 0.2,
+      "temporal_artifacts": 0.2
+    },
+    "families": [
+      {
+        "id": "gemini-video",
+        "kind": "model",
+        "model_id": "gemini-3.1-pro-preview",
+        "evidence_provider": "google",
+        "readiness": "transport-verified",
+        "passes": 2,
+        "rater_ids": ["gemini-3.1-pro-preview"],
+        "raw_response_policy": "Use one inline MP4 per request with explicit 16 fps sampling, temperature 0, and the registered structured schema. Persist canonical scrubbed safety metadata, request/media/rubric bindings, raw response, and response hash under bench/schemas/quality-google-model-evidence-v1.schema.json. Two-pass exact-byte transport calibration is complete, but full-plan fan-out remains blocked until a preregistered nine-video human-anchored calibration qualifies the family."
+      },
+      {
+        "id": "pegasus-video",
+        "kind": "model",
+        "model_id": "pegasus1.5",
+        "evidence_provider": "twelvelabs",
+        "readiness": "calibration-failed",
+        "passes": 2,
+        "rater_ids": ["pegasus1.5"],
+        "raw_response_policy": "Use synchronous full-video structured analysis. Persist the scrubbed request binding, raw response, finish reason, usage, and media hash; never persist or expose the API key or base64 media."
+      },
+      {
+        "id": "human",
+        "kind": "human",
+        "model_id": "three-independent-blind-raters",
+        "evidence_provider": "human",
+        "passes": 1,
+        "minimum_raters": 3,
+        "rater_ids": ["human-01", "human-02", "human-03"],
+        "raw_response_policy": "Process-attested blind human ratings. Hash binding proves report-to-rating custody consistency, not cryptographic proof of independent human origin; operator roster and collection controls remain required."
+      }
+    ],
+    "aggregation": "Treat repeated deterministic passes within one model family as repeatability checks, not independent judgments. Average passes and raters within each family first; average prompt/seed cases within family; then equal-weight the independent families.",
+    "raw_evidence_required": true,
+    "unblinding_key_separate": true
+  },
+  "gates": {
+    "absolute_quality": 7.0,
+    "family_floor": 7.0,
+    "stratum_floor": 6.0,
+    "sf4_noninferiority_margin": -0.25,
+    "maximum_low_quality_items": 1,
+    "low_quality_item_threshold": 4.0,
+    "final_third_temporal_floor": 6.5,
+    "maximum_early_to_late_drop": 1.0,
+    "warm_e2e_fps": 29.0,
+    "cold_e2e_fps": 24.0,
+    "sustained_seconds": 60.0,
+    "sustained_e2e_fps": 24.0,
+    "minimum_each_warm_trial_fps": 29.0,
+    "maximum_first_visible_rgb_s": 0.267,
+    "maximum_p95_effective_frame_interval_ms": 39.5,
+    "required_model_families": 2,
+    "require_human": true,
+    "required_forwards": 45,
+    "required_rgb_frames": 81
+  },
+  "provenance_requirements": [
+    "protocol_sha256",
+    "source_commit",
+    "source_diff_sha256",
+    "checkpoint_revision",
+    "checkpoint_sha256",
+    "decoder_revision",
+    "decoder_sha256",
+    "runner_sha256",
+    "config_sha256",
+    "rubric_sha256",
+    "prompt_utf8_sha256",
+    "effective_prompt_utf8_sha256",
+    "seed",
+    "rng_algorithm",
+    "rng_device",
+    "seed_application_point",
+    "initial_noise_sha256",
+    "input_noise_sha256",
+    "latent_sha256",
+    "media_sha256",
+    "forwards",
+    "decoded_frames",
+    "torch_cuda_driver_hardware",
+    "determinism_flags",
+    "encoding_command"
+  ],
+  "stop_rules": [
+    "Stop before tuning if the archived baseline cannot be reproduced at exactly 45 forwards and 81 frames.",
+    "Stop if prompt+seed does not reproduce the committed initial-noise hash.",
+    "Stop if three warm baseline trials drift more than 3 percent from 31.039 fps or the post-TAEHV GPU-RGB CUDA event drifts more than 10 percent from 0.242 seconds without explanation; this historical event is not CPU-ready or browser-visible latency.",
+    "Stop automated screening if the two model families disagree on at least two of the six registered development prompts or differ by more than 1.0 point on CF1 mean.",
+    "Stop after Round B if no candidate passes; do not expand into decoder, KV-ring, SageAttention, FP8, compile, or generic extra-step work.",
+    "Stop the H100 session at 120 minutes or 6 USD, whichever comes first."
+  ],
+  "sources": [
+    "PLAN.md",
+    "brain/current/State.md",
+    "brain/decisions/ADR-001-quality-qualified-headline.md",
+    "https://github.com/thu-ml/Causal-Forcing/tree/8db419e341e5fc52542c0b2c4542728420ddfb4a",
+    "https://arxiv.org/abs/2605.15141",
+    "https://github.com/Vchitect/VBench",
+    "https://docs.twelvelabs.io/docs/concepts/models/pegasus",
+    "https://docs.twelvelabs.io/v1.3/docs/guides/analyze-videos/structured-responses"
+  ]
+}

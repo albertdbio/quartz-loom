@@ -1,0 +1,87 @@
+{
+  "date": "2026-07-19",
+  "evaluator": "gemini-3.1-pro-preview",
+  "protocol": {
+    "blind": true,
+    "full_video": true,
+    "frames_per_video": 81,
+    "fps": 16,
+    "resolution": "480x832",
+    "passes": 2,
+    "prompts": [
+      "A lone red fox runs through a snowy pine forest at sunrise, cinematic tracking shot, realistic fur, stable anatomy.",
+      "A woman in a yellow raincoat walks toward the camera through a neon-lit Tokyo street after rain, natural face and hands, cinematic realism.",
+      "A vintage red motorcycle speeds along a winding coastal highway at golden hour, low tracking camera, stable wheels and mechanical details."
+    ]
+  },
+  "decoder_ab": {
+    "protocol": "Same CF++ latent sequence decoded with the full Wan2.1 VAE and TAEHV.",
+    "one_step": {
+      "psnr_db": 31.88048474141398,
+      "wan_adjacent_frame_l1": 0.027097200974822044,
+      "taehv_adjacent_frame_l1": 0.028073593974113464,
+      "blind_judgment": "Wan and TAEHV videos judged identical."
+    },
+    "two_step": {
+      "psnr_db": 30.796249919325028,
+      "wan_adjacent_frame_l1": 0.05220156908035278,
+      "taehv_adjacent_frame_l1": 0.053020112216472626,
+      "blind_judgment": "Wan and TAEHV videos judged identical."
+    }
+  },
+  "model_ab": {
+    "mapping": {
+      "P0-X": "cf2_p0.mp4",
+      "P0-Y": "cf1_p0.mp4",
+      "P0-Z": "sf4_p0.mp4",
+      "P1-X": "sf4_p1.mp4",
+      "P1-Y": "cf2_p1.mp4",
+      "P1-Z": "cf1_p1.mp4",
+      "P2-X": "sf4_p2.mp4",
+      "P2-Y": "cf2_p2.mp4",
+      "P2-Z": "cf1_p2.mp4"
+    },
+    "pass_1": {
+      "P0": {
+        "ranking": ["sf4", "cf1", "cf2"],
+        "overall_scores": {"sf4": 6, "cf1": 5, "cf2": 4}
+      },
+      "P1": {
+        "ranking": ["cf1", "cf2", "sf4"],
+        "overall_scores": {"cf1": 7, "cf2": 6, "sf4": 4}
+      },
+      "P2": {
+        "ranking": ["cf1", "cf2", "sf4"],
+        "overall_scores": {"cf1": 6, "cf2": 5, "sf4": 4}
+      }
+    },
+    "pass_2": {
+      "P0": {
+        "ranking": ["sf4", "cf1", "cf2"],
+        "overall_scores": {"sf4": 6, "cf1": 5, "cf2": 3}
+      },
+      "P1": {
+        "ranking": ["cf1", "sf4", "cf2"],
+        "overall_scores": {"cf1": 6, "sf4": 5, "cf2": 4}
+      },
+      "P2": {
+        "ranking": ["cf1", "cf2", "sf4"],
+        "overall_scores": {"cf1": 5, "cf2": 4, "sf4": 3}
+      }
+    },
+    "reconciled": {
+      "mean_overall_score_across_six_ratings": {
+        "cf1": 5.666666666666667,
+        "sf4": 4.666666666666667,
+        "cf2": 4.333333333333333
+      },
+      "cf1_vs_sf4_prompt_wins": "2-1 in both passes",
+      "absolute_7_of_10_bar": {
+        "cf1": false,
+        "cf2": false,
+        "sf4": false
+      },
+      "conclusion": "CF++ 1-step was the best aggregate system in this three-prompt sample and beat SF-4-step on two of three prompts, but did not meet the pre-registered absolute 7/10 quality bar. Results remain prompt-sensitive."
+    }
+  }
+}

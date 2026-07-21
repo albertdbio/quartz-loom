@@ -1,0 +1,9 @@
+{
+  "data": "{\n  \"failure_tags\": [\n    \"none\"\n  ],\n  \"final_third_quality\": 9,\n  \"first_third_quality\": 9,\n  \"rationale\": \"The video perfectly matches the prompt, featuring a lone red fox running through a snowy pine forest at sunrise. The camera executes a smooth, cinematic tracking shot that follows the fox as it approaches. The fur texture is highly detailed and realistic, and the fox's anatomy remains stable and plausible throughout the movement. There are no visible temporal artifacts, flickering, or morphing issues.\",\n  \"scores\": {\n    \"identity_consistency\": 9,\n    \"motion_naturalness\": 9,\n    \"prompt_adherence\": 9,\n    \"spatial_fidelity\": 9,\n    \"temporal_artifacts\": 9\n  }\n}",
+  "finish_reason": "stop",
+  "id": "<redacted-request-id>",
+  "usage": {
+    "input_tokens": 3003,
+    "output_tokens": 182
+  }
+}

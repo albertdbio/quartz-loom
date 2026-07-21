@@ -1,0 +1,26 @@
+[
+  {
+    "chunk_count": 21,
+    "frame_count": 81,
+    "job_id": "203f89a519644ac0be6f5247975ceacf",
+    "label": "short-seed7"
+  },
+  {
+    "chunk_count": 21,
+    "frame_count": 81,
+    "job_id": "75d29769490e43d094954cfe5a5ed48a",
+    "label": "expanded-seed7"
+  },
+  {
+    "chunk_count": 21,
+    "frame_count": 81,
+    "job_id": "cbfacdc97d094b408663df66763c6fff",
+    "label": "expanded-seed20260719"
+  },
+  {
+    "chunk_count": 21,
+    "frame_count": 81,
+    "job_id": "35408d5634d74285bfb010f54c4cde14",
+    "label": "upstream-rich-seed7"
+  }
+]

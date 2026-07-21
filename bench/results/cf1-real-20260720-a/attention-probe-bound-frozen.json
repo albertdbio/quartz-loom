@@ -1,0 +1,631 @@
+{
+  "asset_lock_sha256": "0aee8671f8e3b30286b689a16f6f4a355f917772c16e599cec75a49e89057967",
+  "attention_backend": "flash-attention-2",
+  "attention_source_sha256": "02ad719a76e6bdec79d18fc62b094ef2ad7c28b2d593c9f395ae1226041b7c9d",
+  "authorizes_boot": false,
+  "call_count": 1,
+  "executed_callable": "flash_attn.flash_attn_varlen_func",
+  "gpu_execution_performed": true,
+  "input_shape": [
+    1,
+    16,
+    12,
+    128
+  ],
+  "kind": "cf1-executed-attention-probe",
+  "loaded_facts": {
+    "critical_modules": [
+      {
+        "elf_class": "ELF64",
+        "elf_machine": "Advanced Micro Devices X86-64",
+        "module": "flash_attn_2_cuda",
+        "needed": [
+          "libc10.so",
+          "libtorch_cpu.so",
+          "libtorch_python.so",
+          "libcudart.so.12",
+          "libc10_cuda.so",
+          "libtorch_cuda.so",
+          "libstdc++.so.6",
+          "libgcc_s.so.1",
+          "libc.so.6"
+        ],
+        "path": "/workspace/cf1-venv/lib/python3.12/site-packages/flash_attn_2_cuda.cpython-312-x86_64-linux-gnu.so",
+        "rpath": [],
+        "runpath": [
+          "/opt/hostedtoolcache/Python/3.12.11/x64/lib"
+        ]
+      },
+      {
+        "elf_class": "ELF64",
+        "elf_machine": "Advanced Micro Devices X86-64",
+        "module": "torch._C",
+        "needed": [
+          "libtorch_python.so",
+          "libpthread.so.0",
+          "libc.so.6"
+        ],
+        "path": "/workspace/cf1-venv/lib/python3.12/site-packages/torch/_C.cpython-312-x86_64-linux-gnu.so",
+        "rpath": [
+          "$ORIGIN/../../nvidia/cublas/lib",
+          "$ORIGIN/../../nvidia/cuda_cupti/lib",
+          "$ORIGIN/../../nvidia/cuda_nvrtc/lib",
+          "$ORIGIN/../../nvidia/cuda_runtime/lib",
+          "$ORIGIN/../../nvidia/cudnn/lib",
+          "$ORIGIN/../../nvidia/cufft/lib",
+          "$ORIGIN/../../nvidia/curand/lib",
+          "$ORIGIN/../../nvidia/cusolver/lib",
+          "$ORIGIN/../../nvidia/cusparse/lib",
+          "$ORIGIN/../../nvidia/cusparselt/lib",
+          "$ORIGIN/../../cusparselt/lib",
+          "$ORIGIN/../../nvidia/nccl/lib",
+          "$ORIGIN/../../nvidia/nvtx/lib",
+          "$ORIGIN/../../nvidia/cufile/lib",
+          "$ORIGIN",
+          "$ORIGIN/lib"
+        ],
+        "runpath": []
+      },
+      {
+        "elf_class": "ELF64",
+        "elf_machine": "Advanced Micro Devices X86-64",
+        "module": "torch.lib.libtorch_cuda",
+        "needed": [
+          "libc10_cuda.so",
+          "libcudart.so.12",
+          "libcusparse.so.12",
+          "libcufft.so.11",
+          "libcufile.so.0",
+          "libcusparseLt.so.0",
+          "libnccl.so.2",
+          "libcurand.so.10",
+          "libcublas.so.12",
+          "libcublasLt.so.12",
+          "libcudnn.so.9",
+          "librt.so.1",
+          "libdl.so.2",
+          "libpthread.so.0",
+          "libc10.so",
+          "libtorch_cpu.so",
+          "libstdc++.so.6",
+          "libm.so.6",
+          "libgcc_s.so.1",
+          "libc.so.6",
+          "ld-linux-x86-64.so.2"
+        ],
+        "path": "/workspace/cf1-venv/lib/python3.12/site-packages/torch/lib/libtorch_cuda.so",
+        "rpath": [
+          "$ORIGIN/../../nvidia/cublas/lib",
+          "$ORIGIN/../../nvidia/cuda_cupti/lib",
+          "$ORIGIN/../../nvidia/cuda_nvrtc/lib",
+          "$ORIGIN/../../nvidia/cuda_runtime/lib",
+          "$ORIGIN/../../nvidia/cudnn/lib",
+          "$ORIGIN/../../nvidia/cufft/lib",
+          "$ORIGIN/../../nvidia/curand/lib",
+          "$ORIGIN/../../nvidia/cusolver/lib",
+          "$ORIGIN/../../nvidia/cusparse/lib",
+          "$ORIGIN/../../nvidia/cusparselt/lib",
+          "$ORIGIN/../../cusparselt/lib",
+          "$ORIGIN/../../nvidia/nccl/lib",
+          "$ORIGIN/../../nvidia/nvtx/lib",
+          "$ORIGIN/../../nvidia/cufile/lib",
+          "$ORIGIN"
+        ],
+        "runpath": []
+      }
+    ],
+    "cuda_arch_list": [
+      "sm_100",
+      "sm_120",
+      "sm_70",
+      "sm_75",
+      "sm_80",
+      "sm_86",
+      "sm_90"
+    ],
+    "cuda_runtime": "12.8",
+    "cudnn_version": "9.10.2",
+    "cxx11_abi": true,
+    "import_order": [
+      "torch",
+      "verified-attention-source",
+      "flash-attention-2"
+    ],
+    "loaded_libraries": [
+      {
+        "identity": "lib/python3.12/site-packages/flash_attn_2_cuda.cpython-312-x86_64-linux-gnu.so",
+        "scope": "environment",
+        "sha256": "2b047e79190b7721f0b27630f8321d6dea49d65d25f7b3fe856f3dd2775d6e34",
+        "size": 1000969440
+      },
+      {
+        "identity": "lib/python3.12/site-packages/numpy.libs/libgfortran-040039e1.so.5.0.0",
+        "scope": "environment",
+        "sha256": "14afb3129b1a8b50bc40a3b0820c7f1152ea9bc10121aab152943f7057472886",
+        "size": 2686065
+      },
+      {
+        "identity": "lib/python3.12/site-packages/numpy.libs/libopenblas64_p-r0-0cf96a72.3.23.dev.so",
+        "scope": "environment",
+        "sha256": "9254d0854dd7615e11de28d771ae408878ca8123a7ac204f21e4cc7a376cc2e5",
+        "size": 35123345
+      },
+      {
+        "identity": "lib/python3.12/site-packages/numpy.libs/libquadmath-96973f99.so.0.0.0",
+        "scope": "environment",
+        "sha256": "934c22ded0e7d169c4d4678876c96051adf3d94545da962f60b41659b075da3b",
+        "size": 247609
+      },
+      {
+        "identity": "lib/python3.12/site-packages/numpy/core/_multiarray_tests.cpython-312-x86_64-linux-gnu.so",
+        "scope": "environment",
+        "sha256": "0b2cbb7419ffc2f712987aabaf518a3b1d9de8406093f79dcb1d712a34ab6057",
+        "size": 175912
+      },
+      {
+        "identity": "lib/python3.12/site-packages/numpy/core/_multiarray_umath.cpython-312-x86_64-linux-gnu.so",
+        "scope": "environment",
+        "sha256": "6a650810a8735cbdb988f74729973740a337645dd1585fef696e73e2dbc65beb",
+        "size": 7463681
+      },
+      {
+        "identity": "lib/python3.12/site-packages/numpy/fft/_pocketfft_internal.cpython-312-x86_64-linux-gnu.so",
+        "scope": "environment",
+        "sha256": "38d22249f351b1d50e9269c596889ffc638639ebc150c1e75fc9f55a0f331ab5",
+        "size": 97008
+      },
+      {
+        "identity": "lib/python3.12/site-packages/numpy/linalg/_umath_linalg.cpython-312-x86_64-linux-gnu.so",
+        "scope": "environment",
+        "sha256": "8822e772d743d405983f1b9c6b34b704dd297780890dc245454f1081adf50a4c",
+        "size": 216793
+      },
+      {
+        "identity": "lib/python3.12/site-packages/numpy/random/_bounded_integers.cpython-312-x86_64-linux-gnu.so",
+        "scope": "environment",
+        "sha256": "b39f7e2b4ccfd6904ae60fe1517f6bda8be7835b5bf69d54dec0d693c5e8b793",
+        "size": 348704
+      },
+      {
+        "identity": "lib/python3.12/site-packages/numpy/random/_common.cpython-312-x86_64-linux-gnu.so",
+        "scope": "environment",
+        "sha256": "abd88ca8f447f22c4f51f226734d34732966bae61edd2aa25f74bfec954bee28",
+        "size": 258888
+      },
+      {
+        "identity": "lib/python3.12/site-packages/numpy/random/_generator.cpython-312-x86_64-linux-gnu.so",
+        "scope": "environment",
+        "sha256": "5b3ef2ac8b78aa83bc869b70e30e2a70fbd3ab373c5253ed6eba9982a55fd7e2",
+        "size": 946872
+      },
+      {
+        "identity": "lib/python3.12/site-packages/numpy/random/_mt19937.cpython-312-x86_64-linux-gnu.so",
+        "scope": "environment",
+        "sha256": "3619f7f91b9ee7197c2902c0e197e69b2e5dd45fb11cd22e572e9b0b886514a9",
+        "size": 119488
+      },
+      {
+        "identity": "lib/python3.12/site-packages/numpy/random/_pcg64.cpython-312-x86_64-linux-gnu.so",
+        "scope": "environment",
+        "sha256": "577c1468f4fb40bb23184343e2c1b645a17d1d493641ea92c052f286dc6eb556",
+        "size": 125040
+      },
+      {
+        "identity": "lib/python3.12/site-packages/numpy/random/_philox.cpython-312-x86_64-linux-gnu.so",
+        "scope": "environment",
+        "sha256": "2c9b1fe53ef119e3ed2acb73c802cf2996502b0fd51d4926d4047576cea57514",
+        "size": 106712
+      },
+      {
+        "identity": "lib/python3.12/site-packages/numpy/random/_sfc64.cpython-312-x86_64-linux-gnu.so",
+        "scope": "environment",
+        "sha256": "5883302ce33afd54db6631adbf5e000297b8eb42c0ec894bbec318b5e6b14268",
+        "size": 76224
+      },
+      {
+        "identity": "lib/python3.12/site-packages/numpy/random/bit_generator.cpython-312-x86_64-linux-gnu.so",
+        "scope": "environment",
+        "sha256": "87c5c730887943c603b16c53cf213398336ee410ef46595518093977afd5b0cb",
+        "size": 234016
+      },
+      {
+        "identity": "lib/python3.12/site-packages/numpy/random/mtrand.cpython-312-x86_64-linux-gnu.so",
+        "scope": "environment",
+        "sha256": "8d866b4b6107401ab9546044564208e0a5899c3903da09277d1c4875d98bcf0f",
+        "size": 749040
+      },
+      {
+        "identity": "lib/python3.12/site-packages/nvidia/cublas/lib/libcublas.so.12",
+        "scope": "environment",
+        "sha256": "031ce6c2cbfbb9468f040527cab5c599069ce5609e73e28f87503881063eac21",
+        "size": 116388640
+      },
+      {
+        "identity": "lib/python3.12/site-packages/nvidia/cublas/lib/libcublasLt.so.12",
+        "scope": "environment",
+        "sha256": "10b5e6631cf8115c661eb895ed1533826308b58f7956466f53d236a40c9b622c",
+        "size": 751771728
+      },
+      {
+        "identity": "lib/python3.12/site-packages/nvidia/cuda_cupti/lib/libcupti.so.12",
+        "scope": "environment",
+        "sha256": "fccdc5fcc7c32f8cf4b3ed9b17f7f187a185a6fa0a5bcc06e3434cbd1687c808",
+        "size": 7595792
+      },
+      {
+        "identity": "lib/python3.12/site-packages/nvidia/cuda_nvrtc/lib/libnvrtc.so.12",
+        "scope": "environment",
+        "sha256": "43731e24cd89e3749826304f304e8aa11fbecf1188715271b1f5018d6212b5e6",
+        "size": 104487248
+      },
+      {
+        "identity": "lib/python3.12/site-packages/nvidia/cuda_runtime/lib/libcudart.so.12",
+        "scope": "environment",
+        "sha256": "c3a75b33af334a3486d197dbd1584a2985183ba4688d237a2be5f2f679329920",
+        "size": 728800
+      },
+      {
+        "identity": "lib/python3.12/site-packages/nvidia/cudnn/lib/libcudnn.so.9",
+        "scope": "environment",
+        "sha256": "3b68ea689be647bce63cb3c2d9edb589add415405a7e9f296d69ca029cae0b8b",
+        "size": 125136
+      },
+      {
+        "identity": "lib/python3.12/site-packages/nvidia/cudnn/lib/libcudnn_graph.so.9",
+        "scope": "environment",
+        "sha256": "787c955dce49091ead850e4536666594095ea9f92a8a08879d8ddad466674657",
+        "size": 4439912
+      },
+      {
+        "identity": "lib/python3.12/site-packages/nvidia/cufft/lib/libcufft.so.11",
+        "scope": "environment",
+        "sha256": "5c912146449614f9d73ebd1a5cb604242da6b819d94ba5b4a99272a0649f3761",
+        "size": 278925016
+      },
+      {
+        "identity": "lib/python3.12/site-packages/nvidia/cufile/lib/libcufile.so.0",
+        "scope": "environment",
+        "sha256": "a2f4854177f666c1a8c719b486e4cb1119ebfdd858ebaa6349cb63c5549d27e8",
+        "size": 3209496
+      },
+      {
+        "identity": "lib/python3.12/site-packages/nvidia/curand/lib/libcurand.so.10",
+        "scope": "environment",
+        "sha256": "f9bea038a2703b721571fd45a299a898141fd8cb264a5912635c95116f5960fe",
+        "size": 136749240
+      },
+      {
+        "identity": "lib/python3.12/site-packages/nvidia/cusparse/lib/libcusparse.so.12",
+        "scope": "environment",
+        "sha256": "437651d1ec5d0e5b1b4d07b8c492f153cb4825222fe2d763232a407f667d9bb2",
+        "size": 387990224
+      },
+      {
+        "identity": "lib/python3.12/site-packages/nvidia/cusparselt/lib/libcusparseLt.so.0",
+        "scope": "environment",
+        "sha256": "b3d85a0311eadfd3cec86b0291c9a4b5769cba2f248a9e7e8167fbf3ffa99863",
+        "size": 451980513
+      },
+      {
+        "identity": "lib/python3.12/site-packages/nvidia/nccl/lib/libnccl.so.2",
+        "scope": "environment",
+        "sha256": "1fc36eebc84f4b10923eee21538ed8fa25725647d06f4840bc0fe399a6ed9bc4",
+        "size": 429634192
+      },
+      {
+        "identity": "lib/python3.12/site-packages/nvidia/nvjitlink/lib/libnvJitLink.so.12",
+        "scope": "environment",
+        "sha256": "0369e6867d44b800437de4e146d72c65afc6c75adf677a15c2ecd8e6a7ac135f",
+        "size": 94101392
+      },
+      {
+        "identity": "lib/python3.12/site-packages/torch/_C.cpython-312-x86_64-linux-gnu.so",
+        "scope": "environment",
+        "sha256": "db1e4f96208c6b297186585a04acee533035705706254ebdd4953fbae6b90224",
+        "size": 25481
+      },
+      {
+        "identity": "lib/python3.12/site-packages/torch/lib/libc10.so",
+        "scope": "environment",
+        "sha256": "11add41a25c7803dcbcae77fb42b428d94e091c72738d4b0b923f3bc21fe2f11",
+        "size": 1389289
+      },
+      {
+        "identity": "lib/python3.12/site-packages/torch/lib/libc10_cuda.so",
+        "scope": "environment",
+        "sha256": "ee3e15d5705c557d7d82e7bc289b194eeacb223b27d7be66435c928d4bde9b1a",
+        "size": 667985
+      },
+      {
+        "identity": "lib/python3.12/site-packages/torch/lib/libgomp.so.1",
+        "scope": "environment",
+        "sha256": "76cac79d3b5cadd927888c09ecbced6fc9ea6a411cd4409d301543866e8ac25e",
+        "size": 254305
+      },
+      {
+        "identity": "lib/python3.12/site-packages/torch/lib/libshm.so",
+        "scope": "environment",
+        "sha256": "b34590a5fc37cd18cfb97e7e5cdf31c5fa473f95550e3c314bbb22f144ba516c",
+        "size": 49177
+      },
+      {
+        "identity": "lib/python3.12/site-packages/torch/lib/libtorch.so",
+        "scope": "environment",
+        "sha256": "05967e296713f7f4f2c587ba8c4eb45a84440d5b1127816996c746fc898240ab",
+        "size": 391273
+      },
+      {
+        "identity": "lib/python3.12/site-packages/torch/lib/libtorch_cpu.so",
+        "scope": "environment",
+        "sha256": "75540e9ff02ef34b961f6c1c9434a953b3c945f23992b939c263ee8091a8eb33",
+        "size": 430926857
+      },
+      {
+        "identity": "lib/python3.12/site-packages/torch/lib/libtorch_cuda.so",
+        "scope": "environment",
+        "sha256": "e371cd8f07cb7ecb2b5eaa47a18bcdadddaec5a4e39364d05f3ceea2db1dcf7f",
+        "size": 1015364433
+      },
+      {
+        "identity": "lib/python3.12/site-packages/torch/lib/libtorch_global_deps.so",
+        "scope": "environment",
+        "sha256": "62be2c77db479600ed0c850650b4f9175071ec3488958c607825a5535d85cac1",
+        "size": 17321
+      },
+      {
+        "identity": "lib/python3.12/site-packages/torch/lib/libtorch_python.so",
+        "scope": "environment",
+        "sha256": "3641ee8bfcd5155dca817251530fa81f71c05ec3a6d6289f6f067611f304dcff",
+        "size": 27463257
+      },
+      {
+        "identity": "lib/python3.12/site-packages/triton/_C/libtriton.so",
+        "scope": "environment",
+        "sha256": "0d0ab0a6f849bfed40e39586bbfc4f32b94977ceb78b60a59b565e225d9fa59e",
+        "size": 353085664
+      },
+      {
+        "identity": "lib-dynload/_asyncio.cpython-312-x86_64-linux-gnu.so",
+        "scope": "stdlib",
+        "sha256": "c1dd3a446bbfdc59627c327832c72cc930f1556addd9005c109601ce2411fd81",
+        "size": 82184
+      },
+      {
+        "identity": "lib-dynload/_bz2.cpython-312-x86_64-linux-gnu.so",
+        "scope": "stdlib",
+        "sha256": "5bccbbb9dc55210d519bdcbab48caddfab44a3af5f632b1dac9dfffc2bc32260",
+        "size": 32112
+      },
+      {
+        "identity": "lib-dynload/_contextvars.cpython-312-x86_64-linux-gnu.so",
+        "scope": "stdlib",
+        "sha256": "0bfeca0fe0500b4a0bcb99e914eb8ac9d11a8e609581c7d7a1eb431ab45ea0fe",
+        "size": 14560
+      },
+      {
+        "identity": "lib-dynload/_ctypes.cpython-312-x86_64-linux-gnu.so",
+        "scope": "stdlib",
+        "sha256": "448504ee777c5e9366e9ac741be127c50787345dd04ec27a58d1d0514b3589c7",
+        "size": 137968
+      },
+      {
+        "identity": "lib-dynload/_decimal.cpython-312-x86_64-linux-gnu.so",
+        "scope": "stdlib",
+        "sha256": "b2eb80f2e50d472813500738d20e2d53f14d76ec968b766ed13d425a80eb7fc1",
+        "size": 372904
+      },
+      {
+        "identity": "lib-dynload/_hashlib.cpython-312-x86_64-linux-gnu.so",
+        "scope": "stdlib",
+        "sha256": "78f06b9e16ed0518c44a7ee0d4973037ac7608c2e469165308236bbc8dde7aaa",
+        "size": 64368
+      },
+      {
+        "identity": "lib-dynload/_json.cpython-312-x86_64-linux-gnu.so",
+        "scope": "stdlib",
+        "sha256": "de1fdfa616ae2f72cb80a1dad76bf7143463d9a34600e0daf37109523abcf5d6",
+        "size": 48952
+      },
+      {
+        "identity": "lib-dynload/_lsprof.cpython-312-x86_64-linux-gnu.so",
+        "scope": "stdlib",
+        "sha256": "d0021b287f611774df1b7eb5dcdedf3f4dd413990063097f88571abea68c9137",
+        "size": 32032
+      },
+      {
+        "identity": "lib-dynload/_lzma.cpython-312-x86_64-linux-gnu.so",
+        "scope": "stdlib",
+        "sha256": "e3f0237f9d36a2c45e4b10ffe92bb4c29ad049d5e8642a1f9ce555c8edc6a12a",
+        "size": 49256
+      },
+      {
+        "identity": "lib-dynload/_multiprocessing.cpython-312-x86_64-linux-gnu.so",
+        "scope": "stdlib",
+        "sha256": "ccff2bf0d8f4f038a6b378cf7506a6deb024611afd2ac734021736af269daad1",
+        "size": 24280
+      },
+      {
+        "identity": "lib-dynload/_posixshmem.cpython-312-x86_64-linux-gnu.so",
+        "scope": "stdlib",
+        "sha256": "a845576d70626d8f7d49eafc0fd330db6c17fc1fb4080453a2f436196cc4c30a",
+        "size": 15080
+      },
+      {
+        "identity": "lib-dynload/_queue.cpython-312-x86_64-linux-gnu.so",
+        "scope": "stdlib",
+        "sha256": "2d2037128e51a125b17c0c56e11ff8f31621972753969902d329fbcdede3fafb",
+        "size": 23816
+      },
+      {
+        "identity": "lib-dynload/_ssl.cpython-312-x86_64-linux-gnu.so",
+        "scope": "stdlib",
+        "sha256": "de6167d40100c03b612d81182fd3ca9b1646e8108940d769e8f521a2e0d20501",
+        "size": 225488
+      },
+      {
+        "identity": "lib-dynload/mmap.cpython-312-x86_64-linux-gnu.so",
+        "scope": "stdlib",
+        "sha256": "d5d1e4f3e7142e75bb1e98ba722fc74023dfa0609dcc5ea65ec4fd37d9d970f3",
+        "size": 32600
+      },
+      {
+        "identity": "lib-dynload/termios.cpython-312-x86_64-linux-gnu.so",
+        "scope": "stdlib",
+        "sha256": "6ae907f59296d314554a9a10b930fd42a895d59b75df2e973d59524272437603",
+        "size": 35520
+      },
+      {
+        "identity": "LC_CTYPE",
+        "scope": "system",
+        "sha256": "59015993b1b671273461ef1167d7a9ad76dc090d521c91102e962217ed6b6dba",
+        "size": 360460
+      },
+      {
+        "identity": "gconv-modules.cache",
+        "scope": "system",
+        "sha256": "52c227df9d53248238602c1ddaccd2c8ddc4cc6a61aa45d7c425af590b8806a5",
+        "size": 27028
+      },
+      {
+        "identity": "ld-linux-x86-64.so.2",
+        "scope": "system",
+        "sha256": "6222a16be7f2d458d6870efe6e715fc0c8d45766fb79cf7dcc3125538d703e28",
+        "size": 236616
+      },
+      {
+        "identity": "libbz2.so.1.0.4",
+        "scope": "system",
+        "sha256": "218c4abdabce31161f3c2778762986d1fe06633705c7eb004a740946a5ccdfff",
+        "size": 78944
+      },
+      {
+        "identity": "libc.so.6",
+        "scope": "system",
+        "sha256": "511f825ee075610ac9c0f7f91e2c13de2000d0f7b859f6461137e809a0a009d0",
+        "size": 2125328
+      },
+      {
+        "identity": "libcrypto.so.3",
+        "scope": "system",
+        "sha256": "c19c2cf8d7cf91c4f273b1d3bbc56a9d19c91a739bfe57ad630756ee8ede7b77",
+        "size": 5305304
+      },
+      {
+        "identity": "libcuda.so.580.126.09",
+        "scope": "system",
+        "sha256": "e8e541166449da5a1278f40b27a28d072174b31f2941b101a9609b6d1d3aed32",
+        "size": 96284520
+      },
+      {
+        "identity": "libdl.so.2",
+        "scope": "system",
+        "sha256": "feee7549138dc862300b9ba9b2b02502059c838a6c0b92d2ea4c0a357e8e0b45",
+        "size": 14408
+      },
+      {
+        "identity": "libexpat.so.1.9.1",
+        "scope": "system",
+        "sha256": "7ae38be4b2f909d25c5ca3107ed04bc3128a8a24ea7adfe30102c3f04089c9c3",
+        "size": 174336
+      },
+      {
+        "identity": "libffi.so.8.1.4",
+        "scope": "system",
+        "sha256": "00f593fe192f2851b8ce23b25cec2488d769beb5a8f63e8c9e563071e1075153",
+        "size": 47672
+      },
+      {
+        "identity": "libgcc_s.so.1",
+        "scope": "system",
+        "sha256": "02f3f192bf5f79b811f1e34a650fea443d407408703448906585232383957f60",
+        "size": 183024
+      },
+      {
+        "identity": "liblzma.so.5.4.5",
+        "scope": "system",
+        "sha256": "a9793942a8a5f6f4d0f523ef9e0a5be4f0033f2c6c28520cd2b4e706d53c6e17",
+        "size": 202904
+      },
+      {
+        "identity": "libm.so.6",
+        "scope": "system",
+        "sha256": "f06f2ce1f1833df5f41cf13b6447ff07bea993ad9b27297d3428c2f70ab3f0e7",
+        "size": 952616
+      },
+      {
+        "identity": "libnvidia-ml.so.580.126.09",
+        "scope": "system",
+        "sha256": "7cf5b9e876f8a082616b5b632f426fdf2ac6fb2e04bfa90c5a3f4eebafe90910",
+        "size": 2283608
+      },
+      {
+        "identity": "libpthread.so.0",
+        "scope": "system",
+        "sha256": "4472cde19acc87a431ad1eefe9e86f8238dd1f26f8dac692cff7040474d9d085",
+        "size": 14408
+      },
+      {
+        "identity": "librt.so.1",
+        "scope": "system",
+        "sha256": "4b3a59575a0812a466235bc745814ca5b13825ef5f8ad5680637872ac64cc7ca",
+        "size": 14624
+      },
+      {
+        "identity": "libssl.so.3",
+        "scope": "system",
+        "sha256": "63597a81ef19496ad0423cbaaf04d5b0244c7a9e261e331a5a7f3ac0fcdb9590",
+        "size": 696512
+      },
+      {
+        "identity": "libstdc++.so.6.0.33",
+        "scope": "system",
+        "sha256": "a68762c86d371e6041f03f03a33a78fa235809ae7d81c90185940c93c3535aed",
+        "size": 2592224
+      },
+      {
+        "identity": "libutil.so.1",
+        "scope": "system",
+        "sha256": "b88de5f440af504c5a7f7fa933ee7272c44e18e4613c44b2cc6b5ca40f99d6ba",
+        "size": 14408
+      },
+      {
+        "identity": "libz.so.1.3",
+        "scope": "system",
+        "sha256": "9b64150b28505a33d6bc3ecf709c279f6de97a1c184dbda65d06ee4537f6d286",
+        "size": 113000
+      },
+      {
+        "identity": "python3.12",
+        "scope": "system",
+        "sha256": "1d3cf64f97cadc79fdc6fe2496a21b7b456cb94211978cfef5a65f616af74fd5",
+        "size": 8021824
+      }
+    ],
+    "loaded_libraries_manifest_sha256": "1b4f6ca224da72dd9c2849a24ac793c0d075c955848d88380a91e5e3b0725847",
+    "loaded_library_count": 78,
+    "loaded_library_identity_policy": "explicit-runtime-roots-v1",
+    "nccl_version": "2.27.3",
+    "torch_version": "2.8.0+cu128"
+  },
+  "loaded_facts_sha256": "42dd396d13c9365b57e01fba73649fca26a98a7126275e34f05a1ab5efe4a7fc",
+  "native_identity_sha256": "8884c4be14c4c7c404b346a76347ebd3ed8218c229b6066f4ceba743108c619c",
+  "output_dtype": "torch.bfloat16",
+  "output_finite": true,
+  "output_shape": [
+    1,
+    16,
+    12,
+    128
+  ],
+  "probe_identity_sha256": "070efce1bdcd5972fd9cdde7f02d66dab3320a568e7fb04caa2575aae8f0dd4c",
+  "probe_mode": "bound-verification",
+  "probe_succeeded": true,
+  "ready": false,
+  "runtime_environment_sha256": "858c16004d327fab276c8a8e43aa61bfdfcdbe78033e82edd96dfbe434839b7c",
+  "runtime_evidence_sha256": "8209043b4ebecc85f0e844f9c040b54fc1685104fe9e0b361ce9ee6d060b0c6c",
+  "runtime_id": "cf1-h100-cu128-v1",
+  "runtime_lock_sha256": "d4d163d635ecbafb5b11bbe54cca7bdd5e9f80c1edc23ed96972821940ecc692",
+  "schema_version": 2,
+  "source_commit": "8db419e341e5fc52542c0b2c4542728420ddfb4a",
+  "static_environment_sha256": "8746f8bc9a58cf5e6c0eb308453de002582cb3f1383ecaa2632e2f6223e9784d"
+}

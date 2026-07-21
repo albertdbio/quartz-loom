@@ -1,0 +1,613 @@
+#!/usr/bin/env python3
+"""CLI for the local, pre-paid quality-sweep gates."""
+
+from __future__ import annotations
+
+import argparse
+import json
+import sys
+from pathlib import Path
+
+PROJECT_ROOT = Path(__file__).resolve().parents[1]
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
+
+from bench.quality_sweep import (  # noqa: E402
+    ProtocolError,
+    aggregate_ratings,
+    audit_media,
+    build_blind_plan,
+    build_selection_lock,
+    build_selection_report,
+    canonical_sha256,
+    evaluate_gate,
+    load_json,
+    validate_protocol,
+    validate_run_manifest,
+    validate_selection_lock,
+    unblind_ratings,
+)
+
+
+def _write_json(path: str | Path, value: dict) -> None:
+    destination = Path(path)
+    destination.parent.mkdir(parents=True, exist_ok=True)
+    destination.write_text(json.dumps(value, indent=2, sort_keys=True) + "\n")
+
+
+def _resolve_manifest_media(manifest_path: Path, manifest: dict) -> list[dict]:
+    records = []
+    for item in manifest.get("records", []):
+        record = dict(item)
+        source = Path(record["source_file"])
+        if not source.is_absolute():
+            source = manifest_path.parent / source
+        record["physical_source_file"] = str(source)
+        records.append(record)
+    return records
+
+
+def _load_blind_secret(path: str | Path) -> bytes:
+    try:
+        raw = Path(path).read_bytes()
+    except OSError as exc:
+        raise ProtocolError(f"cannot load blind secret {path}: {exc}") from exc
+    stripped = raw.strip()
+    if len(stripped) == 64:
+        try:
+            stripped = bytes.fromhex(stripped.decode("ascii"))
+        except (UnicodeDecodeError, ValueError):
+            pass
+    if len(stripped) != 32:
+        raise ProtocolError("blind secret file must contain 32 raw bytes or 64 hex characters")
+    return stripped
+
+
+def _load_selection_lock(path: str | Path | None) -> dict | None:
+    return load_json(path) if path is not None else None
+
+
+def _require_sha256(value: object, label: str) -> str:
+    if (
+        not isinstance(value, str)
+        or len(value) != 64
+        or value != value.lower()
+        or any(character not in "0123456789abcdef" for character in value)
+    ):
+        raise ProtocolError(f"{label} must be a lowercase SHA-256")
+    return value
+
+
+def _require_exact_object(value: object, required: set[str], label: str) -> dict:
+    if not isinstance(value, dict):
+        raise ProtocolError(f"{label} must be an object")
+    missing = sorted(required - set(value))
+    if missing:
+        raise ProtocolError(f"{label} missing {missing[0]}")
+    extra = sorted(set(value) - required)
+    if extra:
+        raise ProtocolError(f"{label} contains unsupported field {extra[0]}")
+    return value
+
+
+def _load_normalized_ratings(
+    path: str | Path,
+    *,
+    protocol_sha256: str,
+    manifest_sha256: str,
+) -> list[dict]:
+    envelope = _require_exact_object(
+        load_json(path),
+        {
+            "schema_version",
+            "protocol_sha256",
+            "manifest_sha256",
+            "blind_plan_sha256",
+            "unblinding_key_sha256",
+            "raw_ratings_sha256",
+            "raw_evidence_sha256",
+            "family_id",
+            "rater_id",
+            "pass_id",
+            "ratings",
+        },
+        f"normalized ratings {path}",
+    )
+    if envelope["schema_version"] != 1:
+        raise ProtocolError(f"normalized ratings {path} must use schema_version 1")
+    if envelope["protocol_sha256"] != protocol_sha256:
+        raise ProtocolError(f"normalized ratings {path} protocol_sha256 mismatch")
+    if envelope["manifest_sha256"] != manifest_sha256:
+        raise ProtocolError(f"normalized ratings {path} manifest_sha256 mismatch")
+    for field in (
+        "blind_plan_sha256",
+        "unblinding_key_sha256",
+        "raw_ratings_sha256",
+        "raw_evidence_sha256",
+    ):
+        _require_sha256(envelope[field], f"normalized ratings {path} {field}")
+    rows = envelope["ratings"]
+    if not isinstance(rows, list) or not rows:
+        raise ProtocolError(f"normalized ratings {path} ratings must be a non-empty array")
+    envelope_fields = (
+        "protocol_sha256",
+        "manifest_sha256",
+        "blind_plan_sha256",
+        "unblinding_key_sha256",
+        "raw_ratings_sha256",
+        "raw_evidence_sha256",
+        "family_id",
+        "rater_id",
+        "pass_id",
+    )
+    for row in rows:
+        if not isinstance(row, dict):
+            raise ProtocolError(f"normalized ratings {path} contains a non-object row")
+        for field in envelope_fields:
+            if row.get(field) != envelope[field]:
+                raise ProtocolError(
+                    f"normalized ratings {path} row {field} does not match its envelope"
+                )
+    return rows
+
+
+def _load_evidence_reports(paths: list[str]) -> list[dict]:
+    reports = [load_json(path) for path in paths]
+    if not reports or any(not isinstance(report, dict) for report in reports):
+        raise ProtocolError("raw evidence reports must contain JSON objects")
+    return reports
+
+
+def build_parser() -> argparse.ArgumentParser:
+    parser = argparse.ArgumentParser(description=__doc__)
+    sub = parser.add_subparsers(dest="command", required=True)
+
+    validate = sub.add_parser("validate", help="validate a protocol")
+    validate.add_argument("protocol")
+    validate.add_argument("--require-frozen", action="store_true")
+
+    digest = sub.add_parser("digest", help="print the canonical protocol SHA-256")
+    digest.add_argument("protocol")
+
+    manifest = sub.add_parser(
+        "validate-manifest",
+        help="validate an exact run manifest against the frozen protocol",
+    )
+    manifest.add_argument("protocol")
+    manifest.add_argument("manifest")
+    manifest.add_argument("--selection-lock")
+
+    blind = sub.add_parser("blind", help="create a public blind plan and separate key")
+    blind.add_argument("protocol")
+    blind.add_argument("manifest")
+    blind.add_argument("--family", required=True)
+    blind.add_argument("--rater-id", required=True)
+    blind.add_argument("--pass-id", type=int, required=True)
+    blind.add_argument("--selection-lock")
+    blind.add_argument(
+        "--secret-file",
+        required=True,
+        help="untracked file containing 32 random bytes or 64 hex characters",
+    )
+    blind.add_argument("--public-output", required=True)
+    blind.add_argument("--key-output", required=True)
+
+    unblind = sub.add_parser(
+        "unblind",
+        help="join a complete raw blind-rating envelope through the separate key",
+    )
+    unblind.add_argument("protocol")
+    unblind.add_argument("manifest")
+    unblind.add_argument("public_plan")
+    unblind.add_argument("key")
+    unblind.add_argument("raw_ratings")
+    unblind.add_argument("--selection-lock")
+    unblind.add_argument(
+        "--secret-file",
+        required=True,
+        help="the same operator-only 32-byte secret used to build the blind plan",
+    )
+    unblind.add_argument(
+        "--evidence-report",
+        required=True,
+        help="archived raw provider/human evidence whose canonical hash is declared by raw ratings",
+    )
+    unblind.add_argument("--output", required=True)
+
+    media = sub.add_parser("audit-media", help="hash and ffprobe every manifest video")
+    media.add_argument("protocol")
+    media.add_argument("manifest")
+    media.add_argument("--selection-lock")
+    media.add_argument("--output", required=True)
+
+    aggregate = sub.add_parser(
+        "aggregate",
+        help="aggregate a complete tensor of normalized rating envelopes",
+    )
+    aggregate.add_argument("protocol")
+    aggregate.add_argument("manifest")
+    aggregate.add_argument("ratings", nargs="+")
+    aggregate.add_argument("--evidence-reports", nargs="+", required=True)
+    aggregate.add_argument("--selection-lock")
+    aggregate.add_argument(
+        "--secret-file",
+        required=True,
+        help="the operator-only 32-byte secret used to verify every evidence group",
+    )
+    aggregate.add_argument("--output", required=True)
+
+    select = sub.add_parser(
+        "select",
+        help="recompute development rounds and emit a finalist report plus lock",
+    )
+    select.add_argument("protocol")
+    select.add_argument("--round-a-manifest", required=True)
+    select.add_argument("--round-a-ratings", nargs="+", required=True)
+    select.add_argument("--round-a-evidence-reports", nargs="+", required=True)
+    select.add_argument("--round-b-manifest", required=True)
+    select.add_argument("--round-b-ratings", nargs="+", required=True)
+    select.add_argument("--round-b-evidence-reports", nargs="+", required=True)
+    select.add_argument("--development-performance", required=True)
+    select.add_argument("--secret-file", required=True)
+    select.add_argument("--locked-at", required=True)
+    select.add_argument("--report-output", required=True)
+    select.add_argument("--lock-output", required=True)
+
+    gate = sub.add_parser("gate", help="evaluate the frozen quality/performance gate")
+    gate.add_argument("protocol")
+    gate.add_argument("report")
+    gate.add_argument("--manifest", required=True)
+    gate.add_argument("--selection-lock", required=True)
+    gate.add_argument("--selection-report", required=True)
+    gate.add_argument("--round-a-manifest", required=True)
+    gate.add_argument("--round-a-ratings", nargs="+", required=True)
+    gate.add_argument("--round-a-evidence-reports", nargs="+", required=True)
+    gate.add_argument("--round-b-manifest", required=True)
+    gate.add_argument("--round-b-ratings", nargs="+", required=True)
+    gate.add_argument("--round-b-evidence-reports", nargs="+", required=True)
+    gate.add_argument("--development-performance", required=True)
+    gate.add_argument("--sentinel-manifest", required=True)
+    gate.add_argument("--performance", required=True)
+    gate.add_argument("--media-report", required=True)
+    gate.add_argument("--sentinel-media-report", required=True)
+    gate.add_argument(
+        "--ratings",
+        nargs="+",
+        required=True,
+        help="complete normalized rating envelopes used to recompute the aggregate",
+    )
+    gate.add_argument("--evidence-reports", nargs="+", required=True)
+    gate.add_argument(
+        "--secret-file",
+        required=True,
+        help="the operator-only 32-byte secret used to verify every evidence group",
+    )
+    gate.add_argument("--output", required=True)
+    return parser
+
+
+def main(argv: list[str] | None = None) -> int:
+    args = build_parser().parse_args(argv)
+    try:
+        protocol = load_json(args.protocol)
+        if args.command == "validate":
+            validate_protocol(protocol, require_frozen=args.require_frozen)
+            print(f"valid: {protocol['protocol_id']} ({protocol['status']})")
+            return 0
+        if args.command == "digest":
+            validate_protocol(protocol, require_frozen=False)
+            print(canonical_sha256(protocol))
+            return 0
+        if args.command == "validate-manifest":
+            selection_lock = _load_selection_lock(args.selection_lock)
+            manifest = load_json(args.manifest)
+            index = validate_run_manifest(
+                protocol,
+                manifest,
+                selection_lock=selection_lock,
+            )
+            print(
+                f"valid: {index['phase']} "
+                f"({len(index['records'])} artifacts, {len(index['runs'])} runs)"
+            )
+            return 0
+        if args.command == "blind":
+            manifest = load_json(args.manifest)
+            selection_lock = _load_selection_lock(args.selection_lock)
+            public, key = build_blind_plan(
+                protocol,
+                manifest,
+                args.family,
+                args.pass_id,
+                _load_blind_secret(args.secret_file),
+                selection_lock=selection_lock,
+                rater_id=args.rater_id,
+            )
+            _write_json(args.public_output, public)
+            _write_json(args.key_output, key)
+            print(f"wrote {len(public['records'])} blind records")
+            return 0
+        if args.command == "unblind":
+            manifest = load_json(args.manifest)
+            selection_lock = _load_selection_lock(args.selection_lock)
+            public_plan = _require_exact_object(
+                load_json(args.public_plan),
+                {
+                    "schema_version",
+                    "protocol_sha256",
+                    "manifest_sha256",
+                    "family_id",
+                    "rater_id",
+                    "pass_id",
+                    "records",
+                },
+                "public plan",
+            )
+            key = _require_exact_object(
+                load_json(args.key),
+                {
+                    "schema_version",
+                    "protocol_sha256",
+                    "manifest_sha256",
+                    "blind_plan_sha256",
+                    "family_id",
+                    "rater_id",
+                    "pass_id",
+                    "blind_secret_sha256",
+                    "records",
+                },
+                "unblinding key",
+            )
+            raw = _require_exact_object(
+                load_json(args.raw_ratings),
+                {
+                    "schema_version",
+                    "protocol_sha256",
+                    "manifest_sha256",
+                    "blind_plan_sha256",
+                    "family_id",
+                    "rater_id",
+                    "pass_id",
+                    "raw_evidence_sha256",
+                    "ratings",
+                },
+                "raw ratings",
+            )
+            protocol_hash = canonical_sha256(protocol)
+            manifest_hash = canonical_sha256(manifest)
+            public_hash = canonical_sha256(public_plan)
+            if raw["schema_version"] != 1:
+                raise ProtocolError("raw ratings must use schema_version 1")
+            if raw["protocol_sha256"] != protocol_hash:
+                raise ProtocolError("raw ratings protocol_sha256 mismatch")
+            if raw["manifest_sha256"] != manifest_hash:
+                raise ProtocolError("raw ratings manifest_sha256 mismatch")
+            if raw["blind_plan_sha256"] != public_hash:
+                raise ProtocolError("raw ratings blind_plan_sha256 mismatch")
+            _require_sha256(raw["raw_evidence_sha256"], "raw ratings raw_evidence_sha256")
+            evidence_report = load_json(args.evidence_report)
+            if canonical_sha256(evidence_report) != raw["raw_evidence_sha256"]:
+                raise ProtocolError("raw ratings raw_evidence_sha256 mismatch")
+            for field in ("family_id", "rater_id", "pass_id"):
+                if raw[field] != public_plan.get(field):
+                    raise ProtocolError(f"raw ratings {field} does not match public plan")
+            normalized = unblind_ratings(
+                protocol,
+                manifest,
+                public_plan,
+                key,
+                raw["ratings"],
+                blind_secret=_load_blind_secret(args.secret_file),
+                family_id=raw["family_id"],
+                pass_id=raw["pass_id"],
+                rater_id=raw["rater_id"],
+                raw_evidence_report=evidence_report,
+                selection_lock=selection_lock,
+            )
+            envelope = {
+                "schema_version": 1,
+                "protocol_sha256": protocol_hash,
+                "manifest_sha256": manifest_hash,
+                "blind_plan_sha256": public_hash,
+                "unblinding_key_sha256": canonical_sha256(key),
+                "raw_ratings_sha256": canonical_sha256(raw["ratings"]),
+                "raw_evidence_sha256": raw["raw_evidence_sha256"],
+                "family_id": raw["family_id"],
+                "rater_id": raw["rater_id"],
+                "pass_id": raw["pass_id"],
+                "ratings": normalized,
+            }
+            _write_json(args.output, envelope)
+            print(f"unblinded {len(normalized)} ratings")
+            return 0
+        if args.command == "audit-media":
+            manifest_path = Path(args.manifest)
+            manifest = load_json(manifest_path)
+            selection_lock = _load_selection_lock(args.selection_lock)
+            index = validate_run_manifest(
+                protocol,
+                manifest,
+                selection_lock=selection_lock,
+            )
+            records = _resolve_manifest_media(manifest_path, manifest)
+            contract_key = (
+                "long_horizon_media_contract"
+                if index["phase"] == "sentinel"
+                else "media_contract"
+            )
+            report = audit_media(
+                records,
+                protocol[contract_key],
+                protocol_sha256=index["protocol_sha256"],
+                manifest_sha256=index["manifest_sha256"],
+            )
+            _write_json(args.output, report)
+            print(f"audited {len(report['records'])} media files")
+            return 0
+        if args.command == "aggregate":
+            manifest = load_json(args.manifest)
+            selection_lock = _load_selection_lock(args.selection_lock)
+            manifest_index = validate_run_manifest(
+                protocol,
+                manifest,
+                selection_lock=selection_lock,
+            )
+            ratings = []
+            for path in args.ratings:
+                ratings.extend(
+                    _load_normalized_ratings(
+                        path,
+                        protocol_sha256=manifest_index["protocol_sha256"],
+                        manifest_sha256=manifest_index["manifest_sha256"],
+                    )
+                )
+            report = aggregate_ratings(
+                protocol,
+                ratings,
+                manifest=manifest,
+                selection_lock=selection_lock,
+                blind_secret=_load_blind_secret(args.secret_file),
+                raw_evidence_reports=_load_evidence_reports(args.evidence_reports),
+                require_complete=True,
+            )
+            _write_json(args.output, report)
+            print(f"aggregated {report['n_ratings']} ratings")
+            return 0
+        if args.command == "select":
+            round_a_manifest = load_json(args.round_a_manifest)
+            round_b_manifest = load_json(args.round_b_manifest)
+            round_a_index = validate_run_manifest(protocol, round_a_manifest)
+            round_b_index = validate_run_manifest(protocol, round_b_manifest)
+            round_a_ratings = []
+            for path in args.round_a_ratings:
+                round_a_ratings.extend(
+                    _load_normalized_ratings(
+                        path,
+                        protocol_sha256=round_a_index["protocol_sha256"],
+                        manifest_sha256=round_a_index["manifest_sha256"],
+                    )
+                )
+            round_b_ratings = []
+            for path in args.round_b_ratings:
+                round_b_ratings.extend(
+                    _load_normalized_ratings(
+                        path,
+                        protocol_sha256=round_b_index["protocol_sha256"],
+                        manifest_sha256=round_b_index["manifest_sha256"],
+                    )
+                )
+            selection_report = build_selection_report(
+                protocol,
+                round_a_manifest=round_a_manifest,
+                round_a_ratings=round_a_ratings,
+                round_a_raw_evidence_reports=_load_evidence_reports(
+                    args.round_a_evidence_reports
+                ),
+                round_b_manifest=round_b_manifest,
+                round_b_ratings=round_b_ratings,
+                round_b_raw_evidence_reports=_load_evidence_reports(
+                    args.round_b_evidence_reports
+                ),
+                development_performance=load_json(args.development_performance),
+                blind_secret=_load_blind_secret(args.secret_file),
+            )
+            selection_lock = build_selection_lock(
+                protocol,
+                selection_report,
+                locked_at=args.locked_at,
+            )
+            _write_json(args.report_output, selection_report)
+            _write_json(args.lock_output, selection_lock)
+            print(f"selected {selection_lock['finalist_system_id']}")
+            return 0
+        if args.command == "gate":
+            report = load_json(args.report)
+            manifest_path = Path(args.manifest)
+            manifest = load_json(manifest_path)
+            selection_lock = load_json(args.selection_lock)
+            selection_report = load_json(args.selection_report)
+            round_a_manifest = load_json(args.round_a_manifest)
+            round_b_manifest = load_json(args.round_b_manifest)
+            round_a_index = validate_run_manifest(protocol, round_a_manifest)
+            round_b_index = validate_run_manifest(protocol, round_b_manifest)
+            round_a_ratings = []
+            for path in args.round_a_ratings:
+                round_a_ratings.extend(
+                    _load_normalized_ratings(
+                        path,
+                        protocol_sha256=round_a_index["protocol_sha256"],
+                        manifest_sha256=round_a_index["manifest_sha256"],
+                    )
+                )
+            round_b_ratings = []
+            for path in args.round_b_ratings:
+                round_b_ratings.extend(
+                    _load_normalized_ratings(
+                        path,
+                        protocol_sha256=round_b_index["protocol_sha256"],
+                        manifest_sha256=round_b_index["manifest_sha256"],
+                    )
+                )
+            development_performance = load_json(args.development_performance)
+            manifest_index = validate_run_manifest(
+                protocol,
+                manifest,
+                selection_lock=selection_lock,
+            )
+            sentinel_manifest_path = Path(args.sentinel_manifest)
+            sentinel_manifest = load_json(sentinel_manifest_path)
+            performance = load_json(args.performance)
+            media_report = load_json(args.media_report)
+            sentinel_media_report = load_json(args.sentinel_media_report)
+            ratings = []
+            for path in args.ratings:
+                ratings.extend(
+                    _load_normalized_ratings(
+                        path,
+                        protocol_sha256=manifest_index["protocol_sha256"],
+                        manifest_sha256=manifest_index["manifest_sha256"],
+                    )
+                )
+            result = evaluate_gate(
+                protocol,
+                report,
+                selected_system=selection_lock["finalist_system_id"],
+                reference_system="sf4-reference",
+                performance=performance,
+                media_report=media_report,
+                manifest=manifest,
+                selection_lock=selection_lock,
+                sentinel_manifest=sentinel_manifest,
+                sentinel_media_report=sentinel_media_report,
+                ratings=ratings,
+                raw_evidence_reports=_load_evidence_reports(args.evidence_reports),
+                blind_secret=_load_blind_secret(args.secret_file),
+                media_records=_resolve_manifest_media(manifest_path, manifest),
+                sentinel_media_records=_resolve_manifest_media(
+                    sentinel_manifest_path,
+                    sentinel_manifest,
+                ),
+                selection_report=selection_report,
+                round_a_manifest=round_a_manifest,
+                round_a_ratings=round_a_ratings,
+                round_a_raw_evidence_reports=_load_evidence_reports(
+                    args.round_a_evidence_reports
+                ),
+                round_b_manifest=round_b_manifest,
+                round_b_ratings=round_b_ratings,
+                round_b_raw_evidence_reports=_load_evidence_reports(
+                    args.round_b_evidence_reports
+                ),
+                development_performance=development_performance,
+            )
+            _write_json(args.output, result)
+            print("PASS" if result["pass"] else "FAIL: " + ", ".join(result["failed"]))
+            return 0 if result["pass"] else 2
+    except (ProtocolError, KeyError, TypeError) as exc:
+        print(f"quality-sweep: {exc}", file=sys.stderr)
+        return 1
+    raise AssertionError(f"unhandled command {args.command}")
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

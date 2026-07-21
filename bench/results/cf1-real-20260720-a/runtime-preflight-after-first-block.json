@@ -1,0 +1,6 @@
+{
+  "failure": "static runtime evidence does not verify",
+  "ready": false,
+  "runtime_id": "cf1-h100-cu128-v1",
+  "runtime_lock_sha256": "d4d163d635ecbafb5b11bbe54cca7bdd5e9f80c1edc23ed96972821940ecc692"
+}

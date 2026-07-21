@@ -1,0 +1,24 @@
+{
+  "candidates": [
+    {
+      "content": {
+        "parts": [
+          {
+            "text": "{\n  \"scores\": {\n    \"prompt_adherence\": 6,\n    \"spatial_fidelity\": 6,\n    \"identity_consistency\": 7,\n    \"motion_naturalness\": 4,\n    \"temporal_artifacts\": 7\n  },\n  \"first_third_quality\": 6,\n  \"final_third_quality\": 5,\n  \"failure_tags\": [\n    \"incorrect action\",\n    \"stiff motion\",\n    \"anatomical issues\"\n  ],\n  \"rationale\": \"The video features a fox in a snowy forest at sunrise, but it walks stiffly rather than running. The motion is unnatural and robotic, though the scene remains visually consistent with minimal temporal artifacts.\"\n}"
+          }
+        ],
+        "role": "model"
+      },
+      "finishReason": "STOP",
+      "index": 0
+    }
+  ],
+  "modelVersion": "gemini-3.1-pro-preview",
+  "responseId": "loZdauHcB_7fz7IP56nb4AI",
+  "usageMetadata": {
+    "candidatesTokenCount": 164,
+    "promptTokenCount": 6114,
+    "thoughtsTokenCount": 707,
+    "totalTokenCount": 6985
+  }
+}

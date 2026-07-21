@@ -1,0 +1,7 @@
+{
+  "oneforcing_1step": {
+    "reason": "One-Forcing checkpoint requires its native fork/register-head inference path.",
+    "reason_code": "checkpoint_inference_path_incompatible",
+    "remediation": "Rerun in the One-Forcing repository before scoring or comparison."
+  }
+}

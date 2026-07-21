@@ -1,0 +1,28 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "quality-selection-lock-v1.schema.json",
+  "title": "Quality repair finalist selection lock v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "status",
+    "protocol_sha256",
+    "finalist_system_id",
+    "finalist_config_sha256",
+    "selection_report_sha256",
+    "locked_at"
+  ],
+  "properties": {
+    "schema_version": {"const": 1},
+    "status": {"const": "locked"},
+    "protocol_sha256": {"$ref": "#/$defs/sha256"},
+    "finalist_system_id": {"type": "string", "minLength": 1},
+    "finalist_config_sha256": {"$ref": "#/$defs/sha256"},
+    "selection_report_sha256": {"$ref": "#/$defs/sha256"},
+    "locked_at": {"type": "string", "format": "date-time"}
+  },
+  "$defs": {
+    "sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"}
+  }
+}

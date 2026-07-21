@@ -1,0 +1,72 @@
+{
+  "gpu": "NVIDIA H100 80GB HBM3",
+  "step": 2,
+  "dtype": "bf16 DiT, fp16 TAEHV",
+  "decoder": "TAEHV taew2_1, parallel batch decode",
+  "resolution": "480x832",
+  "latent_frames": 21,
+  "pixel_frames": 81,
+  "prompt": "A lone red fox runs through a snowy pine forest at sunrise, cinematic tracking shot, realistic fur, stable anatomy.",
+  "trials": [
+    {
+      "trial": 0,
+      "warmup": true,
+      "pixel_frames": 81,
+      "forwards": 65,
+      "first_chunk_pre_vae_s": 0.30149340629577637,
+      "generation_s": 3.757918463088572,
+      "taehv_batch_decode_s": 0.19248467218130827,
+      "serial_e2e_s": 3.9504031352698803,
+      "serial_e2e_fps": 20.504236460531846,
+      "estimated_first_visible_rgb_s": 0.3106593430663149,
+      "peak_allocated_gb": 36.03724670410156,
+      "peak_reserved_gb": 46.8515625
+    },
+    {
+      "trial": 1,
+      "warmup": false,
+      "pixel_frames": 81,
+      "forwards": 65,
+      "first_chunk_pre_vae_s": 0.16324305534362793,
+      "generation_s": 3.275466593913734,
+      "taehv_batch_decode_s": 0.09598692692816257,
+      "serial_e2e_s": 3.3714535208418965,
+      "serial_e2e_fps": 24.025245935994167,
+      "estimated_first_visible_rgb_s": 0.16781386138782614,
+      "peak_allocated_gb": 36.224995613098145,
+      "peak_reserved_gb": 47.07421875
+    },
+    {
+      "trial": 2,
+      "warmup": false,
+      "pixel_frames": 81,
+      "forwards": 65,
+      "first_chunk_pre_vae_s": 0.16498875617980957,
+      "generation_s": 3.288153794594109,
+      "taehv_batch_decode_s": 0.09593367204070091,
+      "serial_e2e_s": 3.38408746663481,
+      "serial_e2e_fps": 23.935551547829135,
+      "estimated_first_visible_rgb_s": 0.1695570262769858,
+      "peak_allocated_gb": 36.225239753723145,
+      "peak_reserved_gb": 47.07421875
+    },
+    {
+      "trial": 3,
+      "warmup": false,
+      "pixel_frames": 81,
+      "forwards": 65,
+      "first_chunk_pre_vae_s": 0.1615755558013916,
+      "generation_s": 3.25281354598701,
+      "taehv_batch_decode_s": 0.09565190505236387,
+      "serial_e2e_s": 3.348465451039374,
+      "serial_e2e_fps": 24.19018538024854,
+      "estimated_first_visible_rgb_s": 0.16613040842293275,
+      "peak_allocated_gb": 36.22548007965088,
+      "peak_reserved_gb": 46.916015625
+    }
+  ],
+  "steady_mean_serial_e2e_fps": 24.05032762135728,
+  "steady_mean_generation_s": 3.272144644831618,
+  "steady_mean_decode_s": 0.09585750134040912,
+  "steady_mean_estimated_first_visible_rgb_s": 0.16783376536258157
+}

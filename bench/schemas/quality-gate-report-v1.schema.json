@@ -1,0 +1,133 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "quality-gate-report-v1.schema.json",
+  "title": "Quality-qualified headline gate report v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "protocol_sha256",
+    "manifest_sha256",
+    "aggregate_report_sha256",
+    "media_report_sha256",
+    "sentinel_manifest_sha256",
+    "sentinel_media_report_sha256",
+    "selection_lock_sha256",
+    "selection_report_sha256",
+    "performance_evidence_sha256",
+    "pass",
+    "selected_system",
+    "reference_system",
+    "failed",
+    "checks",
+    "quality_mean",
+    "paired_delta",
+    "report_sha256"
+  ],
+  "properties": {
+    "schema_version": {"const": 1},
+    "protocol_sha256": {"$ref": "#/$defs/sha256"},
+    "manifest_sha256": {"$ref": "#/$defs/sha256"},
+    "aggregate_report_sha256": {"$ref": "#/$defs/sha256"},
+    "media_report_sha256": {"$ref": "#/$defs/sha256"},
+    "sentinel_manifest_sha256": {"$ref": "#/$defs/sha256"},
+    "sentinel_media_report_sha256": {"$ref": "#/$defs/sha256"},
+    "selection_lock_sha256": {"$ref": "#/$defs/sha256"},
+    "selection_report_sha256": {"$ref": "#/$defs/sha256"},
+    "performance_evidence_sha256": {"$ref": "#/$defs/sha256"},
+    "pass": {"type": "boolean"},
+    "selected_system": {"type": "string", "minLength": 1},
+    "reference_system": {"type": "string", "minLength": 1},
+    "failed": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": {"$ref": "#/$defs/gateName"}
+    },
+    "checks": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "absolute_quality",
+        "family_floor",
+        "stratum_floor",
+        "sf4_noninferiority_margin",
+        "maximum_low_quality_items",
+        "low_quality_item_threshold",
+        "final_third_temporal_floor",
+        "maximum_early_to_late_drop",
+        "warm_e2e_fps",
+        "cold_e2e_fps",
+        "sustained_seconds",
+        "sustained_e2e_fps",
+        "minimum_each_warm_trial_fps",
+        "maximum_first_visible_rgb_s",
+        "maximum_p95_effective_frame_interval_ms",
+        "required_model_families",
+        "require_human",
+        "required_forwards",
+        "required_rgb_frames"
+      ],
+      "properties": {
+        "absolute_quality": {"$ref": "#/$defs/check"},
+        "family_floor": {"$ref": "#/$defs/check"},
+        "stratum_floor": {"$ref": "#/$defs/check"},
+        "sf4_noninferiority_margin": {"$ref": "#/$defs/check"},
+        "maximum_low_quality_items": {"$ref": "#/$defs/check"},
+        "low_quality_item_threshold": {"$ref": "#/$defs/check"},
+        "final_third_temporal_floor": {"$ref": "#/$defs/check"},
+        "maximum_early_to_late_drop": {"$ref": "#/$defs/check"},
+        "warm_e2e_fps": {"$ref": "#/$defs/check"},
+        "cold_e2e_fps": {"$ref": "#/$defs/check"},
+        "sustained_seconds": {"$ref": "#/$defs/check"},
+        "sustained_e2e_fps": {"$ref": "#/$defs/check"},
+        "minimum_each_warm_trial_fps": {"$ref": "#/$defs/check"},
+        "maximum_first_visible_rgb_s": {"$ref": "#/$defs/check"},
+        "maximum_p95_effective_frame_interval_ms": {"$ref": "#/$defs/check"},
+        "required_model_families": {"$ref": "#/$defs/check"},
+        "require_human": {"$ref": "#/$defs/check"},
+        "required_forwards": {"$ref": "#/$defs/check"},
+        "required_rgb_frames": {"$ref": "#/$defs/check"}
+      }
+    },
+    "quality_mean": {"type": "number"},
+    "paired_delta": {"type": "number"},
+    "report_sha256": {"$ref": "#/$defs/sha256"}
+  },
+  "$defs": {
+    "sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+    "gateName": {
+      "enum": [
+        "absolute_quality",
+        "family_floor",
+        "stratum_floor",
+        "sf4_noninferiority_margin",
+        "maximum_low_quality_items",
+        "low_quality_item_threshold",
+        "final_third_temporal_floor",
+        "maximum_early_to_late_drop",
+        "warm_e2e_fps",
+        "cold_e2e_fps",
+        "sustained_seconds",
+        "sustained_e2e_fps",
+        "minimum_each_warm_trial_fps",
+        "maximum_first_visible_rgb_s",
+        "maximum_p95_effective_frame_interval_ms",
+        "required_model_families",
+        "require_human",
+        "required_forwards",
+        "required_rgb_frames"
+      ]
+    },
+    "check": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["actual", "operator", "threshold", "pass"],
+      "properties": {
+        "actual": {},
+        "operator": {"type": "string", "minLength": 1},
+        "threshold": {},
+        "pass": {"type": "boolean"}
+      }
+    }
+  }
+}

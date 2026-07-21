@@ -1,0 +1,95 @@
+{
+  "authorizes_performance_claim": false,
+  "authorizes_quality_claim": false,
+  "camera": {
+    "background_track_count": 262,
+    "median_global_motion_px": 3.14215087890625,
+    "median_homography_inlier_fraction": 0.4330708661417323,
+    "median_homography_reprojection_error_px": 1.5856696367263794
+  },
+  "decision_threshold": 5.0,
+  "displaced_vs_collapsed": false,
+  "displacement_score": 2.115336,
+  "foreground": {
+    "camera_compensated_trajectory_span_fraction_width": 0.20569861852205718,
+    "camera_compensated_trajectory_span_px": 171.14125061035156,
+    "centroid_endpoint_displacement_fraction_width": 0.029495610640599176,
+    "centroid_endpoint_displacement_px": 24.540348052978516,
+    "max_centroid_excursion_fraction_width": 0.20569861852205718,
+    "max_centroid_excursion_px": 171.14125061035156,
+    "median_net_displacement_fraction_width": 0.030234969579256497,
+    "median_net_displacement_px": 25.155494689941406,
+    "persistent_track_count": 22,
+    "screen_space_trajectory_span_fraction_width": 0.2073335464184101,
+    "screen_space_trajectory_span_px": 172.5015106201172,
+    "selected_track_count": 37,
+    "track_survival": 0.9017957351290684,
+    "trajectory_path_length_px": 1181.87548828125,
+    "trajectory_span_fraction_width": 0.20569861852205718,
+    "trajectory_span_px": 171.14125061035156,
+    "trajectory_straightness": 0.020763903047576082,
+    "translation_consensus": 0.8173940469709999
+  },
+  "kind": "coherent-displacement-metrics",
+  "models": {
+    "appearance": "facebookresearch/dinov2:dinov2_vits14",
+    "appearance_device": "mps",
+    "camera_compensation": "background-ransac-homography-v1",
+    "flow": "opencv-farneback-warp-v1",
+    "tracker": "facebookresearch/co-tracker:cotracker3_offline",
+    "tracker_device": "mps"
+  },
+  "morph_guardrail": {
+    "appearance_guard": 0.3066801070150679,
+    "dino_guard": 0.08124433228988916,
+    "dinov2_feature_similarity_median": 0.9177885055541992,
+    "dinov2_feature_similarity_p10": 0.5679330229759216,
+    "flow_translation_coherence": 0.00012758879623881396,
+    "flow_warp_residual": 0.04640523553825915,
+    "raw_flow_mean_px": 1.9402966741472483,
+    "warp_guard": 0.7099672778858803
+  },
+  "purpose": "development-displacement-measurement",
+  "schema_version": 1,
+  "score_components": {
+    "appearance_guard": 0.3066801070150679,
+    "coherence_guard": 0.8585583646312795,
+    "displacement_extent": 0.49298183546905805
+  },
+  "source": {
+    "frame_count": 81,
+    "guardrail_frame_indices": [
+      0,
+      1,
+      10,
+      11,
+      20,
+      21,
+      30,
+      31,
+      40,
+      41,
+      50,
+      51,
+      60,
+      61,
+      70,
+      71,
+      80
+    ],
+    "height": 480,
+    "path": "/Users/electric/Documents/areas_of_focus/rtv-agent1/bench/results/p0-root-cause-20260721/cell-b/d2-reset-every-block/clip.mp4",
+    "sampled_frame_indices": [
+      0,
+      10,
+      20,
+      30,
+      40,
+      50,
+      60,
+      70,
+      80
+    ],
+    "width": 832
+  }
+}

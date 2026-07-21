@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Realtime video streaming demo</title>
+    <link rel="stylesheet" href="/demo.css">
+    <script src="/demo.js" defer></script>
+  </head>
+  <body>
+    <h1>Realtime video streaming demo</h1>
+    <p>This local fake backend emits valid PNG frames; it does not run the generation model.</p>
+    <form id="prompt-form">
+      <label for="prompt">Prompt</label>
+      <textarea id="prompt" maxlength="4096" aria-describedby="prompt-help" required>A locked-off medium shot shows one red rubber ball on a smooth white floor. The same ball repeatedly falls straight down under gravity, visibly compresses at each impact, rebounds upward, slows at the top of the arc, then falls again, completing three distinct bounce cycles. Its center rises and falls by about half the frame height while its contact shadow expands on impact and shrinks as it rises. Exactly one ball remains visible throughout; the floor and camera stay stationary in one continuous shot.</textarea>
+      <p id="prompt-help" class="hint">Write your own prompt and generate it directly, or optionally enhance it with Gemini 3.1 Flash-Lite. The enhanced text replaces this field so you can review or edit it first.</p>
+      <div class="form-actions">
+        <label class="seed-control" for="seed">
+          Seed
+          <input id="seed" type="number" value="7" min="0" max="4294967295" step="1" required>
+        </label>
+        <div class="prompt-actions">
+          <button id="enhance-prompt" class="secondary-action" type="button">Enhance prompt</button>
+          <button type="submit">Generate</button>
+        </div>
+      </div>
+    </form>
+    <canvas id="frame" width="832" height="480" aria-label="generated video preview"></canvas>
+      <output id="status" aria-live="polite">Connecting…</output>
+  </body>
+</html>

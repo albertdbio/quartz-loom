@@ -1,0 +1,9 @@
+{
+  "step": 1,
+  "prompt": "A lone red fox runs through a snowy pine forest at sunrise, cinematic tracking shot, realistic fur, stable anatomy.",
+  "seed": 20260719,
+  "taehv_vs_wan_mse": 0.0006485620397143066,
+  "taehv_vs_wan_psnr_db": 31.88048474141398,
+  "wan_adjacent_frame_l1": 0.027097200974822044,
+  "taehv_adjacent_frame_l1": 0.028073593974113464
+}

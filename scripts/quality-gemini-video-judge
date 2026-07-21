@@ -1,0 +1,163 @@
+#!/usr/bin/env python3
+"""Run Gemini 3.1 Pro blind-video judging or a bounded calibration canary."""
+
+from __future__ import annotations
+
+import argparse
+import hashlib
+import json
+import sys
+from pathlib import Path
+
+PROJECT_ROOT = Path(__file__).resolve().parents[1]
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
+
+from bench.gemini_video_judge import (  # noqa: E402
+    GEMINI_ENDPOINT,
+    GEMINI_MODEL_ID,
+    GEMINI_RATING_SCHEMA,
+    GEMINI_VIDEO_FPS,
+    build_gemini_request,
+    load_gemini_api_key,
+    parse_gemini_response,
+    post_gemini,
+    run_gemini_plan,
+    scrub_gemini_response,
+)
+from bench.quality_sweep import (  # noqa: E402
+    ProtocolError,
+    canonical_sha256,
+    load_json,
+)
+from bench.video_judge import build_rating_prompt  # noqa: E402
+
+
+def _write_json(path: str | Path, value: dict) -> None:
+    destination = Path(path)
+    destination.parent.mkdir(parents=True, exist_ok=True)
+    destination.write_text(json.dumps(value, indent=2, sort_keys=True) + "\n")
+
+
+def _read_registered_rubric(protocol: dict) -> str:
+    evaluation = protocol.get("evaluation")
+    if not isinstance(evaluation, dict):
+        raise ProtocolError("protocol evaluation is required")
+    relative = evaluation.get("rubric")
+    expected = evaluation.get("rubric_sha256")
+    if not isinstance(relative, str) or not relative:
+        raise ProtocolError("protocol evaluation.rubric is required")
+    path = Path(relative)
+    if not path.is_absolute():
+        path = PROJECT_ROOT / path
+    try:
+        raw = path.read_bytes()
+    except OSError as exc:
+        raise ProtocolError(f"cannot load registered rubric {relative}") from exc
+    if hashlib.sha256(raw).hexdigest() != expected:
+        raise ProtocolError("registered rubric SHA-256 mismatch")
+    try:
+        return raw.decode("utf-8")
+    except UnicodeDecodeError as exc:
+        raise ProtocolError("registered rubric must be UTF-8") from exc
+
+
+def build_parser() -> argparse.ArgumentParser:
+    parser = argparse.ArgumentParser(description=__doc__)
+    sub = parser.add_subparsers(dest="command", required=True)
+
+    plan = sub.add_parser("plan", help="judge a complete public blind plan")
+    plan.add_argument("protocol")
+    plan.add_argument("public_plan")
+    plan.add_argument("--asset-dir", required=True)
+    plan.add_argument("--evidence-dir", required=True)
+    plan.add_argument("--raw-output", required=True)
+    plan.add_argument("--evidence-output", required=True)
+    plan.add_argument("--dotenv", default=str(PROJECT_ROOT / ".env"))
+    plan.add_argument("--timeout-seconds", type=float, default=300)
+
+    canary = sub.add_parser(
+        "canary", help="run one bounded provider/parser calibration canary"
+    )
+    canary.add_argument("video")
+    canary.add_argument("--prompt", required=True)
+    canary.add_argument(
+        "--rubric", default=str(PROJECT_ROOT / "bench/quality/rubric-v1.md")
+    )
+    canary.add_argument("--output", required=True)
+    canary.add_argument("--dotenv", default=str(PROJECT_ROOT / ".env"))
+    canary.add_argument("--timeout-seconds", type=float, default=300)
+    return parser
+
+
+def main(argv: list[str] | None = None) -> int:
+    args = build_parser().parse_args(argv)
+    try:
+        api_key = load_gemini_api_key(args.dotenv)
+        if args.command == "plan":
+            protocol = load_json(args.protocol)
+            public_plan = load_json(args.public_plan)
+            rubric = _read_registered_rubric(protocol)
+            raw, evidence = run_gemini_plan(
+                protocol,
+                public_plan,
+                args.asset_dir,
+                args.evidence_dir,
+                rubric_text=rubric,
+                transport=lambda request: post_gemini(
+                    request,
+                    api_key=api_key,
+                    timeout_seconds=args.timeout_seconds,
+                ),
+            )
+            _write_json(args.raw_output, raw)
+            _write_json(args.evidence_output, evidence)
+            print(f"judged {len(raw['ratings'])} blind assets with {GEMINI_MODEL_ID}")
+            return 0
+
+        video_path = Path(args.video)
+        try:
+            video = video_path.read_bytes()
+            rubric = Path(args.rubric).read_text()
+        except OSError as exc:
+            raise ProtocolError(f"cannot load Gemini canary input: {exc}") from exc
+        prompt = build_rating_prompt(args.prompt, rubric)
+        request = build_gemini_request(video, prompt)
+        response = scrub_gemini_response(
+            post_gemini(
+                request,
+                api_key=api_key,
+                timeout_seconds=args.timeout_seconds,
+            )
+        )
+        rating = parse_gemini_response(response)
+        evidence = {
+            "schema_version": 1,
+            "purpose": "provider-parser-calibration-canary-not-gate-evidence",
+            "provider": "google",
+            "model_id": GEMINI_MODEL_ID,
+            "endpoint": GEMINI_ENDPOINT,
+            "video_fps": GEMINI_VIDEO_FPS,
+            "media_sha256": hashlib.sha256(video).hexdigest(),
+            "prompt_sha256": hashlib.sha256(prompt.encode("utf-8")).hexdigest(),
+            "response_schema_sha256": canonical_sha256(GEMINI_RATING_SCHEMA),
+            "raw_response": response,
+            "raw_response_sha256": canonical_sha256(response),
+            "rating": rating,
+        }
+        _write_json(args.output, evidence)
+        usage = response["usageMetadata"]
+        mean_score = sum(rating["scores"].values()) / len(rating["scores"])
+        print(
+            f"canary passed with {GEMINI_MODEL_ID}; "
+            f"mean={mean_score:.2f}, input_tokens={usage['promptTokenCount']}, "
+            f"output_tokens={usage['candidatesTokenCount']}"
+        )
+        return 0
+    except ProtocolError as exc:
+        print(f"error: {exc}", file=sys.stderr)
+        return 2
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

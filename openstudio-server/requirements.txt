@@ -1,0 +1,31 @@
+# openstudio-server — GPU pod requirements (RunPod pytorch image: torch 2.8.0+cu128, py3.12).
+#
+# HARD RULE: torch is provided by the image and NOTHING here may reinstall it.
+#   - None of these packages hard-pin torch (accelerate/diffusers require it
+#     loosely, so pip's resolver keeps the installed 2.8.0+cu128).
+#   - streamdiffusion itself is installed by run.sh with --no-deps (its
+#     setup.py pins diffusers==0.24.0 etc.; we supply those pins here so pip
+#     can never "resolve" our torch away).
+#   - run.sh re-verifies `torch.__version__` after install and fails loud.
+#   - xformers is deliberately ABSENT: its wheels pin exact torch builds and
+#     will shadow system torch. torch 2.8 SDPA (AttnProcessor2_0) is plenty on
+#     a 4090 at 512x512 batch-2. If you must try it: install with --no-deps
+#     and re-verify torch, then run server.py --xformers.
+
+# --- transport + imaging (also sufficient for local `--pipeline fake` dev) ---
+websockets==15.0.1              # asyncio server, py3.12 wheels, binary frames
+opencv-python-headless==4.11.0.86  # bundles libjpeg-turbo: decode+encode+resize, no apt deps
+
+# --- StreamDiffusion's pinned ecosystem (setup.py pins diffusers==0.24.0) ---
+# huggingface_hub MUST stay <0.26: diffusers 0.24 imports `cached_download`,
+# which hf_hub removed in 0.26.0.
+diffusers==0.24.0
+huggingface_hub==0.25.2
+transformers==4.46.3            # last 4.46.x; py3.12 wheels; compatible with hf_hub 0.25
+accelerate==1.1.1
+# transitive-but-pinned-for-sanity:
+safetensors>=0.4.3
+pillow>=10.0.0
+# fire/omegaconf are in streamdiffusion's install_requires but only used by its
+# CLI tools/demos; the streamdiffusion PACKAGE imports neither. We install the
+# package --no-deps, so they are not needed here.

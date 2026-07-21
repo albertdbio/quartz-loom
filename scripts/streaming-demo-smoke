@@ -1,0 +1,53 @@
+#!/usr/bin/env python3
+"""Exercise the client-scoped streaming contract with a fake 81-frame backend."""
+
+from __future__ import annotations
+
+import asyncio
+import json
+import sys
+from pathlib import Path
+
+
+ROOT = Path(__file__).resolve().parents[1]
+if str(ROOT) not in sys.path:
+    sys.path.insert(0, str(ROOT))
+
+from bench.streaming_service import (  # noqa: E402
+    FakeStreamingBackend,
+    StreamRequest,
+    run_stream_job,
+)
+
+
+async def _main() -> None:
+    request = StreamRequest(
+        client_id="fake-client",
+        job_id="fake-job",
+        prompt="A red fox runs through snow.",
+        seed=20260719,
+        latent_frames=21,
+    )
+
+    async def emit(client_id: str, event) -> None:
+        print(
+            json.dumps(
+                {
+                    "client_id": client_id,
+                    **event.to_dict(include_payloads=False),
+                },
+                sort_keys=True,
+            ),
+            flush=True,
+        )
+
+    await run_stream_job(
+        request,
+        FakeStreamingBackend(frame_counts=[1, *([4] * 20)]),
+        emit=emit,
+        queue_capacity=2,
+    )
+
+
+if __name__ == "__main__":
+    asyncio.run(_main())

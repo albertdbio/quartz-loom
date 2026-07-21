@@ -1,0 +1,95 @@
+{
+  "authorizes_performance_claim": false,
+  "authorizes_quality_claim": false,
+  "camera": {
+    "background_track_count": 197,
+    "median_global_motion_px": 65.22413635253906,
+    "median_homography_inlier_fraction": 0.29533678756476683,
+    "median_homography_reprojection_error_px": 1.3425769805908203
+  },
+  "decision_threshold": 5.0,
+  "displaced_vs_collapsed": false,
+  "displacement_score": 0.061183,
+  "foreground": {
+    "camera_compensated_trajectory_span_fraction_width": 0.058446051841587354,
+    "camera_compensated_trajectory_span_px": 48.62711513220068,
+    "centroid_endpoint_displacement_fraction_width": 0.021107513110043837,
+    "centroid_endpoint_displacement_px": 17.561450907556473,
+    "max_centroid_excursion_fraction_width": 0.058193416182754025,
+    "max_centroid_excursion_px": 48.41692226405135,
+    "median_net_displacement_fraction_width": 0.6082404576815091,
+    "median_net_displacement_px": 506.0560607910156,
+    "persistent_track_count": 11,
+    "screen_space_trajectory_span_fraction_width": 0.1051264551195529,
+    "screen_space_trajectory_span_px": 87.46521065946801,
+    "selected_track_count": 11,
+    "track_survival": 0.5667789001122334,
+    "trajectory_path_length_px": 164.51560342795875,
+    "trajectory_span_fraction_width": 0.058446051841587354,
+    "trajectory_span_px": 48.62711513220068,
+    "trajectory_straightness": 0.10674641518271924,
+    "translation_consensus": 0.6147755684874993
+  },
+  "kind": "coherent-displacement-metrics",
+  "models": {
+    "appearance": "facebookresearch/dinov2:dinov2_vits14",
+    "appearance_device": "mps",
+    "camera_compensation": "background-ransac-homography-v1",
+    "flow": "opencv-farneback-warp-v1",
+    "tracker": "facebookresearch/co-tracker:cotracker3_offline",
+    "tracker_device": "mps"
+  },
+  "morph_guardrail": {
+    "appearance_guard": 0.0,
+    "dino_guard": 0.0,
+    "dinov2_feature_similarity_median": 0.47567516565322876,
+    "dinov2_feature_similarity_p10": 0.1352718472480774,
+    "flow_translation_coherence": 0.011623913077127292,
+    "flow_warp_residual": 0.007078567272401415,
+    "raw_flow_mean_px": 0.5123860681105725,
+    "warp_guard": 0.9557589545474912
+  },
+  "purpose": "development-displacement-measurement",
+  "schema_version": 1,
+  "score_components": {
+    "appearance_guard": 0.0,
+    "coherence_guard": 0.5902896073311963,
+    "displacement_extent": 0.035329180969322416
+  },
+  "source": {
+    "frame_count": 81,
+    "guardrail_frame_indices": [
+      0,
+      1,
+      10,
+      11,
+      20,
+      21,
+      30,
+      31,
+      40,
+      41,
+      50,
+      51,
+      60,
+      61,
+      70,
+      71,
+      80
+    ],
+    "height": 480,
+    "path": "/Users/electric/Documents/areas_of_focus/decart-research/sgmd-pilot-20260721/clips/step_000075/Locked-off wide street view. A single yellow compact car enters at the far left, drives steadily acr.mp4",
+    "sampled_frame_indices": [
+      0,
+      10,
+      20,
+      30,
+      40,
+      50,
+      60,
+      70,
+      80
+    ],
+    "width": 832
+  }
+}

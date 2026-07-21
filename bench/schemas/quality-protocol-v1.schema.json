@@ -1,0 +1,535 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "quality-protocol-v1.schema.json",
+  "title": "Quality repair protocol v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "protocol_id",
+    "status",
+    "hypothesis",
+    "baseline",
+    "reference_systems",
+    "repair_candidates",
+    "development",
+    "confirmatory",
+    "prompts",
+    "media_contract",
+    "long_horizon_media_contract",
+    "evaluation",
+    "gates",
+    "provenance_requirements",
+    "stop_rules",
+    "sources"
+  ],
+  "properties": {
+    "schema_version": {"const": 1},
+    "protocol_id": {"type": "string", "minLength": 1},
+    "status": {"enum": ["draft", "frozen", "superseded"]},
+    "frozen_at": {"type": "string", "format": "date-time"},
+    "hypothesis": {"type": "string", "minLength": 1},
+    "baseline": {"$ref": "#/$defs/baseline"},
+    "reference_systems": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["sf4-reference"],
+      "properties": {
+        "sf4-reference": {"$ref": "#/$defs/referenceSystem"}
+      }
+    },
+    "repair_candidates": {
+      "type": "array",
+      "minItems": 1,
+      "items": {"$ref": "#/$defs/repairCandidate"}
+    },
+    "excluded_controls": {
+      "type": "array",
+      "items": {"type": "string", "minLength": 1}
+    },
+    "development": {"$ref": "#/$defs/development"},
+    "confirmatory": {"$ref": "#/$defs/confirmatory"},
+    "prompts": {
+      "type": "array",
+      "minItems": 10,
+      "items": {"$ref": "#/$defs/prompt"}
+    },
+    "media_contract": {"$ref": "#/$defs/shortMediaContract"},
+    "long_horizon_media_contract": {"$ref": "#/$defs/longMediaContract"},
+    "evaluation": {"$ref": "#/$defs/evaluation"},
+    "gates": {"$ref": "#/$defs/gates"},
+    "provenance_requirements": {
+      "type": "array",
+      "minItems": 25,
+      "uniqueItems": true,
+      "items": {"$ref": "#/$defs/provenanceName"}
+    },
+    "stop_rules": {
+      "type": "array",
+      "minItems": 1,
+      "items": {"type": "string", "minLength": 1}
+    },
+    "sources": {
+      "type": "array",
+      "minItems": 1,
+      "items": {"type": "string", "minLength": 1}
+    }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": {"status": {"const": "frozen"}},
+        "required": ["status"]
+      },
+      "then": {"required": ["frozen_at"]}
+    }
+  ],
+  "$defs": {
+    "sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+    "pinSha256": {
+      "oneOf": [
+        {"$ref": "#/$defs/sha256"},
+        {"const": "UNRESOLVED"}
+      ]
+    },
+    "commit": {"type": "string", "pattern": "^[0-9a-f]{40}$"},
+    "positiveNumber": {"type": "number", "exclusiveMinimum": 0},
+    "baseline": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "system_id",
+        "repository",
+        "commit",
+        "source_diff_sha256",
+        "config_sha256",
+        "checkpoint",
+        "checkpoint_sha256",
+        "weights",
+        "precision",
+        "decoder",
+        "decoder_mode",
+        "decoder_sha256",
+        "runner",
+        "runner_sha256",
+        "runner_status",
+        "num_latent_frames",
+        "num_frame_per_block",
+        "denoising_step_list",
+        "denoising_step_list_first_chunk",
+        "warp_denoising_step",
+        "timestep_shift",
+        "context_noise",
+        "forwards",
+        "measured_artifact",
+        "measured_artifact_sha256",
+        "measured_warm_e2e_fps",
+        "measured_first_visible_rgb_s",
+        "historical_latency_caveat",
+        "measured_p95_effective_frame_interval_ms",
+        "historical_quality_caveat"
+      ],
+      "properties": {
+        "system_id": {"type": "string", "minLength": 1},
+        "repository": {"type": "string", "minLength": 1},
+        "commit": {"$ref": "#/$defs/commit"},
+        "source_diff_sha256": {"$ref": "#/$defs/pinSha256"},
+        "config_sha256": {"$ref": "#/$defs/pinSha256"},
+        "checkpoint": {"type": "string", "minLength": 1},
+        "checkpoint_sha256": {"$ref": "#/$defs/pinSha256"},
+        "weights": {"type": "string", "minLength": 1},
+        "precision": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["dit", "decoder"],
+          "properties": {
+            "dit": {"type": "string", "minLength": 1},
+            "decoder": {"type": "string", "minLength": 1}
+          }
+        },
+        "decoder": {"type": "string", "minLength": 1},
+        "decoder_mode": {"type": "string", "minLength": 1},
+        "decoder_sha256": {"$ref": "#/$defs/pinSha256"},
+        "runner": {"type": "string", "minLength": 1},
+        "runner_sha256": {"$ref": "#/$defs/pinSha256"},
+        "runner_status": {"enum": ["historical-only", "qualified"]},
+        "num_latent_frames": {"const": 21},
+        "num_frame_per_block": {"const": 1},
+        "denoising_step_list": {
+          "type": "array",
+          "minItems": 1,
+          "items": {"type": "integer"}
+        },
+        "denoising_step_list_first_chunk": {
+          "type": "array",
+          "minItems": 1,
+          "items": {"type": "integer"}
+        },
+        "warp_denoising_step": {"type": "boolean"},
+        "timestep_shift": {"$ref": "#/$defs/positiveNumber"},
+        "context_noise": {"type": "number", "minimum": 0},
+        "forwards": {"const": 45},
+        "measured_artifact": {"type": "string", "minLength": 1},
+        "measured_artifact_sha256": {"$ref": "#/$defs/pinSha256"},
+        "measured_warm_e2e_fps": {"$ref": "#/$defs/positiveNumber"},
+        "measured_first_visible_rgb_s": {"$ref": "#/$defs/positiveNumber"},
+        "historical_latency_caveat": {"type": "string", "minLength": 1},
+        "measured_p95_effective_frame_interval_ms": {"$ref": "#/$defs/positiveNumber"},
+        "historical_quality_caveat": {"type": "string", "minLength": 1}
+      }
+    },
+    "referenceSystem": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "repository",
+        "commit",
+        "source_diff_sha256",
+        "checkpoint",
+        "checkpoint_sha256",
+        "decoder",
+        "decoder_mode",
+        "decoder_sha256",
+        "runner",
+        "runner_sha256",
+        "runner_status",
+        "config_sha256",
+        "weights",
+        "forwards",
+        "historical_manifest",
+        "historical_manifest_sha256",
+        "historical_caveat"
+      ],
+      "properties": {
+        "repository": {"type": "string", "minLength": 1},
+        "commit": {"$ref": "#/$defs/commit"},
+        "source_diff_sha256": {"$ref": "#/$defs/pinSha256"},
+        "checkpoint": {"type": "string", "minLength": 1},
+        "checkpoint_sha256": {"$ref": "#/$defs/pinSha256"},
+        "decoder": {"type": "string", "minLength": 1},
+        "decoder_mode": {"type": "string", "minLength": 1},
+        "decoder_sha256": {"$ref": "#/$defs/pinSha256"},
+        "runner": {"type": "string", "minLength": 1},
+        "runner_sha256": {"$ref": "#/$defs/pinSha256"},
+        "runner_status": {"enum": ["historical-only", "qualified"]},
+        "config_sha256": {"$ref": "#/$defs/pinSha256"},
+        "weights": {"type": "string", "minLength": 1},
+        "forwards": {"const": 35},
+        "historical_manifest": {"type": "string", "minLength": 1},
+        "historical_manifest_sha256": {"$ref": "#/$defs/sha256"},
+        "historical_caveat": {"type": "string", "minLength": 1}
+      }
+    },
+    "repairCandidate": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["system_id", "config_sha256", "changes", "rationale"],
+      "properties": {
+        "system_id": {"type": "string", "minLength": 1},
+        "config_sha256": {"$ref": "#/$defs/pinSha256"},
+        "changes": {"type": "object", "minProperties": 1},
+        "rationale": {"type": "string", "minLength": 1}
+      }
+    },
+    "development": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "prompt_ids",
+        "systems",
+        "round_a_seed_indexes",
+        "round_b_seed_indexes",
+        "round_a_seeds_per_prompt",
+        "round_b_seeds_per_prompt",
+        "selection_min_delta",
+        "temporal_motion_min_delta",
+        "max_single_prompt_drop",
+        "minimum_screening_fps",
+        "max_finalists",
+        "round_b",
+        "no_survivor_rule"
+      ],
+      "properties": {
+        "prompt_ids": {"$ref": "#/$defs/idArray"},
+        "systems": {"$ref": "#/$defs/idArray"},
+        "round_a_seed_indexes": {"$ref": "#/$defs/indexArray"},
+        "round_b_seed_indexes": {"$ref": "#/$defs/indexArray"},
+        "round_a_seeds_per_prompt": {"type": "integer", "minimum": 1},
+        "round_b_seeds_per_prompt": {"type": "integer", "minimum": 1},
+        "selection_min_delta": {"type": "number"},
+        "temporal_motion_min_delta": {"type": "number"},
+        "max_single_prompt_drop": {"type": "number", "minimum": 0},
+        "minimum_screening_fps": {"$ref": "#/$defs/positiveNumber"},
+        "max_finalists": {"type": "integer", "minimum": 1},
+        "round_b": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "evaluate",
+            "required_channel_mean",
+            "minimum_delta_vs_baseline",
+            "minimum_item_score",
+            "minimum_each_warm_trial_fps",
+            "maximum_first_visible_rgb_s",
+            "maximum_p95_effective_frame_interval_ms"
+          ],
+          "properties": {
+            "evaluate": {"type": "string", "minLength": 1},
+            "required_channel_mean": {
+              "type": "number",
+              "minimum": 1,
+              "maximum": 10,
+              "description": "Floor applied independently to every evaluator-family mean; rubric dimensions are not selection channels."
+            },
+            "minimum_delta_vs_baseline": {"type": "number"},
+            "minimum_item_score": {"type": "number", "minimum": 1, "maximum": 10},
+            "minimum_each_warm_trial_fps": {"$ref": "#/$defs/positiveNumber"},
+            "maximum_first_visible_rgb_s": {"$ref": "#/$defs/positiveNumber"},
+            "maximum_p95_effective_frame_interval_ms": {"$ref": "#/$defs/positiveNumber"}
+          }
+        },
+        "no_survivor_rule": {"type": "string", "minLength": 1}
+      }
+    },
+    "confirmatory": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "prompt_ids",
+        "systems",
+        "selection_lock_schema",
+        "seeds_per_prompt",
+        "lock_rule",
+        "long_horizon_prompt_ids",
+        "long_horizon_systems",
+        "long_horizon_latent_frames",
+        "long_horizon_rgb_frames"
+      ],
+      "properties": {
+        "prompt_ids": {"$ref": "#/$defs/idArray"},
+        "systems": {"$ref": "#/$defs/idArray"},
+        "selection_lock_schema": {"type": "string", "minLength": 1},
+        "seeds_per_prompt": {"type": "integer", "minimum": 1},
+        "lock_rule": {"type": "string", "minLength": 1},
+        "long_horizon_prompt_ids": {"$ref": "#/$defs/idArray"},
+        "long_horizon_systems": {"$ref": "#/$defs/idArray"},
+        "long_horizon_latent_frames": {"const": 241},
+        "long_horizon_rgb_frames": {"const": 961}
+      }
+    },
+    "idArray": {
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": {"type": "string", "minLength": 1}
+    },
+    "indexArray": {
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": {"type": "integer", "minimum": 0}
+    },
+    "prompt": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "split", "stratum", "text", "seeds"],
+      "properties": {
+        "id": {"type": "string", "minLength": 1},
+        "split": {"enum": ["development", "confirmatory", "sentinel"]},
+        "stratum": {"type": "string", "minLength": 1},
+        "text": {"type": "string", "minLength": 1},
+        "seeds": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {"type": "integer"}
+        }
+      }
+    },
+    "baseMediaContract": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "width",
+        "height",
+        "fps",
+        "decoded_frames",
+        "duration_tolerance_frames",
+        "codec",
+        "pixel_format"
+      ],
+      "properties": {
+        "width": {"const": 832},
+        "height": {"const": 480},
+        "fps": {"const": 16},
+        "decoded_frames": {"type": "integer", "minimum": 1},
+        "duration_tolerance_frames": {"type": "integer", "minimum": 0},
+        "codec": {"const": "h264"},
+        "pixel_format": {"const": "yuv420p"}
+      }
+    },
+    "shortMediaContract": {
+      "allOf": [
+        {"$ref": "#/$defs/baseMediaContract"},
+        {"type": "object", "properties": {"decoded_frames": {"const": 81}}, "required": ["decoded_frames"]}
+      ]
+    },
+    "longMediaContract": {
+      "allOf": [
+        {"$ref": "#/$defs/baseMediaContract"},
+        {"type": "object", "properties": {"decoded_frames": {"const": 961}}, "required": ["decoded_frames"]}
+      ]
+    },
+    "evaluation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "blind_seed",
+        "blinding_secret_policy",
+        "rubric",
+        "rubric_sha256",
+        "dimensions",
+        "families",
+        "aggregation",
+        "raw_evidence_required",
+        "unblinding_key_separate"
+      ],
+      "properties": {
+        "blind_seed": {"type": "integer"},
+        "blinding_secret_policy": {"type": "string", "minLength": 1},
+        "rubric": {"type": "string", "minLength": 1},
+        "rubric_sha256": {"$ref": "#/$defs/sha256"},
+        "dimensions": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "prompt_adherence",
+            "spatial_fidelity",
+            "identity_consistency",
+            "motion_naturalness",
+            "temporal_artifacts"
+          ],
+          "properties": {
+            "prompt_adherence": {"$ref": "#/$defs/positiveNumber"},
+            "spatial_fidelity": {"$ref": "#/$defs/positiveNumber"},
+            "identity_consistency": {"$ref": "#/$defs/positiveNumber"},
+            "motion_naturalness": {"$ref": "#/$defs/positiveNumber"},
+            "temporal_artifacts": {"$ref": "#/$defs/positiveNumber"}
+          }
+        },
+        "families": {
+          "type": "array",
+          "minItems": 3,
+          "items": {"$ref": "#/$defs/evaluationFamily"}
+        },
+        "aggregation": {"type": "string", "minLength": 1},
+        "raw_evidence_required": {"const": true},
+        "unblinding_key_separate": {"const": true}
+      }
+    },
+    "evaluationFamily": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "kind", "model_id", "evidence_provider", "passes", "rater_ids"],
+      "properties": {
+        "id": {"type": "string", "minLength": 1},
+        "kind": {"enum": ["model", "human"]},
+        "model_id": {"type": "string", "minLength": 1},
+        "evidence_provider": {"type": "string", "minLength": 1},
+        "readiness": {
+          "enum": [
+            "historical-only",
+            "transport-verified",
+            "calibration-failed",
+            "quality-qualified"
+          ]
+        },
+        "passes": {"type": "integer", "minimum": 1},
+        "rater_ids": {"$ref": "#/$defs/idArray"},
+        "minimum_raters": {"type": "integer", "minimum": 3},
+        "raw_response_policy": {"type": "string", "minLength": 1}
+      },
+      "allOf": [
+        {
+          "if": {"properties": {"kind": {"const": "model"}}},
+          "then": {"required": ["readiness"]}
+        }
+      ]
+    },
+    "gates": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "absolute_quality",
+        "family_floor",
+        "stratum_floor",
+        "sf4_noninferiority_margin",
+        "maximum_low_quality_items",
+        "low_quality_item_threshold",
+        "final_third_temporal_floor",
+        "maximum_early_to_late_drop",
+        "warm_e2e_fps",
+        "cold_e2e_fps",
+        "sustained_seconds",
+        "sustained_e2e_fps",
+        "minimum_each_warm_trial_fps",
+        "maximum_first_visible_rgb_s",
+        "maximum_p95_effective_frame_interval_ms",
+        "required_model_families",
+        "require_human",
+        "required_forwards",
+        "required_rgb_frames"
+      ],
+      "properties": {
+        "absolute_quality": {"type": "number", "minimum": 1, "maximum": 10},
+        "family_floor": {"type": "number", "minimum": 1, "maximum": 10},
+        "stratum_floor": {"type": "number", "minimum": 1, "maximum": 10},
+        "sf4_noninferiority_margin": {"type": "number"},
+        "maximum_low_quality_items": {"type": "integer", "minimum": 0},
+        "low_quality_item_threshold": {"type": "number", "minimum": 1, "maximum": 10},
+        "final_third_temporal_floor": {"type": "number", "minimum": 1, "maximum": 10},
+        "maximum_early_to_late_drop": {"type": "number", "minimum": 0},
+        "warm_e2e_fps": {"$ref": "#/$defs/positiveNumber"},
+        "cold_e2e_fps": {"$ref": "#/$defs/positiveNumber"},
+        "sustained_seconds": {"$ref": "#/$defs/positiveNumber"},
+        "sustained_e2e_fps": {"$ref": "#/$defs/positiveNumber"},
+        "minimum_each_warm_trial_fps": {"$ref": "#/$defs/positiveNumber"},
+        "maximum_first_visible_rgb_s": {"$ref": "#/$defs/positiveNumber"},
+        "maximum_p95_effective_frame_interval_ms": {"$ref": "#/$defs/positiveNumber"},
+        "required_model_families": {"type": "integer", "minimum": 2},
+        "require_human": {"type": "boolean"},
+        "required_forwards": {"const": 45},
+        "required_rgb_frames": {"const": 81}
+      }
+    },
+    "provenanceName": {
+      "enum": [
+        "protocol_sha256",
+        "source_commit",
+        "source_diff_sha256",
+        "checkpoint_revision",
+        "checkpoint_sha256",
+        "decoder_revision",
+        "decoder_sha256",
+        "runner_sha256",
+        "config_sha256",
+        "rubric_sha256",
+        "prompt_utf8_sha256",
+        "effective_prompt_utf8_sha256",
+        "seed",
+        "rng_algorithm",
+        "rng_device",
+        "seed_application_point",
+        "initial_noise_sha256",
+        "input_noise_sha256",
+        "latent_sha256",
+        "media_sha256",
+        "forwards",
+        "decoded_frames",
+        "torch_cuda_driver_hardware",
+        "determinism_flags",
+        "encoding_command"
+      ]
+    }
+  }
+}

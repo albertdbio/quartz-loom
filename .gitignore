@@ -1,0 +1,15 @@
+.DS_Store
+.env
+.env.*
+!.env.example
+.codegraph/
+.upstream/
+.venv*/
+node_modules/
+__pycache__/
+*.pyc
+.output/
+dist/
+.vercel/
+*.log
+selfcheck-out/

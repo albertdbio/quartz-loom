@@ -1,0 +1,167 @@
+{
+  "adapter_sha256": "0372d096aa23266bf49e05b85a3e6a87cf61cba87a6c7be69e75ceeaf8f60cd4",
+  "artifact_manifest_sha256": "1b33d98978a413ef07817d82823bff81be91f6f44c56ac9e9f4d989d76359284",
+  "attempt": 1,
+  "authorizes_performance_claim": false,
+  "authorizes_quality_claim": false,
+  "development_adapter_sha256": "6319ead143f2495be0dc89df8624ff8f9ee4aac1d49f5bece81a1967f005041e",
+  "endpoint": "https://generativelanguage.googleapis.com/v1beta/models/gemini-3.1-pro-preview:generateContent",
+  "generation_prompt_sha256": "fcaa04670647e417d16a4562d1027ca97a04ebcf9bed32c201fedd62ed9f785a",
+  "media_byte_count": 1731479,
+  "media_sha256": "8c892d63cbb4cec9ec7856a352630644c054e27159d092b7642291dc1a4f48fb",
+  "model_id": "gemini-3.1-pro-preview",
+  "provider": "google",
+  "purpose": "development-video-understanding-not-gate-evidence",
+  "rating": {
+    "failure_tags": [
+      "unnatural motion",
+      "morphing",
+      "sliding"
+    ],
+    "final_third_quality": 5,
+    "first_third_quality": 6,
+    "rationale": "The video includes the requested fox, snowy forest, and sunrise. However, the fox walks slowly instead of running, and its leg movements are unnatural, sliding through the snow without bearing weight. The front legs exhibit morphing and anatomical inconsistencies as the video progresses.",
+    "scores": {
+      "identity_consistency": 5,
+      "motion_naturalness": 4,
+      "prompt_adherence": 6,
+      "spatial_fidelity": 5,
+      "temporal_artifacts": 5
+    }
+  },
+  "rating_prompt_sha256": "f47b1e37695b16033032eed35b79b09447c49cdc2df48180c350e6e0049bae2b",
+  "raw_response": {
+    "candidates": [
+      {
+        "content": {
+          "parts": [
+            {
+              "text": "{\n  \"scores\": {\n    \"prompt_adherence\": 6,\n    \"spatial_fidelity\": 5,\n    \"identity_consistency\": 5,\n    \"motion_naturalness\": 4,\n    \"temporal_artifacts\": 5\n  },\n  \"first_third_quality\": 6,\n  \"final_third_quality\": 5,\n  \"failure_tags\": [\n    \"unnatural motion\",\n    \"morphing\",\n    \"sliding\"\n  ],\n  \"rationale\": \"The video includes the requested fox, snowy forest, and sunrise. However, the fox walks slowly instead of running, and its leg movements are unnatural, sliding through the snow without bearing weight. The front legs exhibit morphing and anatomical inconsistencies as the video progresses.\"\n}"
+            }
+          ],
+          "role": "model"
+        },
+        "finishReason": "STOP",
+        "index": 0,
+        "safetyRatings": []
+      }
+    ],
+    "modelVersion": "gemini-3.1-pro-preview",
+    "promptFeedback": null,
+    "responseId": "_H5eapGENOi0qtsP9JX02Ag",
+    "usageMetadata": {
+      "candidatesTokenCount": 175,
+      "promptTokenCount": 6114,
+      "thoughtsTokenCount": 887,
+      "totalTokenCount": 7176
+    }
+  },
+  "raw_response_sha256": "92706a894110944474571c916f444afa6e76f0026d2b4d52cacadd5dbfa446ae",
+  "request_identity_sha256": "791bdf6d1e45f112d7804f96c0d051e73589ba62e1ea20d8f85e00b7872a7b94",
+  "response_schema_sha256": "0402f1a4fbd8a512ad3e8f58e776617d59097a9e50e027870617be791d08f023",
+  "rubric_sha256": "c71e0420ded2196b2af3662f40ad240704fe64fd3171884a8c6005f648f1dd6c",
+  "schema_version": 1,
+  "scrubbed_request": {
+    "contents": [
+      {
+        "parts": [
+          {
+            "inlineData": {
+              "decoded_bytes": 1731479,
+              "encoded_bytes": 2308640,
+              "media_sha256": "8c892d63cbb4cec9ec7856a352630644c054e27159d092b7642291dc1a4f48fb",
+              "mimeType": "video/mp4"
+            },
+            "videoMetadata": {
+              "fps": 16.0
+            }
+          },
+          {
+            "text": "Evaluate this full video against the original generation prompt below.\n\nORIGINAL PROMPT:\nA lone red fox runs through a snowy pine forest at sunrise, cinematic tracking shot, realistic fur, stable anatomy.\n\nREGISTERED RUBRIC:\n# Quality rubric v1\n\nThis rubric scores a complete video against the original prompt. Judge the\nvisible result, not the system name, presumed method, or generation speed.\nEvery item receives five integer scores from 1 to 10 and a short rationale.\nWatch the full video at least twice: once normally and once while checking the\nfirst and final thirds for accumulated drift.\n\n## Dimensions\n\n1. **Prompt adherence** \u2014 requested subject, action, count, setting, camera,\n   and attributes are visibly present. Extra detail is not rewarded when it\n   contradicts the original prompt.\n2. **Spatial/anatomical fidelity** \u2014 bodies, faces, hands, rigid objects,\n   contact points, perspective, and scene geometry are plausible within each\n   frame.\n3. **Identity/geometry consistency** \u2014 subjects, object counts, colors,\n   shapes, and background layout persist across time without unexplained\n   replacement, duplication, or morphing.\n4. **Motion naturalness** \u2014 articulated motion, trajectories, interactions,\n   camera motion, fluids, particles, and deformable materials evolve smoothly\n   and physically plausibly. Static output does not score highly merely for\n   being clean.\n5. **Temporal artifacts** \u2014 score high when flicker, popping, tearing,\n   sudden camera jumps, blur accumulation, texture crawl, and late-rollout\n   degradation are absent.\n\nThe per-rating quality score is the unweighted mean of these five dimensions.\nDo not provide a separate discretionary \u201coverall\u201d number.\n\n## Anchors\n\n- **1 \u2014 unusable:** the requested scene is missing or the video is dominated\n  by collapse, severe deformation, discontinuity, or near-static noise.\n- **3 \u2014 poor:** the scene is recognizable, but major prompt elements fail or\n  recurrent structural/temporal errors make the result unsuitable.\n- **5 \u2014 mixed:** recognizable and watchable, with several obvious failures;\n  useful as development evidence but below a public quality bar.\n- **7 \u2014 good:** the request is fulfilled throughout, motion reads naturally,\n  and only minor artifacts are visible on close inspection. This is the\n  absolute gate anchor.\n- **9 \u2014 excellent:** coherent, detailed, natural, and stable throughout, with\n  no material failure and only negligible imperfections.\n\nScores 2, 4, 6, 8, and 10 interpolate between anchors. A 10 should be rare and\nrequires essentially flawless output for this resolution and duration.\n\n## Required response fields\n\nFor each blind asset return:\n\n```json\n{\n  \"blind_id\": \"opaque id supplied with the asset\",\n  \"scores\": {\n    \"prompt_adherence\": 1,\n    \"spatial_fidelity\": 1,\n    \"identity_consistency\": 1,\n    \"motion_naturalness\": 1,\n    \"temporal_artifacts\": 1\n  },\n  \"first_third_quality\": 1,\n  \"final_third_quality\": 1,\n  \"failure_tags\": [\"none or concise controlled tags\"],\n  \"rationale\": \"Brief observations grounded in visible events.\"\n}\n```\n\nDo not guess the generating system. Do not inspect source filenames or an\nunblinding key. If media cannot be decoded or reviewed in full, report the\nasset as invalid rather than assigning a quality score."
+          }
+        ],
+        "role": "user"
+      }
+    ],
+    "generationConfig": {
+      "maxOutputTokens": 2048,
+      "responseFormat": {
+        "text": {
+          "mimeType": "APPLICATION_JSON",
+          "schema": {
+            "properties": {
+              "failure_tags": {
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              "final_third_quality": {
+                "maximum": 10,
+                "minimum": 1,
+                "type": "integer"
+              },
+              "first_third_quality": {
+                "maximum": 10,
+                "minimum": 1,
+                "type": "integer"
+              },
+              "rationale": {
+                "type": "string"
+              },
+              "scores": {
+                "properties": {
+                  "identity_consistency": {
+                    "maximum": 10,
+                    "minimum": 1,
+                    "type": "integer"
+                  },
+                  "motion_naturalness": {
+                    "maximum": 10,
+                    "minimum": 1,
+                    "type": "integer"
+                  },
+                  "prompt_adherence": {
+                    "maximum": 10,
+                    "minimum": 1,
+                    "type": "integer"
+                  },
+                  "spatial_fidelity": {
+                    "maximum": 10,
+                    "minimum": 1,
+                    "type": "integer"
+                  },
+                  "temporal_artifacts": {
+                    "maximum": 10,
+                    "minimum": 1,
+                    "type": "integer"
+                  }
+                },
+                "required": [
+                  "prompt_adherence",
+                  "spatial_fidelity",
+                  "identity_consistency",
+                  "motion_naturalness",
+                  "temporal_artifacts"
+                ],
+                "type": "object"
+              }
+            },
+            "required": [
+              "scores",
+              "first_third_quality",
+              "final_third_quality",
+              "failure_tags",
+              "rationale"
+            ],
+            "type": "object"
+          }
+        }
+      },
+      "temperature": 0
+    }
+  },
+  "status": "complete",
+  "transport_identity": "builtin-urllib-post-gemini-v1",
+  "wire_request_sha256": "c67c19a7773e985fe667cd60e4e0b847dd1ff9a421d5cf05192824708072bd26"
+}

@@ -1,0 +1,95 @@
+{
+  "authorizes_performance_claim": false,
+  "authorizes_quality_claim": false,
+  "camera": {
+    "background_track_count": 354,
+    "median_global_motion_px": 9.208843231201172,
+    "median_homography_inlier_fraction": 0.382183908045977,
+    "median_homography_reprojection_error_px": 1.7182872295379639
+  },
+  "decision_threshold": 5.0,
+  "displaced_vs_collapsed": false,
+  "displacement_score": 0.081487,
+  "foreground": {
+    "camera_compensated_trajectory_span_fraction_width": 0.03978499999413124,
+    "camera_compensated_trajectory_span_px": 33.10111999511719,
+    "centroid_endpoint_displacement_fraction_width": 0.018226417211385872,
+    "centroid_endpoint_displacement_px": 15.164379119873047,
+    "max_centroid_excursion_fraction_width": 0.03752616506356459,
+    "max_centroid_excursion_px": 31.221769332885742,
+    "median_net_displacement_fraction_width": 0.018218578054354742,
+    "median_net_displacement_px": 15.157856941223145,
+    "persistent_track_count": 5,
+    "screen_space_trajectory_span_fraction_width": 0.062721848487854,
+    "screen_space_trajectory_span_px": 52.18457794189453,
+    "selected_track_count": 8,
+    "track_survival": 0.9975308641975309,
+    "trajectory_path_length_px": 473.24017333984375,
+    "trajectory_span_fraction_width": 0.03978499999413124,
+    "trajectory_span_px": 33.10111999511719,
+    "trajectory_straightness": 0.032043727422488254,
+    "translation_consensus": 0.8858337679299102
+  },
+  "kind": "coherent-displacement-metrics",
+  "models": {
+    "appearance": "facebookresearch/dinov2:dinov2_vits14",
+    "appearance_device": "mps",
+    "camera_compensation": "background-ransac-homography-v1",
+    "flow": "opencv-farneback-warp-v1",
+    "tracker": "facebookresearch/co-tracker:cotracker3_offline",
+    "tracker_device": "mps"
+  },
+  "morph_guardrail": {
+    "appearance_guard": 0.6227335484633418,
+    "dino_guard": 0.34819326277998897,
+    "dinov2_feature_similarity_median": 0.7549229860305786,
+    "dinov2_feature_similarity_p10": 0.717892050743103,
+    "flow_translation_coherence": 0.4444791639472019,
+    "flow_warp_residual": 0.006352633063215762,
+    "raw_flow_mean_px": 0.5502622127532959,
+    "warp_guard": 0.9602960433549015
+  },
+  "purpose": "development-displacement-measurement",
+  "schema_version": 1,
+  "score_components": {
+    "appearance_guard": 0.6227335484633418,
+    "coherence_guard": 0.9400247465138768,
+    "displacement_extent": 0.011899450435125164
+  },
+  "source": {
+    "frame_count": 81,
+    "guardrail_frame_indices": [
+      0,
+      1,
+      10,
+      11,
+      20,
+      21,
+      30,
+      31,
+      40,
+      41,
+      50,
+      51,
+      60,
+      61,
+      70,
+      71,
+      80
+    ],
+    "height": 480,
+    "path": "/Users/electric/Documents/areas_of_focus/decart-research/fork-grid-20260721/grid_out/cd_4step/Locked-off wide shot of a single small wooden barrel rolling from the upper-left side of a gentle ra.mp4",
+    "sampled_frame_indices": [
+      0,
+      10,
+      20,
+      30,
+      40,
+      50,
+      60,
+      70,
+      80
+    ],
+    "width": 832
+  }
+}

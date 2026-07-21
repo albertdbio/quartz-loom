@@ -1,0 +1,13 @@
+{
+  "capacity": {
+    "effective_host_headroom_bytes": 250944729088,
+    "gpu_free_bytes": 85017493504,
+    "gpu_total_bytes": 85520809984
+  },
+  "environment_sha256": "8546e39af8489a7e111945db78870e4a41af7b694bdb15786ff1851e32ed8208",
+  "ready": true,
+  "runtime_evidence_sha256": "8209043b4ebecc85f0e844f9c040b54fc1685104fe9e0b361ce9ee6d060b0c6c",
+  "runtime_id": "cf1-h100-cu128-v1",
+  "runtime_lock_sha256": "d4d163d635ecbafb5b11bbe54cca7bdd5e9f80c1edc23ed96972821940ecc692",
+  "static_environment_sha256": "8746f8bc9a58cf5e6c0eb308453de002582cb3f1383ecaa2632e2f6223e9784d"
+}

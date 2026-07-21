@@ -1,0 +1,95 @@
+{
+  "authorizes_performance_claim": false,
+  "authorizes_quality_claim": false,
+  "camera": {
+    "background_track_count": 129,
+    "median_global_motion_px": 19.737953186035156,
+    "median_homography_inlier_fraction": 0.4263565891472868,
+    "median_homography_reprojection_error_px": 1.5768325328826904
+  },
+  "decision_threshold": 5.0,
+  "displaced_vs_collapsed": false,
+  "displacement_score": 0.890132,
+  "foreground": {
+    "camera_compensated_trajectory_span_fraction_width": 0.16320397303654596,
+    "camera_compensated_trajectory_span_px": 135.78570556640625,
+    "centroid_endpoint_displacement_fraction_width": 0.1271533049069918,
+    "centroid_endpoint_displacement_px": 105.79154968261719,
+    "max_centroid_excursion_fraction_width": 0.1619395109323355,
+    "max_centroid_excursion_px": 134.73367309570312,
+    "median_net_displacement_fraction_width": 0.12694624754098746,
+    "median_net_displacement_px": 105.61927795410156,
+    "persistent_track_count": 40,
+    "screen_space_trajectory_span_fraction_width": 0.09356844425201416,
+    "screen_space_trajectory_span_px": 77.84894561767578,
+    "selected_track_count": 45,
+    "track_survival": 0.995679012345679,
+    "trajectory_path_length_px": 1419.4267578125,
+    "trajectory_span_fraction_width": 0.09356844425201416,
+    "trajectory_span_px": 77.84894561767578,
+    "trajectory_straightness": 0.07453117894272625,
+    "translation_consensus": 0.9616811758219532
+  },
+  "kind": "coherent-displacement-metrics",
+  "models": {
+    "appearance": "facebookresearch/dinov2:dinov2_vits14",
+    "appearance_device": "mps",
+    "camera_compensation": "background-ransac-homography-v1",
+    "flow": "opencv-farneback-warp-v1",
+    "tracker": "facebookresearch/co-tracker:cotracker3_offline",
+    "tracker_device": "mps"
+  },
+  "morph_guardrail": {
+    "appearance_guard": 0.7841917231450367,
+    "dino_guard": 0.9958212101368876,
+    "dinov2_feature_similarity_median": 0.9445968866348267,
+    "dinov2_feature_similarity_p10": 0.9013245105743408,
+    "flow_translation_coherence": 0.0009282131689633319,
+    "flow_warp_residual": 0.005178083985811099,
+    "raw_flow_mean_px": 0.6089131534099579,
+    "warp_guard": 0.9676369750886806
+  },
+  "purpose": "development-displacement-measurement",
+  "schema_version": 1,
+  "score_components": {
+    "appearance_guard": 0.7841917231450367,
+    "coherence_guard": 0.9785324538991201,
+    "displacement_extent": 0.10794066441677538
+  },
+  "source": {
+    "frame_count": 81,
+    "guardrail_frame_indices": [
+      0,
+      1,
+      10,
+      11,
+      20,
+      21,
+      30,
+      31,
+      40,
+      41,
+      50,
+      51,
+      60,
+      61,
+      70,
+      71,
+      80
+    ],
+    "height": 480,
+    "path": "/Users/electric/Documents/areas_of_focus/decart-research/fork-grid-20260721/grid_out/ode_4step/Locked-off wide shot of a single bright red rubber ball over a plain gray floor. The ball starts hig.mp4",
+    "sampled_frame_indices": [
+      0,
+      10,
+      20,
+      30,
+      40,
+      50,
+      60,
+      70,
+      80
+    ],
+    "width": 832
+  }
+}

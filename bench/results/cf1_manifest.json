@@ -1,0 +1,20 @@
+[
+  {
+    "file": "cf1_p0.mp4",
+    "prompt_index": 0,
+    "prompt": "A lone red fox runs through a snowy pine forest at sunrise, cinematic tracking shot, realistic fur, stable anatomy.",
+    "seed": 20260719
+  },
+  {
+    "file": "cf1_p1.mp4",
+    "prompt_index": 1,
+    "prompt": "A woman in a yellow raincoat walks toward the camera through a neon-lit Tokyo street after rain, natural face and hands, cinematic realism.",
+    "seed": 20260720
+  },
+  {
+    "file": "cf1_p2.mp4",
+    "prompt_index": 2,
+    "prompt": "A vintage red motorcycle speeds along a winding coastal highway at golden hour, low tracking camera, stable wheels and mechanical details.",
+    "seed": 20260721
+  }
+]

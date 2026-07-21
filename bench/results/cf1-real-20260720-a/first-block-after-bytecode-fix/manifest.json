@@ -1,0 +1,55 @@
+{
+  "block_count": 1,
+  "bootstrap_identity_sha256": "3fea725376946017add66c5ebc1684b9a8505c30ac15f2fd4af9b9e4e8cb0166",
+  "chunk_frame_counts": [
+    1
+  ],
+  "fps_contract": 16,
+  "frame_count": 1,
+  "frame_media_type": "image/png",
+  "frame_payload_sha256": [
+    "b8fed1df9f7888fe2f9322a84a7019402c10d8572b92a6fee53f948d8ac6127b"
+  ],
+  "guard_bundle_sha256": "9a8ddb7aee099d686e257eac124a13f861b3775fbbb6899d70ba5ad4e4204c06",
+  "kind": "cf1-cuda-smoke",
+  "output_directory": "/workspace/cf1-real-20260720-a/first-block-after-bytecode-fix",
+  "prompt_sha256": "fcaa04670647e417d16a4562d1027ca97a04ebcf9bed32c201fedd62ed9f785a",
+  "ready": true,
+  "resolution": {
+    "height": 480,
+    "width": 832
+  },
+  "runtime_environment_sha256": "8546e39af8489a7e111945db78870e4a41af7b694bdb15786ff1851e32ed8208",
+  "runtime_reusable": false,
+  "schema_version": 1,
+  "seed": 20260719,
+  "status": "bounded-first-chunk",
+  "timing": {
+    "block_durations_s": [
+      0.7305790479294956
+    ],
+    "clock": "time.perf_counter",
+    "effective_fps": 0.5326060411635656,
+    "excludes": [
+      "runtime_bootstrap",
+      "model_weight_load",
+      "png_encoder_construction",
+      "output_directory_creation",
+      "manifest_write"
+    ],
+    "first_chunk_encoded_includes": [
+      "session_initialization",
+      "decoder_construction",
+      "generation",
+      "context_refresh",
+      "taehv_decode",
+      "d2h",
+      "png_encode"
+    ],
+    "first_chunk_encoded_s": 1.8693693859968334,
+    "first_frame_written_s": 1.8775537968613207,
+    "origin": "after_runtime_bootstrap_sync_before_session_initialization",
+    "stream_mode": "serial",
+    "wall_s": 1.8775603780522943
+  }
+}

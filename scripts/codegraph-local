@@ -1,0 +1,50 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+CODEGRAPH_JS="$ROOT/../codegraph/dist/bin/codegraph.js"
+
+if [[ ! -f "$CODEGRAPH_JS" ]]; then
+  printf 'Custom Codegraph build not found: %s\n' "$CODEGRAPH_JS" >&2
+  printf 'Build ../codegraph before syncing this project.\n' >&2
+  exit 1
+fi
+
+supports_fts5() {
+  "$1" --no-warnings -e \
+    "const {DatabaseSync}=require('node:sqlite'); const db=new DatabaseSync(':memory:'); db.exec('CREATE VIRTUAL TABLE x USING fts5(a)')" \
+    >/dev/null 2>&1
+}
+
+NODE_BIN="${CODEGRAPH_NODE:-}"
+if [[ -z "$NODE_BIN" ]]; then
+  for candidate in \
+    "$HOME"/.nvm/versions/node/v22*/bin/node \
+    "$HOME"/.nvm/versions/node/v23*/bin/node \
+    "$HOME"/.nvm/versions/node/v24*/bin/node \
+    /opt/homebrew/opt/node@22/bin/node \
+    /usr/local/opt/node@22/bin/node; do
+    if [[ -x "$candidate" ]] && supports_fts5 "$candidate"; then
+      NODE_BIN="$candidate"
+      break
+    fi
+  done
+fi
+
+if [[ -z "$NODE_BIN" ]]; then
+  NODE_BIN="$(command -v node)"
+fi
+
+major="$($NODE_BIN -p 'Number(process.versions.node.split(".")[0])')"
+if (( major < 20 || major >= 25 )); then
+  printf 'Custom Codegraph requires Node 20-24; resolved %s (%s).\n' "$NODE_BIN" "$major" >&2
+  printf 'Set CODEGRAPH_NODE to a Node 22-24 executable.\n' >&2
+  exit 1
+fi
+if ! supports_fts5 "$NODE_BIN"; then
+  printf 'Resolved Node lacks SQLite FTS5 support: %s.\n' "$NODE_BIN" >&2
+  printf 'Set CODEGRAPH_NODE to a Node 22-24 executable with FTS5 enabled.\n' >&2
+  exit 1
+fi
+
+exec "$NODE_BIN" "$CODEGRAPH_JS" "$@"

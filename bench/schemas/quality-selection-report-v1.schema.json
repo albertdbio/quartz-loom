@@ -1,0 +1,127 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "quality-selection-report-v1.schema.json",
+  "title": "Quality repair deterministic finalist selection report v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "status",
+    "protocol_sha256",
+    "development_performance_sha256",
+    "round_a",
+    "round_b",
+    "finalist_system_id",
+    "finalist_config_sha256",
+    "report_sha256"
+  ],
+  "properties": {
+    "schema_version": {"const": 1},
+    "status": {"const": "selected"},
+    "protocol_sha256": {"$ref": "#/$defs/sha256"},
+    "development_performance_sha256": {"$ref": "#/$defs/sha256"},
+    "round_a": {"$ref": "#/$defs/roundA"},
+    "round_b": {"$ref": "#/$defs/roundB"},
+    "finalist_system_id": {"type": "string", "minLength": 1},
+    "finalist_config_sha256": {"$ref": "#/$defs/sha256"},
+    "report_sha256": {"$ref": "#/$defs/sha256"}
+  },
+  "$defs": {
+    "sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+    "criteria": {
+      "type": "object",
+      "minProperties": 1,
+      "additionalProperties": {"type": "boolean"}
+    },
+    "roundACandidate": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "mean",
+        "mean_delta_vs_baseline",
+        "temporal_motion_delta_vs_baseline",
+        "worst_item_delta_vs_baseline",
+        "screening_fps",
+        "criteria",
+        "pass"
+      ],
+      "properties": {
+        "mean": {"type": "number"},
+        "mean_delta_vs_baseline": {"type": "number"},
+        "temporal_motion_delta_vs_baseline": {"type": "number"},
+        "worst_item_delta_vs_baseline": {"type": "number"},
+        "screening_fps": {"type": "number", "exclusiveMinimum": 0},
+        "criteria": {"$ref": "#/$defs/criteria"},
+        "pass": {"type": "boolean"}
+      }
+    },
+    "roundBCandidate": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "mean",
+        "mean_delta_vs_baseline",
+        "minimum_channel_mean",
+        "minimum_item_score",
+        "minimum_warm_fps",
+        "maximum_first_visible_rgb_s",
+        "maximum_p95_effective_frame_interval_ms",
+        "criteria",
+        "pass"
+      ],
+      "properties": {
+        "mean": {"type": "number"},
+        "mean_delta_vs_baseline": {"type": "number"},
+        "minimum_channel_mean": {
+          "type": "number",
+          "description": "Minimum mean across the independent evaluator families, not across rubric dimensions."
+        },
+        "minimum_item_score": {"type": "number"},
+        "minimum_warm_fps": {"type": "number", "exclusiveMinimum": 0},
+        "maximum_first_visible_rgb_s": {"type": "number", "exclusiveMinimum": 0},
+        "maximum_p95_effective_frame_interval_ms": {"type": "number", "exclusiveMinimum": 0},
+        "criteria": {"$ref": "#/$defs/criteria"},
+        "pass": {"type": "boolean"}
+      }
+    },
+    "roundA": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "manifest_sha256",
+        "aggregate_report_sha256",
+        "candidates",
+        "survivors"
+      ],
+      "properties": {
+        "manifest_sha256": {"$ref": "#/$defs/sha256"},
+        "aggregate_report_sha256": {"$ref": "#/$defs/sha256"},
+        "candidates": {
+          "type": "object",
+          "minProperties": 1,
+          "additionalProperties": {"$ref": "#/$defs/roundACandidate"}
+        },
+        "survivors": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {"type": "string", "minLength": 1}
+        }
+      }
+    },
+    "roundB": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["manifest_sha256", "aggregate_report_sha256", "candidates"],
+      "properties": {
+        "manifest_sha256": {"$ref": "#/$defs/sha256"},
+        "aggregate_report_sha256": {"$ref": "#/$defs/sha256"},
+        "candidates": {
+          "type": "object",
+          "minProperties": 1,
+          "additionalProperties": {"$ref": "#/$defs/roundBCandidate"}
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,53 @@
+{
+  "endpoint": "https://generativelanguage.googleapis.com/v1beta/models/gemini-3.1-pro-preview:generateContent",
+  "media_sha256": "654664691ab61e64324ce807a8c4a98b153496000108b0491efef5038441f9c7",
+  "model_id": "gemini-3.1-pro-preview",
+  "prompt_sha256": "f47b1e37695b16033032eed35b79b09447c49cdc2df48180c350e6e0049bae2b",
+  "provider": "google",
+  "purpose": "provider-parser-calibration-canary-not-gate-evidence",
+  "rating": {
+    "failure_tags": [
+      "unnatural motion",
+      "morphing",
+      "anatomical distortion"
+    ],
+    "final_third_quality": 4,
+    "first_third_quality": 5,
+    "rationale": "The video includes the requested fox, snowy forest, and sunrise, though the fox walks rather than runs. The motion is stiff, and the fox's anatomy and fur markings morph noticeably as it turns toward the camera.",
+    "scores": {
+      "identity_consistency": 4,
+      "motion_naturalness": 4,
+      "prompt_adherence": 5,
+      "spatial_fidelity": 4,
+      "temporal_artifacts": 5
+    }
+  },
+  "raw_response": {
+    "candidates": [
+      {
+        "content": {
+          "parts": [
+            {
+              "text": "{\n  \"scores\": {\n    \"prompt_adherence\": 5,\n    \"spatial_fidelity\": 4,\n    \"identity_consistency\": 4,\n    \"motion_naturalness\": 4,\n    \"temporal_artifacts\": 5\n  },\n  \"first_third_quality\": 5,\n  \"final_third_quality\": 4,\n  \"failure_tags\": [\n    \"unnatural motion\",\n    \"morphing\",\n    \"anatomical distortion\"\n  ],\n  \"rationale\": \"The video includes the requested fox, snowy forest, and sunrise, though the fox walks rather than runs. The motion is stiff, and the fox's anatomy and fur markings morph noticeably as it turns toward the camera.\"\n}"
+            }
+          ],
+          "role": "model"
+        },
+        "finishReason": "STOP",
+        "index": 0
+      }
+    ],
+    "modelVersion": "gemini-3.1-pro-preview",
+    "responseId": "TYddapyPC5yVmtkPksrfwQU",
+    "usageMetadata": {
+      "candidatesTokenCount": 169,
+      "promptTokenCount": 6114,
+      "thoughtsTokenCount": 855,
+      "totalTokenCount": 7138
+    }
+  },
+  "raw_response_sha256": "b45a76fc42af3bd9ff7e3dd2b3abb0cd60f4a3532b1f5389e98f707e09677e33",
+  "response_schema_sha256": "0402f1a4fbd8a512ad3e8f58e776617d59097a9e50e027870617be791d08f023",
+  "schema_version": 1,
+  "video_fps": 16.0
+}

@@ -1,0 +1,72 @@
+{
+  "gpu": "NVIDIA H100 80GB HBM3",
+  "step": 2,
+  "dtype": "bf16",
+  "decoder": "Wan2.1 full VAE, batch decode",
+  "resolution": "480x832",
+  "latent_frames": 21,
+  "pixel_frames": 81,
+  "prompt": "A lone red fox runs through a snowy pine forest at sunrise, cinematic tracking shot, realistic fur, stable anatomy.",
+  "trials": [
+    {
+      "trial": 0,
+      "warmup": true,
+      "frames": 81,
+      "forwards": 65,
+      "first_chunk_pre_vae_s": 0.2912449836730957,
+      "text_plus_diffusion_s": 3.6476597785949707,
+      "vae_s": 1.953743763267994,
+      "e2e_s": 5.601403541862965,
+      "diffusion_reported_fps": 22.20601835602116,
+      "e2e_fps": 14.460661402920508,
+      "peak_allocated_gb": 23.338817596435547,
+      "peak_reserved_gb": 25.048828125
+    },
+    {
+      "trial": 1,
+      "warmup": false,
+      "frames": 81,
+      "forwards": 65,
+      "first_chunk_pre_vae_s": 0.1616380214691162,
+      "text_plus_diffusion_s": 3.2850024700164795,
+      "vae_s": 1.8515221364796162,
+      "e2e_s": 5.136524606496096,
+      "diffusion_reported_fps": 24.657515706401785,
+      "e2e_fps": 15.769417301644065,
+      "peak_allocated_gb": 23.705493927001953,
+      "peak_reserved_gb": 26.068359375
+    },
+    {
+      "trial": 2,
+      "warmup": false,
+      "frames": 81,
+      "forwards": 65,
+      "first_chunk_pre_vae_s": 0.16278505325317383,
+      "text_plus_diffusion_s": 3.302983522415161,
+      "vae_s": 1.8537991745397449,
+      "e2e_s": 5.156782696954906,
+      "diffusion_reported_fps": 24.523283101567614,
+      "e2e_fps": 15.707468156032775,
+      "peak_allocated_gb": 23.704830169677734,
+      "peak_reserved_gb": 25.412109375
+    },
+    {
+      "trial": 3,
+      "warmup": false,
+      "frames": 81,
+      "forwards": 65,
+      "first_chunk_pre_vae_s": 0.16116023063659668,
+      "text_plus_diffusion_s": 3.273369073867798,
+      "vae_s": 1.8542721755802631,
+      "e2e_s": 5.127641249448061,
+      "diffusion_reported_fps": 24.745147330511916,
+      "e2e_fps": 15.796736951657614,
+      "peak_allocated_gb": 23.705005645751953,
+      "peak_reserved_gb": 25.36328125
+    }
+  ],
+  "steady_mean_e2e_fps": 15.757874136444817,
+  "steady_mean_text_plus_diffusion_s": 3.287118355433146,
+  "steady_mean_vae_s": 1.8531978288665414,
+  "steady_mean_first_chunk_pre_vae_s": 0.16186110178629556
+}

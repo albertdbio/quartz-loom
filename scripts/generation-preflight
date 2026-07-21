@@ -1,0 +1,62 @@
+#!/usr/bin/env python3
+"""Validate a recovered-runner generation plan without loading CUDA or a model."""
+
+from __future__ import annotations
+
+import argparse
+import json
+import sys
+from pathlib import Path
+
+PROJECT_ROOT = Path(__file__).resolve().parents[1]
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
+
+from bench.generation_preflight import (  # noqa: E402
+    PreflightError,
+    validate_preflight_plan,
+)
+
+
+def _reject_duplicate_keys(pairs: list[tuple[str, object]]) -> dict[str, object]:
+    value: dict[str, object] = {}
+    for key, item in pairs:
+        if key in value:
+            raise PreflightError(f"duplicate JSON key {key}")
+        value[key] = item
+    return value
+
+
+def build_parser() -> argparse.ArgumentParser:
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("plan", help="JSON preflight plan")
+    parser.add_argument("--output", help="write the validated report to this path")
+    return parser
+
+
+def main(argv: list[str] | None = None) -> int:
+    args = build_parser().parse_args(argv)
+    try:
+        try:
+            plan = json.loads(
+                Path(args.plan).read_text(),
+                object_pairs_hook=_reject_duplicate_keys,
+            )
+        except (OSError, json.JSONDecodeError) as exc:
+            raise PreflightError(f"cannot load preflight plan: {exc}") from exc
+        report = validate_preflight_plan(plan)
+        rendered = json.dumps(report, indent=2, sort_keys=True) + "\n"
+        if args.output:
+            destination = Path(args.output)
+            destination.parent.mkdir(parents=True, exist_ok=True)
+            destination.write_text(rendered)
+        else:
+            sys.stdout.write(rendered)
+        return 0
+    except PreflightError as exc:
+        print(f"error: {exc}", file=sys.stderr)
+        return 2
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

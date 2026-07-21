@@ -1,0 +1,499 @@
+{
+  "clips": [
+    {
+      "condition": "d0-full-wan-vae",
+      "displaced": false,
+      "displacement_score": 4.000687,
+      "filename": "00-ball.mp4",
+      "prompt": "ball",
+      "result_json": "clips/d0-full-wan-vae/00-ball.mp4.json",
+      "source": "/Users/electric/Documents/areas_of_focus/rtv-agent1/bench/results/p0-root-cause-20260721/cell-c-wan/clip.mp4",
+      "span_fraction": 0.217463,
+      "survival": 0.974747
+    },
+    {
+      "condition": "d1-rolling-taehv",
+      "displaced": false,
+      "displacement_score": 3.889719,
+      "filename": "00-ball.mp4",
+      "prompt": "ball",
+      "result_json": "clips/d1-rolling-taehv/00-ball.mp4.json",
+      "source": "/Users/electric/Documents/areas_of_focus/rtv-agent1/bench/results/p0-root-cause-20260721/cell-b/d1-rolling-taehv/clip.mp4",
+      "span_fraction": 0.216092,
+      "survival": 0.982363
+    },
+    {
+      "condition": "d2-reset-every-block",
+      "displaced": false,
+      "displacement_score": 2.115336,
+      "filename": "00-ball.mp4",
+      "prompt": "ball",
+      "result_json": "clips/d2-reset-every-block/00-ball.mp4.json",
+      "source": "/Users/electric/Documents/areas_of_focus/rtv-agent1/bench/results/p0-root-cause-20260721/cell-b/d2-reset-every-block/clip.mp4",
+      "span_fraction": 0.205699,
+      "survival": 0.901796
+    },
+    {
+      "condition": "ring-off",
+      "displaced": false,
+      "displacement_score": 3.889719,
+      "filename": "00-ball.mp4",
+      "prompt": "ball",
+      "result_json": "clips/ring-off/00-ball.mp4.json",
+      "source": "/Users/electric/Documents/areas_of_focus/rtv-agent1/bench/results/p0-root-cause-20260721/cell-a-off/ball/clip.mp4",
+      "span_fraction": 0.216092,
+      "survival": 0.982363
+    },
+    {
+      "condition": "ring-off",
+      "displaced": false,
+      "displacement_score": 0.050011,
+      "filename": "01-walker.mp4",
+      "prompt": "walker",
+      "result_json": "clips/ring-off/01-walker.mp4.json",
+      "source": "/Users/electric/Documents/areas_of_focus/rtv-agent1/bench/results/p0-root-cause-20260721/cell-a-off/walker/clip.mp4",
+      "span_fraction": 0.048802,
+      "survival": 0.956790
+    },
+    {
+      "condition": "ring-off",
+      "displaced": false,
+      "displacement_score": 0.211627,
+      "filename": "02-rolling-object.mp4",
+      "prompt": "rolling-object",
+      "result_json": "clips/ring-off/02-rolling-object.mp4.json",
+      "source": "/Users/electric/Documents/areas_of_focus/rtv-agent1/bench/results/p0-root-cause-20260721/cell-a-off/rolling-object/clip.mp4",
+      "span_fraction": 0.056676,
+      "survival": 0.980012
+    },
+    {
+      "condition": "ring-off",
+      "displaced": false,
+      "displacement_score": 0.000000,
+      "filename": "03-vehicle.mp4",
+      "prompt": "vehicle",
+      "result_json": "clips/ring-off/03-vehicle.mp4.json",
+      "source": "/Users/electric/Documents/areas_of_focus/rtv-agent1/bench/results/p0-root-cause-20260721/cell-a-off/vehicle/clip.mp4",
+      "span_fraction": 0.006685,
+      "survival": 0.977208
+    },
+    {
+      "condition": "ring-on",
+      "displaced": false,
+      "displacement_score": 0.000000,
+      "filename": "00-ball.mp4",
+      "prompt": "ball",
+      "result_json": "clips/ring-on/00-ball.mp4.json",
+      "source": "/Users/electric/Documents/areas_of_focus/rtv-agent1/bench/results/p0-root-cause-20260721/cell-a-on/ball/clip.mp4",
+      "span_fraction": 0.009082,
+      "survival": 1.000000
+    },
+    {
+      "condition": "ring-on",
+      "displaced": false,
+      "displacement_score": 0.004881,
+      "filename": "01-walker.mp4",
+      "prompt": "walker",
+      "result_json": "clips/ring-on/01-walker.mp4.json",
+      "source": "/Users/electric/Documents/areas_of_focus/rtv-agent1/bench/results/p0-root-cause-20260721/cell-a-on/walker/clip.mp4",
+      "span_fraction": 0.020146,
+      "survival": 1.000000
+    },
+    {
+      "condition": "ring-on",
+      "displaced": false,
+      "displacement_score": 0.000000,
+      "filename": "02-rolling-object.mp4",
+      "prompt": "rolling-object",
+      "result_json": "clips/ring-on/02-rolling-object.mp4.json",
+      "source": "/Users/electric/Documents/areas_of_focus/rtv-agent1/bench/results/p0-root-cause-20260721/cell-a-on/rolling-object/clip.mp4",
+      "span_fraction": 0.012754,
+      "survival": 0.979424
+    },
+    {
+      "condition": "ring-on",
+      "displaced": false,
+      "displacement_score": 0.071057,
+      "filename": "03-vehicle.mp4",
+      "prompt": "vehicle",
+      "result_json": "clips/ring-on/03-vehicle.mp4.json",
+      "source": "/Users/electric/Documents/areas_of_focus/rtv-agent1/bench/results/p0-root-cause-20260721/cell-a-on/vehicle/clip.mp4",
+      "span_fraction": 0.040267,
+      "survival": 0.983539
+    }
+  ],
+  "comparison": {
+    "comparable_prompt_count": 4,
+    "condition_a": "ring-off",
+    "condition_b": "ring-on",
+    "delta_definition": "ring-on - ring-off",
+    "hole_prompt_count": 0,
+    "mean_delta_b_minus_a": -1.018855,
+    "mean_verdict": "ring-off higher on mean by 1.018855",
+    "per_prompt": [
+      {
+        "condition_a": "ring-off",
+        "condition_b": "ring-on",
+        "delta_b_minus_a": -3.889719,
+        "displaced_transition": "false->false",
+        "prompt": "ball",
+        "score_a": 3.889719,
+        "score_b": 0.000000,
+        "span_fraction_delta_b_minus_a": -0.207010,
+        "status": "compared",
+        "survival_delta_b_minus_a": 0.017637,
+        "verdict": "ring-off higher by 3.889719"
+      },
+      {
+        "condition_a": "ring-off",
+        "condition_b": "ring-on",
+        "delta_b_minus_a": -0.045130,
+        "displaced_transition": "false->false",
+        "prompt": "walker",
+        "score_a": 0.050011,
+        "score_b": 0.004881,
+        "span_fraction_delta_b_minus_a": -0.028656,
+        "status": "compared",
+        "survival_delta_b_minus_a": 0.043210,
+        "verdict": "ring-off higher by 0.045130"
+      },
+      {
+        "condition_a": "ring-off",
+        "condition_b": "ring-on",
+        "delta_b_minus_a": -0.211627,
+        "displaced_transition": "false->false",
+        "prompt": "rolling-object",
+        "score_a": 0.211627,
+        "score_b": 0.000000,
+        "span_fraction_delta_b_minus_a": -0.043922,
+        "status": "compared",
+        "survival_delta_b_minus_a": -0.000588,
+        "verdict": "ring-off higher by 0.211627"
+      },
+      {
+        "condition_a": "ring-off",
+        "condition_b": "ring-on",
+        "delta_b_minus_a": 0.071057,
+        "displaced_transition": "false->false",
+        "prompt": "vehicle",
+        "score_a": 0.000000,
+        "score_b": 0.071057,
+        "span_fraction_delta_b_minus_a": 0.033582,
+        "status": "compared",
+        "survival_delta_b_minus_a": 0.006331,
+        "verdict": "ring-on higher by 0.071057"
+      }
+    ]
+  },
+  "conditions": [
+    "d0-full-wan-vae",
+    "d1-rolling-taehv",
+    "d2-reset-every-block",
+    "ring-off",
+    "ring-on"
+  ],
+  "holes": [
+    {
+      "condition": "d0-full-wan-vae",
+      "filename": "01-walker.mp4",
+      "prompt": "walker"
+    },
+    {
+      "condition": "d0-full-wan-vae",
+      "filename": "02-rolling-object.mp4",
+      "prompt": "rolling-object"
+    },
+    {
+      "condition": "d0-full-wan-vae",
+      "filename": "03-vehicle.mp4",
+      "prompt": "vehicle"
+    },
+    {
+      "condition": "d1-rolling-taehv",
+      "filename": "01-walker.mp4",
+      "prompt": "walker"
+    },
+    {
+      "condition": "d1-rolling-taehv",
+      "filename": "02-rolling-object.mp4",
+      "prompt": "rolling-object"
+    },
+    {
+      "condition": "d1-rolling-taehv",
+      "filename": "03-vehicle.mp4",
+      "prompt": "vehicle"
+    },
+    {
+      "condition": "d2-reset-every-block",
+      "filename": "01-walker.mp4",
+      "prompt": "walker"
+    },
+    {
+      "condition": "d2-reset-every-block",
+      "filename": "02-rolling-object.mp4",
+      "prompt": "rolling-object"
+    },
+    {
+      "condition": "d2-reset-every-block",
+      "filename": "03-vehicle.mp4",
+      "prompt": "vehicle"
+    }
+  ],
+  "input_root": "/private/tmp/realtime-video-p0-displacement-batch-input",
+  "kind": "coherent-displacement-batch-comparison",
+  "matrix": [
+    {
+      "cells": {
+        "d0-full-wan-vae": {
+          "condition": "d0-full-wan-vae",
+          "displaced": false,
+          "displacement_score": 4.000687,
+          "filename": "00-ball.mp4",
+          "prompt": "ball",
+          "result_json": "clips/d0-full-wan-vae/00-ball.mp4.json",
+          "span_fraction": 0.217463,
+          "status": "scored",
+          "survival": 0.974747
+        },
+        "d1-rolling-taehv": {
+          "condition": "d1-rolling-taehv",
+          "displaced": false,
+          "displacement_score": 3.889719,
+          "filename": "00-ball.mp4",
+          "prompt": "ball",
+          "result_json": "clips/d1-rolling-taehv/00-ball.mp4.json",
+          "span_fraction": 0.216092,
+          "status": "scored",
+          "survival": 0.982363
+        },
+        "d2-reset-every-block": {
+          "condition": "d2-reset-every-block",
+          "displaced": false,
+          "displacement_score": 2.115336,
+          "filename": "00-ball.mp4",
+          "prompt": "ball",
+          "result_json": "clips/d2-reset-every-block/00-ball.mp4.json",
+          "span_fraction": 0.205699,
+          "status": "scored",
+          "survival": 0.901796
+        },
+        "ring-off": {
+          "condition": "ring-off",
+          "displaced": false,
+          "displacement_score": 3.889719,
+          "filename": "00-ball.mp4",
+          "prompt": "ball",
+          "result_json": "clips/ring-off/00-ball.mp4.json",
+          "span_fraction": 0.216092,
+          "status": "scored",
+          "survival": 0.982363
+        },
+        "ring-on": {
+          "condition": "ring-on",
+          "displaced": false,
+          "displacement_score": 0.000000,
+          "filename": "00-ball.mp4",
+          "prompt": "ball",
+          "result_json": "clips/ring-on/00-ball.mp4.json",
+          "span_fraction": 0.009082,
+          "status": "scored",
+          "survival": 1.000000
+        }
+      },
+      "filename_slot": "00-ball.mp4",
+      "prompt": "ball"
+    },
+    {
+      "cells": {
+        "d0-full-wan-vae": {
+          "condition": "d0-full-wan-vae",
+          "displaced": null,
+          "displacement_score": null,
+          "filename": "01-walker.mp4",
+          "prompt": "walker",
+          "result_json": null,
+          "span_fraction": null,
+          "status": "missing",
+          "survival": null
+        },
+        "d1-rolling-taehv": {
+          "condition": "d1-rolling-taehv",
+          "displaced": null,
+          "displacement_score": null,
+          "filename": "01-walker.mp4",
+          "prompt": "walker",
+          "result_json": null,
+          "span_fraction": null,
+          "status": "missing",
+          "survival": null
+        },
+        "d2-reset-every-block": {
+          "condition": "d2-reset-every-block",
+          "displaced": null,
+          "displacement_score": null,
+          "filename": "01-walker.mp4",
+          "prompt": "walker",
+          "result_json": null,
+          "span_fraction": null,
+          "status": "missing",
+          "survival": null
+        },
+        "ring-off": {
+          "condition": "ring-off",
+          "displaced": false,
+          "displacement_score": 0.050011,
+          "filename": "01-walker.mp4",
+          "prompt": "walker",
+          "result_json": "clips/ring-off/01-walker.mp4.json",
+          "span_fraction": 0.048802,
+          "status": "scored",
+          "survival": 0.956790
+        },
+        "ring-on": {
+          "condition": "ring-on",
+          "displaced": false,
+          "displacement_score": 0.004881,
+          "filename": "01-walker.mp4",
+          "prompt": "walker",
+          "result_json": "clips/ring-on/01-walker.mp4.json",
+          "span_fraction": 0.020146,
+          "status": "scored",
+          "survival": 1.000000
+        }
+      },
+      "filename_slot": "01-walker.mp4",
+      "prompt": "walker"
+    },
+    {
+      "cells": {
+        "d0-full-wan-vae": {
+          "condition": "d0-full-wan-vae",
+          "displaced": null,
+          "displacement_score": null,
+          "filename": "02-rolling-object.mp4",
+          "prompt": "rolling-object",
+          "result_json": null,
+          "span_fraction": null,
+          "status": "missing",
+          "survival": null
+        },
+        "d1-rolling-taehv": {
+          "condition": "d1-rolling-taehv",
+          "displaced": null,
+          "displacement_score": null,
+          "filename": "02-rolling-object.mp4",
+          "prompt": "rolling-object",
+          "result_json": null,
+          "span_fraction": null,
+          "status": "missing",
+          "survival": null
+        },
+        "d2-reset-every-block": {
+          "condition": "d2-reset-every-block",
+          "displaced": null,
+          "displacement_score": null,
+          "filename": "02-rolling-object.mp4",
+          "prompt": "rolling-object",
+          "result_json": null,
+          "span_fraction": null,
+          "status": "missing",
+          "survival": null
+        },
+        "ring-off": {
+          "condition": "ring-off",
+          "displaced": false,
+          "displacement_score": 0.211627,
+          "filename": "02-rolling-object.mp4",
+          "prompt": "rolling-object",
+          "result_json": "clips/ring-off/02-rolling-object.mp4.json",
+          "span_fraction": 0.056676,
+          "status": "scored",
+          "survival": 0.980012
+        },
+        "ring-on": {
+          "condition": "ring-on",
+          "displaced": false,
+          "displacement_score": 0.000000,
+          "filename": "02-rolling-object.mp4",
+          "prompt": "rolling-object",
+          "result_json": "clips/ring-on/02-rolling-object.mp4.json",
+          "span_fraction": 0.012754,
+          "status": "scored",
+          "survival": 0.979424
+        }
+      },
+      "filename_slot": "02-rolling-object.mp4",
+      "prompt": "rolling-object"
+    },
+    {
+      "cells": {
+        "d0-full-wan-vae": {
+          "condition": "d0-full-wan-vae",
+          "displaced": null,
+          "displacement_score": null,
+          "filename": "03-vehicle.mp4",
+          "prompt": "vehicle",
+          "result_json": null,
+          "span_fraction": null,
+          "status": "missing",
+          "survival": null
+        },
+        "d1-rolling-taehv": {
+          "condition": "d1-rolling-taehv",
+          "displaced": null,
+          "displacement_score": null,
+          "filename": "03-vehicle.mp4",
+          "prompt": "vehicle",
+          "result_json": null,
+          "span_fraction": null,
+          "status": "missing",
+          "survival": null
+        },
+        "d2-reset-every-block": {
+          "condition": "d2-reset-every-block",
+          "displaced": null,
+          "displacement_score": null,
+          "filename": "03-vehicle.mp4",
+          "prompt": "vehicle",
+          "result_json": null,
+          "span_fraction": null,
+          "status": "missing",
+          "survival": null
+        },
+        "ring-off": {
+          "condition": "ring-off",
+          "displaced": false,
+          "displacement_score": 0.000000,
+          "filename": "03-vehicle.mp4",
+          "prompt": "vehicle",
+          "result_json": "clips/ring-off/03-vehicle.mp4.json",
+          "span_fraction": 0.006685,
+          "status": "scored",
+          "survival": 0.977208
+        },
+        "ring-on": {
+          "condition": "ring-on",
+          "displaced": false,
+          "displacement_score": 0.071057,
+          "filename": "03-vehicle.mp4",
+          "prompt": "vehicle",
+          "result_json": "clips/ring-on/03-vehicle.mp4.json",
+          "span_fraction": 0.040267,
+          "status": "scored",
+          "survival": 0.983539
+        }
+      },
+      "filename_slot": "03-vehicle.mp4",
+      "prompt": "vehicle"
+    }
+  ],
+  "metric_kind": "coherent-displacement-metrics",
+  "prompt_order": [
+    "ball",
+    "walker",
+    "rolling-object",
+    "vehicle"
+  ],
+  "schema_version": 1,
+  "slot_mode": "shared-filename"
+}

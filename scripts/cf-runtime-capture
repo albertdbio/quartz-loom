@@ -1,0 +1,27 @@
+#!/usr/bin/env python3
+"""Capture CF++1 H100 runtime facts without authorizing a model boot."""
+
+from __future__ import annotations
+
+import os
+import sys
+from pathlib import Path
+
+PROJECT_ROOT = Path(__file__).resolve().parents[1]
+_PYCACHE_CANDIDATE = Path("/tmp") / (
+    f"cf1-runtime-capture-pycache-{os.getpid()}-{os.urandom(16).hex()}"
+)
+if _PYCACHE_CANDIDATE.exists() or _PYCACHE_CANDIDATE.is_symlink():
+    raise RuntimeError("runtime capture bytecode cache prefix already exists")
+os.environ["PYTHONDONTWRITEBYTECODE"] = "1"
+os.environ["PYTHONPYCACHEPREFIX"] = str(_PYCACHE_CANDIDATE)
+sys.pycache_prefix = str(_PYCACHE_CANDIDATE)
+sys.dont_write_bytecode = True
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
+
+from bench.cf_runtime_preflight import capture_main  # noqa: E402
+
+
+if __name__ == "__main__":
+    raise SystemExit(capture_main())

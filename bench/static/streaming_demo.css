@@ -1,0 +1,87 @@
+:root {
+  color-scheme: dark;
+  font-family: system-ui, sans-serif;
+}
+
+body {
+  max-width: 52rem;
+  margin: 2rem auto;
+  padding: 0 1rem;
+  background: #111827;
+  color: #f9fafb;
+}
+
+form {
+  display: grid;
+  gap: .5rem;
+}
+
+input,
+textarea,
+button {
+  padding: .75rem;
+  border: 1px solid #4b5563;
+  border-radius: .5rem;
+}
+
+textarea {
+  min-height: 9rem;
+  resize: vertical;
+  font: inherit;
+}
+
+.hint {
+  margin: 0;
+  color: #cbd5e1;
+  font-size: .9rem;
+  line-height: 1.4;
+}
+
+.form-actions {
+  display: flex;
+  align-items: end;
+  justify-content: space-between;
+  gap: .75rem;
+  margin-top: .25rem;
+}
+
+.seed-control {
+  display: grid;
+  gap: .25rem;
+  color: #cbd5e1;
+  font-size: .9rem;
+}
+
+.prompt-actions {
+  display: flex;
+  align-items: center;
+  gap: .75rem;
+}
+
+.secondary-action {
+  background: transparent;
+  color: #dbeafe;
+}
+
+#seed {
+  width: 11rem;
+}
+
+button {
+  cursor: pointer;
+}
+
+canvas {
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  margin-top: 1rem;
+  background: #030712;
+  image-rendering: pixelated;
+}
+
+output {
+  display: block;
+  min-height: 1.5rem;
+  margin-top: .75rem;
+  color: #93c5fd;
+}
