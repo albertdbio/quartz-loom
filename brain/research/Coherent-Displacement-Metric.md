@@ -179,18 +179,19 @@ can map output pixels arbitrarily far outside the source; with
 reflecting those coordinates. Repeated samples caught one batch inside the same
 native call, and a controlled near-singular transform reproduced it.
 
-The motion-proposal path now checks the complete rectangular mapping before
-warping: corner denominators must remain finite, bounded away from zero, and
-one-signed, and projected corner coordinates must stay within eight frame
-spans. For a linear-fractional homography, one-signed denominators make the
-corner extrema sufficient over the rectangle. If any sampled transform is
-unsafe, the complete optional proposal is discarded and the existing
-camera-compensated excursion selector runs instead. Keeping a partial proposal
-from only the safe frames is forbidden: it selected the wrong foreground and
-changed normalized vehicle step 10 from its independent 1.795996 baseline to
-0.040983.
+The motion-proposal path now checks both the fitted mapping and its inverse over
+the complete rectangular domain before warping: corner denominators must remain
+finite, bounded away from zero, and one-signed, and projected corner
+coordinates must stay within eight frame spans. For a linear-fractional
+homography, one-signed denominators make the corner extrema sufficient over the
+rectangle. Failed inversion or any unsafe sampled transform discards the
+complete optional proposal and runs the existing camera-compensated excursion
+selector instead. Keeping a partial proposal from only the safe frames is
+forbidden: it selected the wrong foreground and changed normalized vehicle
+step 10 from its independent 1.795996 baseline to 0.040983.
 
-Both the direct unsafe call and the biased-partial-proposal path are red-first
-regressions. The corrected step-10 full report is byte-identical to the stored
-spot result, the accepted pilot vehicle report is unchanged, and the fast
-measurement suite passes 56 tests (four learned opt-ins skipped).
+Direct expansion, near-singular inverse expansion, and singular/unsafe
+late-frame partial-proposal paths are red-first regressions. The corrected
+step-10 full report is byte-identical to the stored spot result, the accepted
+pilot vehicle report is unchanged, and the fast measurement suite passes 58
+tests (four learned opt-ins skipped).

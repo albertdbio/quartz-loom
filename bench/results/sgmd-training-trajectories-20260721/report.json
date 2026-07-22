@@ -2,13 +2,14 @@
   "aggregation_policy": {
     "degraded_count": "Count status=scored cells with coherence_degraded=true; this flag denotes screen-space-only displacement, not coherence-axis failure.",
     "mean_coherence": "Mean every numeric coherence_score with coherence_status=scored, including cells whose displacement is degraded.",
-    "mean_displacement": "Mean only status=scored cells with camera_compensated=true. Screen-space fallbacks, errors, invalid cells, and holes are excluded, never zero-filled."
+    "mean_displacement": "Mean only status=scored cells with camera_compensated=true. Screen-space fallbacks, errors, invalid cells, and holes are excluded, never zero-filled.",
+    "rounding": "Aggregate means use the exact six-decimal cell values and decimal round-to-nearest, ties-to-even at six places."
   },
   "conclusions": {
-    "lambda_answer": "The data contradicts the proposed monotonic framing. Lower lambda=0.05 does not hold motion longer or blur less: across its 15 compensated cells it averages 1.078594 motion and 6.423868 coherence across all 20 cells. Lambda=0.2 averages 1.886850 motion across the same 15 compensated-cell coverage and 7.033567 coherence across all 20 cells, finishing at 1.693540 / 7.403891 with zero degraded cells.",
+    "lambda_answer": "The data contradicts the proposed monotonic framing. Lower lambda=0.05 does not hold motion longer or blur less: across its 15 compensated cells it averages 1.078594 motion and 6.423868 coherence across all 20 cells. Lambda=0.2 averages 1.886850 motion across its own 15 compensated cells (equal count but unequal prompt/step membership) and 7.033567 coherence across all 20 cells, finishing at 1.693540 / 7.403891 with zero degraded cells.",
     "lambda_denominator_caveat": "On prompts camera-compensated under both lambdas, lambda=0.2 wins motion at four of five matched checkpoints but loses at step 20. The advantage is prompt-specific: at step 50 its walker is lower than lambda=0.05 while its barrel is much higher.",
     "normalized_lam0p1": "Fisher normalization avoids the raw run's simple early transport collapse, but the path is non-monotonic and early motion means have thin denominators. From step 30 onward it occupies roughly 0.61-1.30 compensated motion and 7.10-7.36 coherence, with one error at step 50.",
-    "raw_sgmd": "Raw SGMD has one compensated cell at step 25 (the vehicle at 2.030809) and three degraded cells; by step 50 its compensated mean is 0.224815 while coherence rises to 6.871822. It does not trace a stable top-right path.",
+    "raw_sgmd": "Raw SGMD has one compensated cell at step 25 (the vehicle at 2.030809) and three degraded cells; by step 50 its compensated mean is 0.224814 while coherence rises to 6.871822. It does not trace a stable top-right path.",
     "scope_caveat": "Displacement plus coherence does not establish prompt fidelity or correct physics. In particular, lambda=0.2's very large vehicle scores and its step-30 ball motion should still receive frame/blind review before promotion."
   },
   "condition_holes": [],
@@ -43,13 +44,13 @@
           "compensated_displacement_count": 2,
           "condition": "step_000050",
           "degraded_count": 2,
-          "degraded_screen_space_mean": 1.161237,
+          "degraded_screen_space_mean": 1.161238,
           "displaced_count": 0,
           "displacement_error_count": 0,
           "expected_prompt_count": 4,
           "invalid_count": 0,
           "mean_coherence": 6.871822,
-          "mean_displacement": 0.224815,
+          "mean_displacement": 0.224814,
           "missing_count": 0,
           "status": "scored"
         },
@@ -75,7 +76,7 @@
           "compensated_displacement_count": 2,
           "condition": "step_000100",
           "degraded_count": 2,
-          "degraded_screen_space_mean": 0.214239,
+          "degraded_screen_space_mean": 0.214240,
           "displaced_count": 0,
           "displacement_error_count": 0,
           "expected_prompt_count": 4,
@@ -439,7 +440,7 @@
           "compensated_displacement_count": 1,
           "condition": "step_000005",
           "degraded_count": 2,
-          "degraded_screen_space_mean": 1.212845,
+          "degraded_screen_space_mean": 1.212844,
           "displaced_count": 0,
           "displacement_error_count": 1,
           "expected_prompt_count": 4,
@@ -525,7 +526,7 @@
           "expected_prompt_count": 4,
           "invalid_count": 0,
           "mean_coherence": 7.180474,
-          "mean_displacement": 0.607627,
+          "mean_displacement": 0.607628,
           "missing_count": 0,
           "status": "scored"
         },
@@ -1409,7 +1410,7 @@
           "expected_prompt_count": 4,
           "invalid_count": 0,
           "mean_coherence": 6.355175,
-          "mean_displacement": 1.091509,
+          "mean_displacement": 1.091510,
           "missing_count": 0,
           "status": "scored"
         },
@@ -1456,8 +1457,8 @@
           "displacement_error_count": 0,
           "expected_prompt_count": 4,
           "invalid_count": 0,
-          "mean_coherence": 7.350589,
-          "mean_displacement": 1.717051,
+          "mean_coherence": 7.350588,
+          "mean_displacement": 1.717052,
           "missing_count": 0,
           "status": "scored"
         },
@@ -2354,6 +2355,7 @@
     "sgmd_lsweep"
   ],
   "cross_checks": {
+    "all_compensated_contract_checks_pass": false,
     "all_numeric_and_exact_report_checks_pass": true,
     "checks": [
       {
@@ -2366,8 +2368,9 @@
         "exact_report_match": true,
         "expected_reported": 2.031000,
         "matches_reported_precision": true,
+        "numeric_and_exact_report_match": true,
         "prompt": "vehicle",
-        "status": "pass"
+        "status": "pass_compensated"
       },
       {
         "actual": 0.352059,
@@ -2379,8 +2382,9 @@
         "exact_report_match": true,
         "expected_reported": 0.352000,
         "matches_reported_precision": true,
+        "numeric_and_exact_report_match": true,
         "prompt": "vehicle",
-        "status": "pass"
+        "status": "pass_compensated"
       },
       {
         "actual": 0.061183,
@@ -2392,8 +2396,9 @@
         "exact_report_match": true,
         "expected_reported": 0.061000,
         "matches_reported_precision": true,
+        "numeric_and_exact_report_match": true,
         "prompt": "vehicle",
-        "status": "pass"
+        "status": "pass_compensated"
       },
       {
         "actual": 0.227143,
@@ -2405,8 +2410,9 @@
         "exact_report_match": true,
         "expected_reported": 0.227000,
         "matches_reported_precision": true,
+        "numeric_and_exact_report_match": true,
         "prompt": "vehicle",
-        "status": "pass"
+        "status": "pass_compensated"
       },
       {
         "actual": 1.795996,
@@ -2418,8 +2424,9 @@
         "exact_report_match": true,
         "expected_reported": 1.796000,
         "matches_reported_precision": true,
+        "numeric_and_exact_report_match": true,
         "prompt": "vehicle",
-        "status": "pass"
+        "status": "pass_compensated"
       },
       {
         "actual": 2.456558,
@@ -2431,8 +2438,9 @@
         "exact_report_match": true,
         "expected_reported": 2.457000,
         "matches_reported_precision": true,
+        "numeric_and_exact_report_match": true,
         "prompt": "vehicle",
-        "status": "pass"
+        "status": "matched_degraded"
       },
       {
         "actual": 1.963068,
@@ -2444,8 +2452,9 @@
         "exact_report_match": true,
         "expected_reported": 1.963000,
         "matches_reported_precision": true,
+        "numeric_and_exact_report_match": true,
         "prompt": "vehicle",
-        "status": "pass"
+        "status": "matched_degraded"
       },
       {
         "actual": 0.009206,
@@ -2457,8 +2466,9 @@
         "exact_report_match": true,
         "expected_reported": 0.009000,
         "matches_reported_precision": true,
+        "numeric_and_exact_report_match": true,
         "prompt": "vehicle",
-        "status": "pass"
+        "status": "pass_compensated"
       },
       {
         "actual": 2.200041,
@@ -2470,8 +2480,9 @@
         "exact_report_match": true,
         "expected_reported": 2.200000,
         "matches_reported_precision": true,
+        "numeric_and_exact_report_match": true,
         "prompt": "vehicle",
-        "status": "pass"
+        "status": "pass_compensated"
       },
       {
         "actual": 2.045688,
@@ -2483,8 +2494,9 @@
         "exact_report_match": true,
         "expected_reported": 2.046000,
         "matches_reported_precision": true,
+        "numeric_and_exact_report_match": true,
         "prompt": "vehicle",
-        "status": "pass"
+        "status": "pass_compensated"
       },
       {
         "actual": 1.345532,
@@ -2496,12 +2508,14 @@
         "exact_report_match": true,
         "expected_reported": 1.346000,
         "matches_reported_precision": true,
+        "numeric_and_exact_report_match": true,
         "prompt": "vehicle",
-        "status": "pass"
+        "status": "pass_compensated"
       }
     ],
-    "degraded_provenance_caveat_count": 2,
-    "note": "All supplied scalars match at their reported three-decimal precision and all 11 current displacement reports are byte-identical to the independent stored spot reports. Fnorm vehicle steps 15 and 20 are explicitly screen-space-only, despite the prompt describing all anchors as compensated."
+    "compensated_pass_count": 9,
+    "matched_degraded_count": 2,
+    "note": "All supplied scalars match at their reported three-decimal precision and all 11 current displacement reports are byte-identical to the independent stored spot reports. Nine checks satisfy the compensated contract. Fnorm vehicle steps 15 and 20 are matched degraded screen-space diagnostics, not compensated passes, despite the task wording."
   },
   "kind": "sgmd-motion-coherence-training-trajectory",
   "lambda_common_prompt_comparison": [
@@ -2511,9 +2525,9 @@
         "ball",
         "barrel"
       ],
-      "fnorm_lam0p05_mean_displacement": 1.091509,
+      "fnorm_lam0p05_mean_displacement": 1.091510,
       "fnorm_lam0p2_mean_displacement": 1.187784,
-      "high_minus_low": 0.096275
+      "high_minus_low": 0.096274
     },
     {
       "checkpoint": 20,
@@ -2522,7 +2536,7 @@
         "barrel"
       ],
       "fnorm_lam0p05_mean_displacement": 0.739730,
-      "fnorm_lam0p2_mean_displacement": 0.335925,
+      "fnorm_lam0p2_mean_displacement": 0.335926,
       "high_minus_low": -0.403804
     },
     {
@@ -2615,9 +2629,9 @@
     }
   ],
   "step_25_anomaly": {
-    "classification": "genuine_sample_level_motion_dropout_with_secondary_structure_softening",
+    "classification": "valid_decode_transport_shortfall_with_tracking_and_identity_confidence_failure",
     "confidence": "moderate",
-    "diagnosis": "The file is a healthy 81-frame decode and the learned coherence axis remains 8.723019 with temporal=10. The clip therefore is neither a broken decode nor a coherence collapse. Its requested transport is weaker and reverses mid-clip; the displacement score is further amplified downward by only 0.078189 track survival, so 0.009206 should not be read as literal absence of all screen motion.",
+    "diagnosis": "The file is a healthy 81-frame decode and the learned coherence axis remains 8.723019 with temporal=10. The clip therefore is neither a broken decode nor a coherence collapse. Its requested transport is visibly weaker and reverses mid-clip, but 0.009206 is not a clean metric-confirmed dropout: visual centroid span is 196 px (0.235577W) while the selected tracks report only 0.035408W, with three persistent tracks, 0.078189 survival, and appearance_guard=0.0. The observed transport shortfall is real; the scalar severity is dominated by tracking and identity-confidence failure.",
     "neighbor_points": [
       {
         "camera_compensated": false,
@@ -2653,7 +2667,7 @@
         "temporal_coherence_score": 10.000000
       }
     ],
-    "redecode_recommendation": "Do not re-decode the same artifact as a corruption repair. If checkpoint-level promotion hinges on this isolated dip, add another deterministic seed/sample to measure variance rather than replacing this valid observation.",
+    "redecode_recommendation": "Do not re-decode the same artifact as a corruption repair. If checkpoint-level promotion hinges on this isolated dip, retain the clip and add another deterministic seed plus a manual/bbox-assisted track check rather than replacing this valid observation.",
     "step_25_coherence": {
       "coherence_score": 8.723019,
       "degradation_drop": 0.965936,
@@ -2709,8 +2723,11 @@
       "temporal_coherence_score": 10.000000
     },
     "step_25_displacement": {
+      "appearance_guard": 0.000000,
       "camera_compensated_span_fraction_width": 0.037375,
       "coherence_guard": 0.270521,
+      "dinov2_feature_similarity_median": 0.521531,
+      "dinov2_feature_similarity_p10": 0.392171,
       "displacement_extent": 0.008131,
       "displacement_score": 0.009206,
       "persistent_track_count": 3,
@@ -2776,13 +2793,13 @@
       "condition": "step_000050",
       "corpus": "sgmd_pilot",
       "degraded_count": 2,
-      "degraded_screen_space_mean": 1.161237,
+      "degraded_screen_space_mean": 1.161238,
       "displaced_count": 0,
       "displacement_error_count": 0,
       "expected_prompt_count": 4,
       "invalid_count": 0,
       "mean_coherence": 6.871822,
-      "mean_displacement": 0.224815,
+      "mean_displacement": 0.224814,
       "missing_count": 0,
       "run": "raw_sgmd_lam0p1",
       "status": "scored"
@@ -2814,7 +2831,7 @@
       "condition": "step_000100",
       "corpus": "sgmd_pilot",
       "degraded_count": 2,
-      "degraded_screen_space_mean": 0.214239,
+      "degraded_screen_space_mean": 0.214240,
       "displaced_count": 0,
       "displacement_error_count": 0,
       "expected_prompt_count": 4,
@@ -2833,7 +2850,7 @@
       "condition": "step_000005",
       "corpus": "sgmd_fnorm",
       "degraded_count": 2,
-      "degraded_screen_space_mean": 1.212845,
+      "degraded_screen_space_mean": 1.212844,
       "displaced_count": 0,
       "displacement_error_count": 1,
       "expected_prompt_count": 4,
@@ -2934,7 +2951,7 @@
       "expected_prompt_count": 4,
       "invalid_count": 0,
       "mean_coherence": 7.180474,
-      "mean_displacement": 0.607627,
+      "mean_displacement": 0.607628,
       "missing_count": 0,
       "run": "fnorm_lam0p1",
       "status": "scored"
@@ -3029,7 +3046,7 @@
       "expected_prompt_count": 4,
       "invalid_count": 0,
       "mean_coherence": 6.355175,
-      "mean_displacement": 1.091509,
+      "mean_displacement": 1.091510,
       "missing_count": 0,
       "run": "fnorm_lam0p05",
       "status": "scored"
@@ -3085,8 +3102,8 @@
       "displacement_error_count": 0,
       "expected_prompt_count": 4,
       "invalid_count": 0,
-      "mean_coherence": 7.350589,
-      "mean_displacement": 1.717051,
+      "mean_coherence": 7.350588,
+      "mean_displacement": 1.717052,
       "missing_count": 0,
       "run": "fnorm_lam0p05",
       "status": "scored"

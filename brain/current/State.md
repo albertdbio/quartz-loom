@@ -2,8 +2,8 @@
 type: state
 status: active
 date: 2026-07-21
-description: "The measurement track now has a motion-invariant DINOv2+RAFT coherence axis beside coherent displacement. Real calibration separates finals, four-step, and one-step clips at 9.80 > 5.67 > 0.97 mean coherence; SGMD update-25 vehicle is the mixed operating point at motion 2.030809 / coherence 7.553927 with late degradation explicit."
-related: ["[[ADR-001-quality-qualified-headline]]", "[[ADR-002-consensus-review-panel]]", "[[ADR-003-serving-product-model-track-split]]", "[[Gotcha-Rolling-TAEHV-Context-Trim]]", "[[Gotcha-Seed-Is-Not-Artifact-Provenance]]", "[[Gotcha-Quality-Decoder-Must-Match-Performance-Path]]", "[[Gotcha-Consensus-Timeouts-Preserve-Voter-Sessions]]", "[[Gotcha-Async-Timeouts-Need-Task-Isolation]]", "[[Gotcha-Transport-Write-Is-Not-Presentation]]", "[[Unsloth-Puzzles-Systems-Study]]", "[[Pegasus-1.5-Video-Judge-Calibration]]", "[[Gemini-3.1-Video-Judge-Calibration]]", "[[Pinned-CF1-CUDA-Bootstrap]]", "[[CF1-H100-Runtime-Preflight]]", "[[CF1-Rolling-TAEHV-Session]]", "[[CF1-Latent-Pull-and-Smoke]]", "[[CF1-Development-Video-Artifact]]", "[[CF1-Persistent-CUDA-Worker]]", "[[CF1-Prompt-Conditioned-Motion]]", "[[Streaming-Service-Boundary]]", "[[Browser-Streaming-Transport]]", "[[Coherent-Displacement-Metric]]", "[[Displacement-Batch-Comparison]]", "[[Coherence-Metric]]", "[[session-1-h100-gate-and-second-brain]]", "[[session-2-codex-codegraph-consensus]]", "[[session-3-unsloth-puzzles-study]]", "[[session-4-quality-protocol-hardening]]", "[[session-5-gemini-calibration-and-runner-preflight]]", "[[session-6-streaming-service-boundary]]", "[[session-7-browser-streaming-transport]]", "[[session-8-persistent-process-worker]]", "[[session-9-pinned-assets-and-cuda-bootstrap]]", "[[session-10-rolling-cuda-session-core]]", "[[session-11-runtime-preflight]]", "[[session-12-latent-pull-and-smoke]]", "[[session-13-development-video-artifact]]", "[[session-14-persistent-cuda-worker]]", "[[session-15-persistent-worker-acceptance]]", "[[session-16-acceptance-evidence-hardening]]", "[[session-17-frozen-h100-generation-and-browser-acceptance]]", "[[session-18-motion-diagnosis-and-looping-replay]]", "[[session-19-live-temporal-prompt-jpeg-release]]", "[[session-20-editable-optional-prompt-enhancement]]", "[[session-21-coherent-displacement-metric]]", "[[session-22-displacement-batch-comparison]]", "[[session-23-fork-grid-displacement-baseline]]", "[[session-24-sgmd-degraded-displacement]]", "[[session-25-openstudio-4090-open-model-server]]", "[[session-26-coherence-axis]]"]
+description: "The motion-by-coherence instrument has now scored 96 clips across raw SGMD, normalized lambda=0.1, and normalized lambda sweeps. Lambda=0.2 owns the strongest observed late operating point (step 50: 1.693540 motion / 7.403891 coherence), contrary to the lower-lambda framing, with coverage and prompt-fidelity caveats explicit."
+related: ["[[ADR-001-quality-qualified-headline]]", "[[ADR-002-consensus-review-panel]]", "[[ADR-003-serving-product-model-track-split]]", "[[Gotcha-Rolling-TAEHV-Context-Trim]]", "[[Gotcha-Seed-Is-Not-Artifact-Provenance]]", "[[Gotcha-Quality-Decoder-Must-Match-Performance-Path]]", "[[Gotcha-Consensus-Timeouts-Preserve-Voter-Sessions]]", "[[Gotcha-Async-Timeouts-Need-Task-Isolation]]", "[[Gotcha-Transport-Write-Is-Not-Presentation]]", "[[Unsloth-Puzzles-Systems-Study]]", "[[Pegasus-1.5-Video-Judge-Calibration]]", "[[Gemini-3.1-Video-Judge-Calibration]]", "[[Pinned-CF1-CUDA-Bootstrap]]", "[[CF1-H100-Runtime-Preflight]]", "[[CF1-Rolling-TAEHV-Session]]", "[[CF1-Latent-Pull-and-Smoke]]", "[[CF1-Development-Video-Artifact]]", "[[CF1-Persistent-CUDA-Worker]]", "[[CF1-Prompt-Conditioned-Motion]]", "[[Streaming-Service-Boundary]]", "[[Browser-Streaming-Transport]]", "[[Coherent-Displacement-Metric]]", "[[Displacement-Batch-Comparison]]", "[[Coherence-Metric]]", "[[SGMD-Training-Trajectories]]", "[[session-1-h100-gate-and-second-brain]]", "[[session-2-codex-codegraph-consensus]]", "[[session-3-unsloth-puzzles-study]]", "[[session-4-quality-protocol-hardening]]", "[[session-5-gemini-calibration-and-runner-preflight]]", "[[session-6-streaming-service-boundary]]", "[[session-7-browser-streaming-transport]]", "[[session-8-persistent-process-worker]]", "[[session-9-pinned-assets-and-cuda-bootstrap]]", "[[session-10-rolling-cuda-session-core]]", "[[session-11-runtime-preflight]]", "[[session-12-latent-pull-and-smoke]]", "[[session-13-development-video-artifact]]", "[[session-14-persistent-cuda-worker]]", "[[session-15-persistent-worker-acceptance]]", "[[session-16-acceptance-evidence-hardening]]", "[[session-17-frozen-h100-generation-and-browser-acceptance]]", "[[session-18-motion-diagnosis-and-looping-replay]]", "[[session-19-live-temporal-prompt-jpeg-release]]", "[[session-20-editable-optional-prompt-enhancement]]", "[[session-21-coherent-displacement-metric]]", "[[session-22-displacement-batch-comparison]]", "[[session-23-fork-grid-displacement-baseline]]", "[[session-24-sgmd-degraded-displacement]]", "[[session-25-openstudio-4090-open-model-server]]", "[[session-26-coherence-axis]]", "[[session-27-sgmd-training-trajectories]]"]
 ---
 
 # Current State
@@ -107,6 +107,19 @@ this track builds repeatable measurements and hands them off.
   ball is 0.000000. `--with-coherence` adds schema-4 two-axis matrices while
   the disabled schema-3 output tree remains byte-identical. See
   [[Coherence-Metric]].
+- **Three SGMD training trajectories are now on that shared two-axis plane** —
+  96 read-only clips across 24 checkpoints were scored into native sibling
+  `batch_scores_2axis/` trees and one deterministic combined report/CSV. Motion
+  means include camera-compensated cells only; degraded counts and denominators
+  remain explicit. The proposed lower-lambda advantage does not reproduce:
+  normalized lambda=0.2 beats lambda=0.05 on matched-prompt motion at four of
+  five checkpoints and, at full-coverage step 50, reaches **1.693540 motion /
+  7.403891 coherence** versus **0.735094 / 6.834893**. The large gains are
+  prompt-specific and still require frame/blind fidelity review. The normalized
+  lambda=0.1 step-25 vehicle is a valid decode with healthy coherence but a
+  shortened/reversing traverse and a tracker/identity-confidence failure; its
+  0.009206 score is not proof of zero visible motion. See
+  [[SGMD-Training-Trajectories]].
 - **P0 localization is accepted ground truth, not an experiment to repeat** —
   the recent-clean KV ring is dropped (it raised throughput while blind motion
   fell), resetting rolling-TAEHV state made motion worse, and the same latents
@@ -484,18 +497,24 @@ this track builds repeatable measurements and hands them off.
 - `degrades_over_time=false` does not mean healthy: a clip already incoherent
   in frames 0–20 cannot show a later two-point drop. Read all three segment
   scores and retain frame/blind review for prompt fidelity and physics.
+- Equal compensated-cell counts do not imply equal prompt membership. The
+  lambda sweep has 15 compensated cells per arm, but pooled means use different
+  subsets; the matched-prompt table is the apples-to-apples comparison. High
+  lambda's very large vehicle/barrel and step-30 ball values still require
+  visual/blind validation before promotion.
+- The normalized lambda=0.1 vehicle anchors at steps 15 and 20 reproduce
+  numerically but are screen-space fallbacks, not compensated measurements.
+  Their values are excluded from compensated trajectory means.
 
 ## Likely next experiment
 
-Stop at the completed measurement handoff. Score the supplied Fisher-
-normalization run with `displacement_batch.py --with-coherence` when its output
-tree arrives; promotion means a measurable move toward the top-right of the
-motion×coherence plane, not merely recovering one axis by sacrificing the
-other. Reuse the same prompts/defaults, retain ERROR/INVALID/degraded cells as
-unavailable by default, and pair both scalars with frame/blind review for
-prompt-faithful sustained action. This track should not choose training or
-inference strategy or re-enter KV-ring, decoder, AvatarForcing, or inference-
-schedule work.
+Stop at the completed measurement handoff. Lambda=0.2 is the strongest
+quantitative promotion candidate in this fixed sample, but the orchestrating
+researcher should first inspect/blind-rate its high-motion cells for prompt
+fidelity, direction, and physics and, if the isolated normalized step-25 dip
+matters, add another deterministic seed plus a manual or box-assisted track
+check. This measurement track should not choose training or inference strategy
+or re-enter KV-ring, decoder, AvatarForcing, or inference-schedule work.
 
 Do not touch the exited H100 pod. The next bounded measurement increment should
 begin only when the orchestrator supplies a concrete experiment output or a new

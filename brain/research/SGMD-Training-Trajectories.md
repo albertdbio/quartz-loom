@@ -16,7 +16,10 @@ sweep corpora contain 96 unique clips across 24 checkpoints. All expected
 lambda=0.2 conditions had arrived before scoring, so the final report has no
 condition holes. Each corpus has its own sibling `batch_scores_2axis/` tree
 with the native schema-4 report, matrix, and complete per-clip displacement and
-coherence reports.
+coherence records: every successful score retains its full report and every
+failure remains an explicit row. In the normalized lambda=0.1 tree this means
+37/40 displacement JSONs plus three explicit displacement errors, and 40/40
+coherence JSONs.
 
 Trajectory motion is the mean of successful **camera-compensated** cells only.
 Screen-space fallbacks are starred, counted separately, and never mixed into
@@ -54,7 +57,7 @@ physics.
 
 Raw SGMD does not trace a stable top-right path: update 25 has only one
 compensated prompt (vehicle 2.030809) and three degraded cells; by update 50 its
-compensated mean is 0.224815 while coherence rises to 6.871822. Normalized
+compensated mean is 0.224814 while coherence rises to 6.871822. Normalized
 lambda=0.1 is non-monotonic and early rows have thin motion denominators, but
 from step 30 onward it generally occupies 0.61-1.30 compensated motion and
 7.10-7.36 coherence.
@@ -68,13 +71,15 @@ span versus 279 and 396 pixels at neighboring steps 20 and 30. Coherence is
 **9.812063 -> 8.581635 -> 8.846127** and `degrades_over_time=false`; this is not
 a coherence collapse.
 
-The near-zero **0.009206** displacement score represents a real sample-level
-failure of sustained intended transport, amplified by fragile tracking: only
-three persistent selected tracks and 0.078189 survival. It must not be read as
-literal absence of screen motion. Do not re-decode the same file as a
-corruption repair. If checkpoint promotion hinges on the isolated dip, add
-another deterministic seed/sample to measure variance while retaining this
-valid observation.
+The near-zero **0.009206** displacement score is not a clean measurement of
+the visible traverse. The car's roughly 196-pixel visual span is **0.236W**,
+while the selected CoTracker tracks report only **0.035W**: three persistent
+tracks survive, survival is 0.078189, and the DINO appearance guard is zero.
+Classify this as a valid-decode transport shortfall/path reversal **plus a
+tracker/identity-confidence failure**, not as proof that the clip has no
+motion. Do not re-decode the same file as a corruption repair. If checkpoint
+promotion hinges on the isolated dip, add another deterministic sample and a
+manual or box-assisted track check.
 
 ## Runtime safety learned during scoring
 
@@ -82,15 +87,17 @@ A normalized batch initially spent 90 minutes inside one OpenCV
 `warpPerspective`. A near-singular/projective-horizon background homography can
 send `BORDER_REFLECT101` source coordinates arbitrarily far outside the frame,
 making border reflection effectively unbounded. The optional motion-proposal
-warp now validates the complete rectangular domain through corner denominator
-sign/scale and an eight-frame-span coordinate bound. Any unsafe sampled warp
+warp now validates both the fitted mapping and its inverse over the complete
+rectangular domain through corner denominator sign/scale and an eight-frame-
+span coordinate bound. Inversion failure or any unsafe sampled mapping
 discards the whole optional proposal and falls back to the existing compensated
 excursion selector; retaining a partial proposal selected the wrong foreground.
 
-Both failure modes are red-first regressions. The normal pilot vehicle report
+All four forward/inverse/singular/partial-proposal guards are red-first
+regressions. The normal pilot vehicle report
 remains exact, normalized step-10 vehicle returns to its independent
 **1.795996** full report, and the complete fast displacement/batch/coherence
-suite passes 56 tests (four learned opt-ins skipped).
+suite passes 58 tests (four learned opt-ins skipped).
 
 ## Limits
 

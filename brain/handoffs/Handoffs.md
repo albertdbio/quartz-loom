@@ -39,3 +39,4 @@ research notes hold the durable detail.
 | 24 | [[session-24-sgmd-degraded-displacement]] | Added explicit screen-space fallback provenance and scored the four-update SGMD pilot without mixing degraded cells into compensated comparisons |
 | 25 | [[session-25-openstudio-4090-open-model-server]] | Brought the openstudio sd-turbo StreamDiffusion server live on a rented 4090 with selfcheck, tunnel-contract, and real-imagery restyle verification; pod left running for studio client integration |
 | 26 | [[session-26-coherence-axis]] | Added and calibrated the independent coherence axis, integrated schema-4 motion×coherence batches, and retained byte-identical legacy displacement outputs |
+| 27 | [[session-27-sgmd-training-trajectories]] | Scored three SGMD distillation trajectories on the shared motion×coherence plane, rejected the lower-lambda framing, and kept coverage and step-25 confidence caveats explicit |

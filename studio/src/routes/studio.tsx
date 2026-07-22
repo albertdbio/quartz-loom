@@ -1,6 +1,7 @@
 import { createSignal, For, onCleanup, onMount, Show } from "solid-js"
 import type { OpenStats } from "~/lib/open-realtime"
 import { startVoicePrompt, voiceSupported, type VoiceSession } from "~/lib/voice-prompt"
+import Onboarding, { type OnboardingChoice } from "~/components/onboarding"
 
 /**
  * studio — real-time video editing with Decart's Lucy 2.5.
@@ -55,6 +56,7 @@ export default function Studio() {
   const [voiceOn, setVoiceOn] = createSignal(false)
   const [voiceHeard, setVoiceHeard] = createSignal("")
   const [hasVoice, setHasVoice] = createSignal(false)
+  const [showOnboarding, setShowOnboarding] = createSignal(false)
   // Mode/URL are only switchable between sessions.
   const modeLocked = () => status() !== "idle" && status() !== "error"
 
@@ -65,6 +67,7 @@ export default function Studio() {
     const savedStory = localStorage.getItem(STORY_WS_URL_KEY)
     if (savedStory) setStoryWsUrl(savedStory)
     setHasVoice(voiceSupported())
+    if (localStorage.getItem("studio.onboarded") !== "1") setShowOnboarding(true)
     // On phones the natural subject is the world, not the selfie — default to
     // the back camera (and no mirror; mirroring a back camera reads backwards).
     if (/Mobi|Android|iPhone|iPad/i.test(navigator.userAgent)) {
@@ -72,6 +75,12 @@ export default function Studio() {
       setMirror(false)
     }
   })
+
+  function finishOnboarding(pick?: OnboardingChoice) {
+    localStorage.setItem("studio.onboarded", "1")
+    setShowOnboarding(false)
+    if (pick && !modeLocked()) setMode(pick)
+  }
 
   function switchFacing(next: Facing) {
     setFacing(next)
@@ -410,9 +419,13 @@ export default function Studio() {
   return (
     <main class={`studio ${mode() !== "lucy" ? "open" : ""}`}>
       <style>{CSS}</style>
+      <Show when={showOnboarding()}>
+        <Onboarding onDone={finishOnboarding} />
+      </Show>
       <header>
         <h1>
           studio <span class="tag">real-time</span>
+          <button class="help" title="how this works" onClick={() => setShowOnboarding(true)}>?</button>
         </h1>
         <p>
           Point your camera, describe the edit, watch it transform live.
@@ -581,6 +594,9 @@ const CSS = `
     max-width: 1100px; margin: 0 auto; padding: 28px 20px 48px; color: var(--text);
     font-family: system-ui,-apple-system,sans-serif; }
   .studio header h1 { font-size: 34px; margin: 0 0 4px; display:flex; align-items:center; gap:12px; }
+  .studio .help { width:26px; height:26px; border-radius:50%; padding:0; font-size:14px; color:#8a96a3;
+    background:transparent; border:1px solid #232b35; line-height:1; }
+  .studio .help:hover { color:#6ea8fe; border-color:#6ea8fe; }
   .studio .tag { font-size:12px; color:var(--accent); border:1px solid var(--border); border-radius:999px; padding:3px 10px; font-weight:500; }
   .studio header p { color: var(--dim); margin: 0 0 20px; line-height:1.5; }
   .studio .hint { font-size:13px; opacity:.75; }

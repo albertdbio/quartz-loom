@@ -561,6 +561,11 @@ def build_report() -> dict[str, Any]:
     summary_by_run = {row["run"]: row for row in series_summary}
     low_lambda = summary_by_run["fnorm_lam0p05"]
     high_lambda = summary_by_run["fnorm_lam0p2"]
+    raw_step_50 = next(
+        row
+        for row in trajectory_by_run["raw_sgmd_lam0p1"]
+        if row["checkpoint"] == 50
+    )
     report = {
         "aggregation_policy": {
             "degraded_count": (
@@ -575,6 +580,10 @@ def build_report() -> dict[str, Any]:
                 "Mean only status=scored cells with camera_compensated=true. Screen-space "
                 "fallbacks, errors, invalid cells, and holes are excluded, never zero-filled."
             ),
+            "rounding": (
+                "Aggregate means use the exact six-decimal cell values and decimal "
+                "round-to-nearest, ties-to-even at six places."
+            ),
         },
         "conclusions": {
             "lambda_answer": (
@@ -583,7 +592,8 @@ def build_report() -> dict[str, Any]:
                 f"it averages {low_lambda['pooled_mean_displacement']:.6f} motion and "
                 f"{low_lambda['pooled_mean_coherence']:.6f} coherence across all 20 cells. "
                 f"Lambda=0.2 averages {high_lambda['pooled_mean_displacement']:.6f} motion "
-                "across the same 15 compensated-cell coverage and "
+                "across its own 15 compensated cells (equal count but unequal prompt/step "
+                "membership) and "
                 f"{high_lambda['pooled_mean_coherence']:.6f} coherence across all 20 cells, finishing at "
                 "1.693540 / 7.403891 with zero degraded cells."
             ),
@@ -601,7 +611,8 @@ def build_report() -> dict[str, Any]:
             ),
             "raw_sgmd": (
                 "Raw SGMD has one compensated cell at step 25 (the vehicle at 2.030809) and "
-                "three degraded cells; by step 50 its compensated mean is 0.224815 while "
+                "three degraded cells; by step 50 its compensated mean is "
+                f"{raw_step_50['mean_displacement']:.6f} while "
                 "coherence rises to 6.871822. It does not trace a stable top-right path."
             ),
             "scope_caveat": (
@@ -649,7 +660,8 @@ def markdown(report: dict[str, Any]) -> str:
         "All motion means below use camera-compensated cells only. A `*` marks a "
         "screen-space-only displacement diagnostic; starred cells are counted separately "
         "and excluded from motion means. Coherence remains independently usable. Errors and "
-        "holes are never zero-filled.",
+        "holes are never zero-filled. Aggregate means use decimal round-to-nearest, "
+        "ties-to-even at six places.",
         "",
         "## Cross-check",
         "",
