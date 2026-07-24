@@ -38,6 +38,13 @@ const PRESETS: ReadonlyArray<{ label: string; prompt: string }> = [
   { label: "Underwater", prompt: "Submerge the scene underwater with caustic light rays, drifting bubbles, and a teal ocean tint." },
 ]
 
+/** Thrown by connectApi when the server answers 402 — handled as UX, not error. */
+class PaywallSignal extends Error {
+  constructor() {
+    super("paywall")
+  }
+}
+
 export default function Studio() {
   let inputVideo: HTMLVideoElement | undefined
   let outputVideo: HTMLVideoElement | undefined
@@ -57,8 +64,79 @@ export default function Studio() {
   const [voiceHeard, setVoiceHeard] = createSignal("")
   const [hasVoice, setHasVoice] = createSignal(false)
   const [showOnboarding, setShowOnboarding] = createSignal(false)
+  // Billing: the hosted-API path is metered — first minute free, then $20/mo.
+  const [plan, setPlan] = createSignal<"loading" | "free" | "pro">("loading")
+  const [remainingFree, setRemainingFree] = createSignal(60)
+  const [freeLeft, setFreeLeft] = createSignal<number | null>(null)
+  const [showPaywall, setShowPaywall] = createSignal(false)
+  const [paywallReason, setPaywallReason] = createSignal<"exhausted" | "time-up">("exhausted")
+  const [notice, setNotice] = createSignal("")
+  let freeTimer: ReturnType<typeof setInterval> | null = null
   // Mode/URL are only switchable between sessions.
+  // (The metered paths are exactly the ones that call connectApi — the free
+  // countdown arms from the mint response, so no separate mode check needed.)
   const modeLocked = () => status() !== "idle" && status() !== "error"
+
+  async function refreshPlan() {
+    try {
+      const res = await fetch("/api/billing/status")
+      if (!res.ok) return
+      const s = (await res.json()) as { plan: "free" | "pro"; remainingSeconds?: number }
+      setPlan(s.plan)
+      if (s.plan === "free") setRemainingFree(s.remainingSeconds ?? 0)
+    } catch {
+      // status is cosmetic — the token route is the real gate
+    }
+  }
+
+  async function subscribe() {
+    try {
+      const res = await fetch("/api/billing/checkout", { method: "POST" })
+      const body = (await res.json()) as { url?: string; error?: string }
+      if (res.ok && body.url) {
+        window.location.href = body.url
+        return
+      }
+      setErr(body.error ?? "could not start checkout")
+    } catch (e) {
+      setErr(e instanceof Error ? e.message : String(e))
+    }
+  }
+
+  async function manageBilling() {
+    try {
+      const res = await fetch("/api/billing/portal", { method: "POST" })
+      const body = (await res.json()) as { url?: string; error?: string }
+      if (res.ok && body.url) {
+        window.location.href = body.url
+        return
+      }
+      setErr(body.error ?? "could not open the billing portal")
+    } catch (e) {
+      setErr(e instanceof Error ? e.message : String(e))
+    }
+  }
+
+  function startFreeCountdown(seconds: number) {
+    setFreeLeft(seconds)
+    freeTimer = setInterval(() => {
+      const left = (freeLeft() ?? 0) - 1
+      setFreeLeft(left)
+      if (left <= 0) {
+        stopFreeCountdown()
+        stop()
+        setPaywallReason("time-up")
+        setShowPaywall(true)
+        void refreshPlan()
+      }
+    }, 1000)
+  }
+
+  function stopFreeCountdown() {
+    if (freeTimer) clearInterval(freeTimer)
+    freeTimer = null
+    setFreeLeft(null)
+  }
 
   onMount(() => {
     // Route SSRs — localStorage exists only client-side.
@@ -73,6 +151,18 @@ export default function Studio() {
     if (/Mobi|Android|iPhone|iPad/i.test(navigator.userAgent)) {
       setFacing("environment")
       setMirror(false)
+    }
+    void refreshPlan()
+    const params = new URLSearchParams(window.location.search)
+    if (params.get("pro") === "1") {
+      setNotice("Welcome to Studio Pro — unlimited sessions are yours. 🎉")
+      history.replaceState(null, "", window.location.pathname)
+    } else if (params.get("checkout") === "cancelled") {
+      setNotice("Checkout cancelled — your free minute is still here when you want it.")
+      history.replaceState(null, "", window.location.pathname)
+    } else if (params.get("checkout") === "failed") {
+      setNotice("We couldn't confirm that payment. If you were charged, contact support.")
+      history.replaceState(null, "", window.location.pathname)
     }
   })
 
@@ -174,11 +264,23 @@ export default function Studio() {
     const { createDecartClient, models } = await import("@decartai/sdk")
     const model = models.realtime("lucy-2.5")
     const res = await fetch("/api/decart/token", { method: "POST" })
+    if (res.status === 402) {
+      setPaywallReason("exhausted")
+      setShowPaywall(true)
+      throw new PaywallSignal()
+    }
     if (!res.ok) {
       const body = await res.text().catch(() => "")
       throw new Error(`token mint failed (${res.status}) ${body}`)
     }
-    const { apiKey } = (await res.json()) as { apiKey: string }
+    const minted = (await res.json()) as { apiKey: string; plan?: "free" | "pro"; freeSeconds?: number }
+    const { apiKey } = minted
+    if (minted.plan === "free") {
+      setPlan("free")
+      startFreeCountdown(minted.freeSeconds ?? 60)
+    } else if (minted.plan === "pro") {
+      setPlan("pro")
+    }
     const client = createDecartClient({ apiKey })
     return client.realtime.connect(input, {
       model,
@@ -311,6 +413,12 @@ export default function Studio() {
       rt = await connectApi(stream, mirror() ? "auto" : false)
       setStatus("live")
     } catch (e) {
+      if (e instanceof PaywallSignal) {
+        // Not an error — the paywall modal is already up.
+        setStatus("idle")
+        stop()
+        return
+      }
       const name = e instanceof Error ? e.name : ""
       const msg =
         name === "NotAllowedError" || name === "SecurityError"
@@ -405,10 +513,12 @@ export default function Studio() {
     }
     rt = null
     stopStoryFeedback()
+    stopFreeCountdown()
     stream?.getTracks().forEach((t) => t.stop())
     stream = null
     editedStream = null
     if (status() === "live") setStatus("idle")
+    void refreshPlan()
   }
 
   onCleanup(() => {
@@ -422,11 +532,67 @@ export default function Studio() {
       <Show when={showOnboarding()}>
         <Onboarding onDone={finishOnboarding} />
       </Show>
+      <Show when={showPaywall()}>
+        <div class="paywall-backdrop" onClick={(e) => e.target === e.currentTarget && setShowPaywall(false)}>
+          <div class="paywall" role="dialog" aria-modal="true" aria-label="Studio Pro">
+            <h2>{paywallReason() === "time-up" ? "Your free minute is up ⏱" : "You've used your free minute"}</h2>
+            <p class="pitch">
+              That was the hosted realtime engine — the smooth one. Keep it running as long as you
+              like with <b>Studio Pro</b>.
+            </p>
+            <div class="price">
+              <span class="amount">$20</span>
+              <span class="per">/month</span>
+            </div>
+            <ul>
+              <li>Unlimited realtime sessions (hosted API engine)</li>
+              <li>All styles + voice-driven story mode</li>
+              <li>Record &amp; download everything you make</li>
+              <li>Cancel anytime in the billing portal</li>
+            </ul>
+            <button class="primary big" onClick={() => void subscribe()}>
+              Subscribe — $20/month
+            </button>
+            <p class="fine">
+              Payments by Stripe. The self-hosted open-model mode stays free — bring your own GPU.
+            </p>
+            <button class="dismiss" onClick={() => setShowPaywall(false)}>
+              not now
+            </button>
+          </div>
+        </div>
+      </Show>
       <header>
         <h1>
           studio <span class="tag">real-time</span>
+          <Show when={plan() === "pro"}>
+            <span class="plan pro" title="Studio Pro — unlimited sessions">PRO</span>
+          </Show>
+          <Show when={plan() === "free"}>
+            <button
+              class="plan free"
+              title="First minute free — subscribe for unlimited"
+              onClick={() => {
+                setPaywallReason("exhausted")
+                setShowPaywall(true)
+              }}
+            >
+              {remainingFree() > 0 ? "free minute available" : "free minute used · go pro"}
+            </button>
+          </Show>
+          <Show when={freeLeft() !== null}>
+            <span class={`plan countdown ${(freeLeft() ?? 0) <= 10 ? "low" : ""}`}>
+              {Math.floor((freeLeft() ?? 0) / 60)}:{String((freeLeft() ?? 0) % 60).padStart(2, "0")} free left
+            </span>
+          </Show>
           <button class="help" title="how this works" onClick={() => setShowOnboarding(true)}>?</button>
+          <Show when={plan() === "pro"}>
+            <button class="manage" onClick={() => void manageBilling()}>manage billing</button>
+          </Show>
         </h1>
+        <Show when={notice()}>
+          <p class="notice">{notice()}</p>
+        </Show>
         <p>
           Point your camera, describe the edit, watch it transform live.
           <br />
@@ -645,6 +811,30 @@ const CSS = `
   .studio .pulse { width:8px; height:8px; border-radius:50%; background:#ff6b6b; flex:0 0 auto;
     animation: studio-pulse 1.2s ease-in-out infinite; }
   @keyframes studio-pulse { 0%,100% { opacity:.35; transform:scale(.85);} 50% { opacity:1; transform:scale(1.15);} }
+  .studio .plan { font-size:11px; border-radius:999px; padding:3px 10px; font-weight:600; letter-spacing:.04em; }
+  .studio .plan.pro { color:#ffd76a; border:1px solid #6b5a23; background:#241d0b; }
+  .studio .plan.free { color:#5ee6a8; border:1px solid #234535; background:#0e1f17; cursor:pointer; font:inherit; font-size:11px; font-weight:600; }
+  .studio .plan.free:hover { border-color:#5ee6a8; }
+  .studio .plan.countdown { color:#6ea8fe; border:1px solid #223349; background:#0e1826; font-variant-numeric:tabular-nums; }
+  .studio .plan.countdown.low { color:#ff8a8a; border-color:#4a2323; background:#241010; }
+  .studio .manage { font-size:11px; color:#8a96a3; background:transparent; border:1px solid #232b35; border-radius:8px; padding:4px 10px; }
+  .studio .manage:hover { color:#6ea8fe; border-color:#6ea8fe; }
+  .studio .notice { color:#5ee6a8; font-size:13px; margin:0 0 10px; }
+  .paywall-backdrop { position:fixed; inset:0; background:rgba(4,6,10,.72); backdrop-filter:blur(4px);
+    display:flex; align-items:center; justify-content:center; z-index:50; padding:20px; }
+  .paywall { background:#12161d; border:1px solid #232b35; border-radius:20px; padding:28px 30px; max-width:420px;
+    width:100%; color:#e8edf2; text-align:center; box-shadow:0 24px 80px rgba(0,0,0,.5); }
+  .paywall h2 { margin:0 0 6px; font-size:22px; }
+  .paywall .pitch { color:#8a96a3; font-size:14px; line-height:1.5; margin:0 0 14px; }
+  .paywall .pitch b { color:#e8edf2; }
+  .paywall .price { display:flex; align-items:baseline; justify-content:center; gap:4px; margin:6px 0 12px; }
+  .paywall .amount { font-size:44px; font-weight:700; color:#6ea8fe; }
+  .paywall .per { color:#8a96a3; }
+  .paywall ul { text-align:left; color:#b6c1cc; font-size:13px; line-height:1.9; margin:0 auto 18px; padding-left:22px; max-width:320px; }
+  .paywall .big { width:100%; padding:14px 18px; font-size:15px; border-radius:12px; }
+  .paywall .fine { color:#7d8894; font-size:12px; margin:12px 0 4px; }
+  .paywall .dismiss { background:transparent; border:1px solid #232b35; border-radius:8px; color:#8a96a3; font-size:13px; cursor:pointer; padding:7px 16px; margin-top:4px; }
+  .paywall .dismiss:hover { color:#b6c1cc; border-color:#3a4552; }
   @media (max-width: 760px){
     .studio { padding: 16px 12px 40px; }
     .studio header h1 { font-size: 26px; }

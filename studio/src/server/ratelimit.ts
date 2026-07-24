@@ -8,6 +8,19 @@
  */
 const hits = new Map<string, number[]>()
 
+/**
+ * Client IP for rate-limit keys. Uses the RIGHTMOST x-forwarded-for entry —
+ * the one appended by our own proxy/platform — because the leftmost entries
+ * are client-supplied and spoofable into fresh rate-limit buckets (review
+ * finding). On Vercel/most CDNs the rightmost hop is trustworthy.
+ */
+export function clientIp(request: Request): string {
+  const xff = request.headers.get("x-forwarded-for")
+  if (!xff) return "local"
+  const parts = xff.split(",").map((p) => p.trim()).filter(Boolean)
+  return parts[parts.length - 1] ?? "local"
+}
+
 export function rateLimit(key: string, max: number, windowMs: number): boolean {
   const now = Date.now()
   const recent = (hits.get(key) ?? []).filter((t) => now - t < windowMs)

@@ -1,13 +1,15 @@
 import "dotenv/config"
 import { Layer, ManagedRuntime } from "effect"
+import { Billing } from "./billing"
 import { DecartRealtime } from "./decart"
 
 /**
- * Server-only Effect runtime for studio. Only the Decart realtime-token service
- * is needed; a missing DECART_API_KEY surfaces as a ConfigError when the
- * /api/decart/token route is first used. `dotenv/config` loads `.env` in dev.
+ * Server-only Effect runtime for studio: Decart realtime-token minting plus
+ * Stripe billing. Both resolve their config PER CALL, so missing env
+ * (DECART_API_KEY / STRIPE_SECRET_KEY / STRIPE_PRICE_ID) only fails the routes
+ * that need it, not the whole runtime. `dotenv/config` loads `.env` in dev.
  */
-const AppLayer = Layer.mergeAll(DecartRealtime.layer)
+const AppLayer = Layer.mergeAll(DecartRealtime.layer, Billing.layer)
 
 export const runtime = ManagedRuntime.make(AppLayer)
 
