@@ -1,4 +1,14 @@
 import { createSignal, For, onCleanup, onMount, Show } from "solid-js"
+import WandOnboarding from "~/components/wand-onboarding"
+import {
+  loadProfile,
+  rankSpells,
+  saveProfile,
+  SPELLS,
+  personalLine,
+  starterSpellIndex,
+  type WandProfile,
+} from "~/lib/spells"
 
 /**
  * magic wand ✨ — touch anything, transform it.
@@ -15,77 +25,6 @@ import { createSignal, For, onCleanup, onMount, Show } from "solid-js"
  */
 type Status = "idle" | "connecting" | "live" | "error"
 
-interface Spell {
-  readonly emoji: string
-  readonly name: string
-  readonly prompt: string
-}
-
-const SPELL_BASE =
-  "Magic touch effect, one continuous photoreal camera shot: any object the person's hand " +
-  "or handheld wand touches instantly transforms, the transformation spreading outward from " +
-  "exactly the point of contact. Everything not yet touched stays completely photorealistic " +
-  "and unchanged, with consistent real-world lighting and contact shadows. "
-
-const SPELLS: ReadonlyArray<Spell> = [
-  {
-    emoji: "🏆",
-    name: "Midas",
-    prompt: SPELL_BASE +
-      "Touched objects turn into solid gleaming gold with mirror-like reflections, tiny golden " +
-      "sparkles bursting from the contact point.",
-  },
-  {
-    emoji: "❄️",
-    name: "Frost",
-    prompt: SPELL_BASE +
-      "Touched objects freeze into crystalline blue ice, frost crystals crawling outward from the " +
-      "fingertip, a wisp of cold mist rising.",
-  },
-  {
-    emoji: "🌸",
-    name: "Bloom",
-    prompt: SPELL_BASE +
-      "Touched objects burst into blooming flowers, moss and lush green vines spreading from the " +
-      "touch point, petals drifting off gently.",
-  },
-  {
-    emoji: "🧸",
-    name: "Toy",
-    prompt: SPELL_BASE +
-      "Touched objects become glossy plastic toy versions of themselves with bright saturated " +
-      "colors, smooth simplified shapes, and molded seams.",
-  },
-  {
-    emoji: "🕹️",
-    name: "8-bit",
-    prompt: SPELL_BASE +
-      "Touched objects turn into chunky 8-bit voxel pixel art with a limited retro palette, " +
-      "little pixel particles scattering from the contact point.",
-  },
-  {
-    emoji: "👻",
-    name: "Spectral",
-    prompt: SPELL_BASE +
-      "Touched objects become translucent glowing ghost versions of themselves, ethereal cyan " +
-      "wisps curling away from the contact point.",
-  },
-  {
-    emoji: "🍬",
-    name: "Candy",
-    prompt: SPELL_BASE +
-      "Touched objects turn into glossy candy — striped sugar, gumdrop textures, dripping " +
-      "frosting — with a sugary sparkle at the contact point.",
-  },
-  {
-    emoji: "✏️",
-    name: "Sketch",
-    prompt: SPELL_BASE +
-      "Touched objects become hand-drawn pencil sketches of themselves, cross-hatched shading on " +
-      "white paper texture, graphite dust puffing from the contact point.",
-  },
-]
-
 export default function Wand() {
   let outputVideo: HTMLVideoElement | undefined
   let pipVideo: HTMLVideoElement | undefined
@@ -101,6 +40,18 @@ export default function Wand() {
   // z-index, burying the generated stream. The magic reads better without it
   // anyway — you can see reality with your own eyes.
   const [showPip, setShowPip] = createSignal(false)
+  // Onboarding answers re-rank the deck and choose the opening spell, so the
+  // questions visibly pay off instead of being a survey.
+  const [profile, setProfile] = createSignal<WandProfile | null>(null)
+  const [showOnboarding, setShowOnboarding] = createSignal(false)
+  const deck = () => {
+    const p = profile()
+    return p ? rankSpells(SPELLS, p.goal) : SPELLS
+  }
+  const intro = () => {
+    const p = profile()
+    return p ? personalLine(p.craft, p.goal, deck()[0]?.name ?? "") : ""
+  }
 
   let rt: any = null
   let stream: MediaStream | null = null
@@ -114,7 +65,25 @@ export default function Wand() {
       .then((r) => (r.ok ? r.json() : null))
       .then((s: { plan: "free" | "pro" } | null) => s && setPlan(s.plan))
       .catch(() => {})
+    const saved = loadProfile()
+    if (saved) setProfile(saved)
+    else setShowOnboarding(true)
   })
+
+  function finishOnboarding(p?: WandProfile) {
+    setShowOnboarding(false)
+    if (!p) return
+    setProfile(p)
+    saveProfile(p)
+    setSpell(starterSpellIndex(deck(), p.goal))
+    // Fire-and-forget: two enum answers, no identifiers, so the founder can
+    // see what people come here to make. Never blocks the experience.
+    void fetch("/api/profile", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ craft: p.craft, goal: p.goal }),
+    }).catch(() => {})
+  }
 
   function stopCountdown() {
     if (freeTimer) clearInterval(freeTimer)
@@ -185,7 +154,7 @@ export default function Wand() {
             void outputVideo.play().catch(() => {})
           }
         },
-        initialState: { prompt: { text: SPELLS[spell()]!.prompt, enhance: true } },
+        initialState: { prompt: { text: deck()[spell()]!.prompt, enhance: true } },
       })
       setStatus("live")
       if (minted.plan === "free") {
@@ -225,7 +194,7 @@ export default function Wand() {
     setSpell(i)
     if (!rt) return
     try {
-      await rt.set({ prompt: SPELLS[i]!.prompt })
+      await rt.set({ prompt: deck()[i]!.prompt })
     } catch (e) {
       setErr(e instanceof Error ? e.message : String(e))
     }
@@ -277,6 +246,10 @@ export default function Wand() {
     <main class="wand">
       <style>{CSS}</style>
 
+      <Show when={showOnboarding()}>
+        <WandOnboarding onDone={finishOnboarding} />
+      </Show>
+
       {/* the stage: generated stream, edge to edge */}
       <video ref={outputVideo} class="stage" autoplay playsinline muted />
       <video ref={pipVideo} class="pip" classList={{ hidden: !showPip() }} autoplay playsinline muted />
@@ -315,6 +288,9 @@ export default function Wand() {
               Point the camera at the world, hold out your hand — or grab a pencil as your wand —
               and <b>touch something</b>.
             </p>
+            <Show when={intro()}>
+              <p class="intro">{intro()}</p>
+            </Show>
             <button class="cta" onClick={start}>begin ✨</button>
             <Show when={plan() === "free"}>
               <p class="free-hint">first minute free · then $20/mo</p>
@@ -329,7 +305,7 @@ export default function Wand() {
       {/* bottom chrome — spells + stop, inset off the home indicator */}
       <div class="bottom">
         <div class="spells">
-          <For each={SPELLS}>
+          <For each={deck()}>
             {(s, i) => (
               <button
                 class={`spell ${spell() === i() ? "on" : ""}`}
@@ -422,6 +398,7 @@ const CSS = `
     box-shadow:0 8px 34px rgba(127,106,255,.5); }
   .wand .cta:active { transform:scale(.98); }
   .wand .free-hint { color:var(--dim); font-size:12px; margin:0; }
+  .wand .intro { margin:0; color:var(--gold); font-size:13.5px; line-height:1.5; max-width:340px; }
 
   /* bottom chrome */
   .wand .bottom { position:absolute; left:0; right:0; bottom:0; z-index:6;

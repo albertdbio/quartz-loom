@@ -3,6 +3,7 @@
     "name": "Magic Wand",
     "slug": "magic-wand",
     "version": "1.0.0",
+    "description": "Touch anything, transform it. Point your camera at the real world and watch whatever you touch turn to gold, ice, pixels, or paint — live.",
     "orientation": "portrait",
     "userInterfaceStyle": "dark",
     "backgroundColor": "#07070d",
