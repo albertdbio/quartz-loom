@@ -1,0 +1,38 @@
+{
+  "expo": {
+    "name": "Magic Wand",
+    "slug": "magic-wand",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "userInterfaceStyle": "dark",
+    "backgroundColor": "#07070d",
+    "splash": {
+      "backgroundColor": "#07070d"
+    },
+    "ios": {
+      "bundleIdentifier": "video.realtime.magicwand",
+      "infoPlist": {
+        "NSCameraUsageDescription": "Magic Wand uses the camera so the things you touch can transform live.",
+        "NSMicrophoneUsageDescription": "Magic Wand can use the microphone for voice-cast spells.",
+        "NSAppTransportSecurity": {
+          "NSAllowsLocalNetworking": true
+        }
+      }
+    },
+    "android": {
+      "package": "video.realtime.magicwand",
+      "permissions": [
+        "android.permission.CAMERA",
+        "android.permission.RECORD_AUDIO",
+        "android.permission.INTERNET",
+        "android.permission.MODIFY_AUDIO_SETTINGS"
+      ],
+      "adaptiveIcon": {
+        "backgroundColor": "#07070d"
+      }
+    },
+    "extra": {
+      "wandUrl": "https://studio-wand.vercel.app/wand"
+    }
+  }
+}
