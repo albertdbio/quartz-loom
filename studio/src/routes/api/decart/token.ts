@@ -14,6 +14,7 @@ import { errorJson } from "~/server/http"
 import { jsonWithCookies, paymentsEnabled, resolvePlan } from "~/server/plan"
 import { clientIp, rateLimit } from "~/server/ratelimit"
 import { runtime } from "~/server/runtime"
+import { grantSession } from "~/server/usage"
 
 /**
  * Mint a short-lived Decart realtime token for one browser studio session.
@@ -38,9 +39,32 @@ export async function POST(event: APIEvent): Promise<Response> {
       const plan = yield* resolvePlan(event.request)
       const decart = yield* DecartRealtime
 
-      if (plan.plan === "pro" || plan.plan === "member") {
+      if (plan.plan === "pro") {
         const apiKey = yield* decart.mintToken()
-        return jsonWithCookies({ apiKey, plan: plan.plan }, plan.setCookies)
+        return jsonWithCookies({ apiKey, plan: "pro" }, plan.setCookies)
+      }
+
+      if (plan.plan === "member") {
+        // Draw this session from the monthly budget BEFORE minting: the mint is
+        // the metering event, so a client that never reports back has still
+        // paid for what it was granted.
+        const grant = yield* Effect.sync(() => grantSession(plan.pid))
+        if (grant.granted <= 0) {
+          return jsonWithCookies(
+            {
+              error: "you've used this month's minutes — they reset on the 1st",
+              quota: true,
+              remainingSeconds: 0,
+            },
+            plan.setCookies,
+            402,
+          )
+        }
+        const apiKey = yield* decart.mintToken()
+        return jsonWithCookies(
+          { apiKey, plan: "member", freeSeconds: grant.granted, remainingSeconds: grant.remaining },
+          plan.setCookies,
+        )
       }
 
       if (plan.remaining <= 0) {

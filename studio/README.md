@@ -73,6 +73,23 @@ Entitlement ladder: **owner → pro (Stripe) → member (phone-verified) → ano
 Flipping the flag needs no code change; the Stripe paths stay built and tested
 either way.
 
+### What a member gets
+
+`MEMBER_MONTHLY_SECONDS` (default 1200 = 20 min) is drawn down `SESSION_SECONDS`
+(default 120) at a time. The budget is spent **at grant time**, exactly like the
+anonymous free minute — the mint is the metering event, so closing the tab or
+killing the app can't buy free seconds back. The last grant of a month is
+partial rather than refused, and quotas reset on the 1st (UTC).
+
+Uncapped members were the single largest exposure with payments off: the engine
+bills per second of active generation, so "unlimited" meant an unbounded bill
+with no revenue against it.
+
+The wand runs **`lucy-restyle-2`**, not `lucy-2.5` — same vendor and quality
+tier, literally the "realtime style transfer" model, at half the per-second
+price. Verify any model swap against the pricing page: the realtime and batch
+rates differ, and the batch number is the one that looks authoritative.
+
 ### How the login works
 
 1. `POST /api/auth/sms/start` `{phone}` → normalizes to E.164, texts a 6-digit

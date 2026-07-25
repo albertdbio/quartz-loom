@@ -24,6 +24,13 @@ import {
  * Billing rides the same gated /api/decart/token mint as the studio: first
  * minute free (server-burned), then Studio Pro. See server/plan.ts.
  */
+/**
+ * The wand is a restyle product, so it runs Decart's restyle model: same
+ * vendor and quality tier as lucy-2.5 at half the per-second price, which is
+ * the difference between a viable free tier and a money incinerator.
+ */
+const REALTIME_MODEL = "lucy-restyle-2"
+
 type Status = "idle" | "connecting" | "live" | "error"
 
 export default function Wand() {
@@ -38,6 +45,8 @@ export default function Wand() {
   const [freeLeft, setFreeLeft] = createSignal<number | null>(null)
   const [showPaywall, setShowPaywall] = createSignal(false)
   const [paywallReason, setPaywallReason] = createSignal<"exhausted" | "time-up">("exhausted")
+  const [memberLeft, setMemberLeft] = createSignal<number | null>(null)
+  const [quotaSpent, setQuotaSpent] = createSignal(false)
   // Raw-camera PiP is OFF by default: on iOS WKWebView a <video> playing a
   // local capture stream composites ABOVE other video layers regardless of
   // z-index, burying the generated stream. The magic reads better without it
@@ -67,9 +76,14 @@ export default function Wand() {
     try {
       const res = await fetch("/api/billing/status")
       if (!res.ok) return
-      const st = (await res.json()) as { plan: "free" | "pro" | "member"; paymentsEnabled?: boolean }
+      const st = (await res.json()) as {
+        plan: "free" | "pro" | "member"
+        paymentsEnabled?: boolean
+        remainingSeconds?: number
+      }
       setPlan(st.plan)
       setPayments(st.paymentsEnabled === true)
+      if (st.plan === "member") setMemberLeft(st.remainingSeconds ?? null)
     } catch {
       // status is cosmetic — the token route is the real gate
     }
@@ -117,8 +131,13 @@ export default function Wand() {
       setFreeLeft(left)
       if (left <= 0) {
         stop()
-        setPaywallReason("time-up")
-        setShowPaywall(true)
+        if (plan() === "member") {
+          // a session ended; whether they can start another is the balance's call
+          if ((memberLeft() ?? 0) <= 0) setQuotaSpent(true)
+        } else {
+          setPaywallReason("time-up")
+          setShowPaywall(true)
+        }
       }
     }, 1000)
   }
@@ -149,16 +168,27 @@ export default function Wand() {
     setStatus("connecting")
     try {
       const { createDecartClient, models } = await import("@decartai/sdk")
-      const model = models.realtime("lucy-2.5")
+      const model = models.realtime(REALTIME_MODEL)
       const res = await fetch("/api/decart/token", { method: "POST" })
       if (res.status === 402) {
-        setPaywallReason("exhausted")
-        setShowPaywall(true)
+        const denial = (await res.json().catch(() => ({}))) as { quota?: boolean }
+        if (denial.quota) {
+          setQuotaSpent(true)
+          setMemberLeft(0)
+        } else {
+          setPaywallReason("exhausted")
+          setShowPaywall(true)
+        }
         setStatus("idle")
         return
       }
       if (!res.ok) throw new Error(`could not start (${res.status})`)
-      const minted = (await res.json()) as { apiKey: string; plan?: "free" | "pro" | "member"; freeSeconds?: number }
+      const minted = (await res.json()) as {
+        apiKey: string
+        plan?: "free" | "pro" | "member"
+        freeSeconds?: number
+        remainingSeconds?: number
+      }
 
       // Rear camera by default — magic wand is a walk-around-and-touch toy.
       stream = await navigator.mediaDevices.getUserMedia({
@@ -191,8 +221,12 @@ export default function Wand() {
       if (minted.plan === "free") {
         setPlan("free")
         startCountdown(minted.freeSeconds ?? 60)
-      } else if (minted.plan === "pro" || minted.plan === "member") {
-        setPlan(minted.plan)
+      } else if (minted.plan === "member") {
+        setPlan("member")
+        setMemberLeft(minted.remainingSeconds ?? null)
+        startCountdown(minted.freeSeconds ?? 120)
+      } else if (minted.plan === "pro") {
+        setPlan("pro")
       }
     } catch (e) {
       const name = e instanceof Error ? e.name : ""
@@ -290,7 +324,13 @@ export default function Wand() {
         <h1>
           magic wand <span class="sparkle">✨</span>
           <Show when={plan() === "pro" || plan() === "member"}>
-            <span class="pro">{plan() === "pro" ? "PRO" : "✓"}</span>
+            <span class="pro">
+              {plan() === "pro"
+                ? "PRO"
+                : memberLeft() === null
+                  ? "✓"
+                  : `${Math.ceil((memberLeft() ?? 0) / 60)}m left`}
+            </span>
             <button class="signout" onClick={() => void signOut()} title="sign out">
               sign out
             </button>
@@ -362,6 +402,18 @@ export default function Wand() {
         </Show>
       </div>
 
+      <Show when={quotaSpent()}>
+        <div class="pw-backdrop" onClick={(e) => e.target === e.currentTarget && setQuotaSpent(false)}>
+          <div class="pw" role="dialog" aria-modal="true" aria-label="monthly limit">
+            <h2>That's this month's magic ✨</h2>
+            <p>
+              You've used your minutes for the month. They reset on the 1st — and
+              we're working on more.
+            </p>
+            <button class="dismiss" onClick={() => setQuotaSpent(false)}>ok</button>
+          </div>
+        </div>
+      </Show>
       <Show when={showPaywall() && !payments()}>
         <SmsSignIn
           reason={paywallReason()}
