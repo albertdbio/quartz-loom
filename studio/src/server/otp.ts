@@ -17,6 +17,9 @@ import { EncryptJWT, jwtDecrypt } from "jose"
  * itself), matching the entitlement model the rest of the app already uses.
  */
 
+/** Cookie holding the encrypted login challenge. */
+export const CHALLENGE_COOKIE = "studio_otp"
+
 export const CODE_LENGTH = 6
 export const CHALLENGE_TTL_SECONDS = 10 * 60
 

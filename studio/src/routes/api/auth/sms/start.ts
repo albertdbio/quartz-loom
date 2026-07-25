@@ -3,13 +3,17 @@ import { Effect, Redacted, Schema } from "effect"
 import { SessionSecretConfig } from "~/server/billing"
 import { cookieHeader, requestIsSecure } from "~/server/entitlement"
 import { decodeBody, errorJson } from "~/server/http"
-import { CHALLENGE_TTL_SECONDS, generateCode, normalizePhone, sealChallenge } from "~/server/otp"
+import {
+  CHALLENGE_COOKIE,
+  CHALLENGE_TTL_SECONDS,
+  generateCode,
+  normalizePhone,
+  sealChallenge,
+} from "~/server/otp"
 import { jsonWithCookies } from "~/server/plan"
 import { clientIp, rateLimit } from "~/server/ratelimit"
 import { runtime } from "~/server/runtime"
 import { otpMessage, Sms } from "~/server/sms"
-
-export const CHALLENGE_COOKIE = "studio_otp"
 
 const Body = Schema.Struct({ phone: Schema.String })
 

@@ -10,12 +10,11 @@ import {
   UID_MAX_AGE,
 } from "~/server/entitlement"
 import { decodeBody, errorJson } from "~/server/http"
-import { codeMatches, openChallenge, phoneId } from "~/server/otp"
+import { CHALLENGE_COOKIE, codeMatches, openChallenge, phoneId } from "~/server/otp"
 import { jsonWithCookies } from "~/server/plan"
 import { clientIp, rateLimit } from "~/server/ratelimit"
 import { runtime } from "~/server/runtime"
 import { recordSignIn } from "~/server/subscribers"
-import { CHALLENGE_COOKIE } from "../sms/start"
 
 const Body = Schema.Struct({
   code: Schema.String,
