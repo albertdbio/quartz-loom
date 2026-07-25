@@ -63,6 +63,18 @@ export default function Wand() {
   let chunks: Blob[] = []
   let freeTimer: ReturnType<typeof setInterval> | null = null
 
+  async function refreshPlan() {
+    try {
+      const res = await fetch("/api/billing/status")
+      if (!res.ok) return
+      const st = (await res.json()) as { plan: "free" | "pro" | "member"; paymentsEnabled?: boolean }
+      setPlan(st.plan)
+      setPayments(st.paymentsEnabled === true)
+    } catch {
+      // status is cosmetic — the token route is the real gate
+    }
+  }
+
   onMount(() => {
     void fetch("/api/billing/status")
       .then((r) => (r.ok ? r.json() : null))
@@ -109,6 +121,16 @@ export default function Wand() {
         setShowPaywall(true)
       }
     }, 1000)
+  }
+
+  async function signOut() {
+    try {
+      await fetch("/api/auth/logout", { method: "POST" })
+    } catch {
+      // best effort — the cookies are cleared server-side or not at all
+    }
+    setPlan("free")
+    await refreshPlan()
   }
 
   async function subscribe() {
@@ -269,6 +291,9 @@ export default function Wand() {
           magic wand <span class="sparkle">✨</span>
           <Show when={plan() === "pro" || plan() === "member"}>
             <span class="pro">{plan() === "pro" ? "PRO" : "✓"}</span>
+            <button class="signout" onClick={() => void signOut()} title="sign out">
+              sign out
+            </button>
           </Show>
         </h1>
         <div class="top-right">
@@ -399,6 +424,10 @@ const CSS = `
   .wand .chip.countdown.low { color:var(--err); border-color:rgba(255,107,138,.5); }
   .wand .chip.rec { color:#ff8aa5; }
   .wand .chip.rec.on { background:rgba(90,18,36,.8); color:#ff6b8a; border-color:#ff6b8a; }
+  .wand .signout { font-size:10px; color:var(--dim); background:rgba(10,8,20,.55);
+    border:1px solid rgba(255,255,255,.14); border-radius:999px; padding:4px 9px; cursor:pointer;
+    font-family:inherit; }
+  .wand .signout:hover { color:var(--text); }
   .wand .pro { font-size:10px; color:var(--gold); border:1px solid rgba(255,215,106,.45);
     background:rgba(60,45,10,.6); border-radius:999px; padding:2px 8px; font-weight:800; }
 

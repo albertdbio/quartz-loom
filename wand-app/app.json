@@ -21,7 +21,8 @@
         "NSAppTransportSecurity": {
           "NSAllowsLocalNetworking": true
         }
-      }
+      },
+      "appleTeamId": "THRN2A465Z"
     },
     "android": {
       "package": "video.realtime.magicwand",
