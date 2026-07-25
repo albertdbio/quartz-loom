@@ -60,6 +60,72 @@ Setup:
 node scripts/stripe-bootstrap.mjs   # prints STRIPE_PRICE_ID= for .env
 ```
 
+## Phone sign-in (the MVP gate)
+
+`PAYMENTS_ENABLED` decides what a spent free minute costs you:
+
+| flag | anonymous | after the free minute |
+|---|---|---|
+| `false` (MVP default) | 60s free | **sign in with a phone number → unlimited** |
+| `true` | 60s free | Stripe paywall, $20/month |
+
+Entitlement ladder: **owner → pro (Stripe) → member (phone-verified) → anonymous**.
+Flipping the flag needs no code change; the Stripe paths stay built and tested
+either way.
+
+### How the login works
+
+1. `POST /api/auth/sms/start` `{phone}` → normalizes to E.164, texts a 6-digit
+   code, and sets `studio_otp` — an **encrypted (JWE/A256GCM)** cookie.
+2. `POST /api/auth/sms/verify` `{code, marketingConsent}` → sets `studio_uid`
+   (a signed cookie holding an HMAC pseudonym, never the number) and records
+   the subscriber.
+3. `POST /api/auth/logout` → drops `studio_uid`.
+
+**Why the challenge cookie is encrypted rather than signed** — the one thing
+not to "simplify" later: that cookie lands in the browser of whoever *started*
+the login, who may have typed someone else's number. A signed-but-readable
+payload would hand them the code that was texted to the victim (or a 6-digit
+hash they could brute-force offline in milliseconds). `test/otp.test.ts`
+asserts the code and phone never appear in the token or its base64 segments.
+
+Verify attempts are capped per IP, because a counter inside the cookie can't be
+trusted — a client can replay an older copy to reset it. A shared store (Redis)
+is the upgrade when this runs on more than one box.
+
+### Twilio setup — reuse mochi's brand AND campaign
+
+The account's A2P registration already covers this app; **do not register a new
+campaign**:
+
+- Brand: `APPROVED` / `VETTED_VERIFIED`
+- Campaign `QE2c6890da8086d771620e9b13fadeba0b` on messaging service
+  `MGe0a8243a58c015290a6d6a308e2675b2`: **MIXED**, `VERIFIED`, described as
+  "one-time passcodes, notifications, updates", with the registered sample
+  **"Your one-time passcode is 123456."** — our OTP is exactly that content.
+
+What this app needs is its **own sender number attached to that same campaign**.
+Both existing numbers are already answering as mochi personas and their inbound
+webhooks point at mochi's agent, so sharing one would route a Magic Wand user's
+"STOP" into a conversation with a different product. This app is outbound-only
+(the code is typed into the app, never replied to), so it needs no inbound
+webhook at all — Twilio answers STOP/HELP on the number itself.
+
+Set `TWILIO_ACCOUNT_SID`, `TWILIO_API_KEY_SID`, `TWILIO_API_KEY_SECRET` (same
+account as mochi/core) and `TWILIO_FROM_NUMBER` (the new number).
+
+### The engagement list
+
+`server/subscribers.ts` keeps one `node:sqlite` file (`SUBSCRIBERS_DB`): a row
+per signed-in pseudonym, and the **dialable number only while marketing consent
+stands** — withdrawing consent nulls it, so the store can't outlive permission.
+The consent box is unticked, labelled "not required to sign in", names the
+sender, and states frequency plus HELP/STOP (CTIA).
+
+Before any promotional send, update the campaign's description/samples to cover
+marketing content — today they describe only passcodes/notifications/updates,
+and carriers audit traffic against what's registered.
+
 ### Owner bypass (unlimited, no Stripe)
 
 Set `OWNER_KEY` in `.env` (`openssl rand -hex 24`), then visit once per
