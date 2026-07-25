@@ -92,7 +92,16 @@ Stripe webhooks + a shared store.
 ## Security and cost
 
 The token endpoint is IP rate-limited AND billing-gated (above). Keep the
-permanent Decart API key server-side and monitor session creation and duration
-— each hosted realtime session is paid usage at **$0.04 per second**, so the
-$20/month price assumes typical creative-session volumes, not 24/7 streaming;
-add hard monthly caps before scaling.
+permanent Decart API key server-side and monitor session creation and duration.
+
+**Cost of a session (Decart pricing, verified 2026-07):** the *realtime* API
+bills per second of active generation — `lucy-2.5` (what we ship) at
+**$0.02/sec = $1.20/min**, `lucy-restyle-2` at **$0.01/sec = $0.60/min**. The
+$0.04/sec figure is the *batch video* rate and does NOT apply to this app;
+an earlier version of this file quoted it and understated nothing — it
+overstated cost by 2×, but the correction matters in both directions.
+
+**The $20/month plan is therefore capacity-limited, not unlimited-safe:** at
+$1.20/min it goes underwater past **~16 minutes/user/month**, and the free
+minute costs **$1.20 per person who taps begin**. Set a monthly minute cap and
+watch the free-tier burn before any launch that could go viral.

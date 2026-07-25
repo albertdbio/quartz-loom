@@ -11,7 +11,7 @@ import {
   signState,
 } from "~/server/entitlement"
 import { errorJson } from "~/server/http"
-import { jsonWithCookies, resolvePlan } from "~/server/plan"
+import { jsonWithCookies, paymentsEnabled, resolvePlan } from "~/server/plan"
 import { clientIp, rateLimit } from "~/server/ratelimit"
 import { runtime } from "~/server/runtime"
 
@@ -38,17 +38,22 @@ export async function POST(event: APIEvent): Promise<Response> {
       const plan = yield* resolvePlan(event.request)
       const decart = yield* DecartRealtime
 
-      if (plan.plan === "pro") {
+      if (plan.plan === "pro" || plan.plan === "member") {
         const apiKey = yield* decart.mintToken()
-        return jsonWithCookies({ apiKey, plan: "pro" }, plan.setCookies)
+        return jsonWithCookies({ apiKey, plan: plan.plan }, plan.setCookies)
       }
 
       if (plan.remaining <= 0) {
         return jsonWithCookies(
-          {
-            error: "your free minute is used up — Studio Pro is $20/month for unlimited sessions",
-            paywall: true,
-          },
+          paymentsEnabled()
+            ? {
+                error: "your free minute is used up — Studio Pro is $20/month for unlimited sessions",
+                paywall: true,
+              }
+            : {
+                error: "your free minute is used up — sign in with your phone to keep casting",
+                signin: true,
+              },
           plan.setCookies,
           402,
         )

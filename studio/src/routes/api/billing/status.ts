@@ -1,7 +1,7 @@
 import type { APIEvent } from "@solidjs/start/server"
 import { Effect } from "effect"
 import { errorJson } from "~/server/http"
-import { jsonWithCookies, resolvePlan } from "~/server/plan"
+import { jsonWithCookies, paymentsEnabled, resolvePlan } from "~/server/plan"
 import { runtime } from "~/server/runtime"
 
 /** Entitlement snapshot for the studio UI: plan + remaining free seconds. */
@@ -9,9 +9,12 @@ export async function GET(event: APIEvent): Promise<Response> {
   return runtime.runPromise(
     Effect.gen(function* () {
       const plan = yield* resolvePlan(event.request)
-      return plan.plan === "pro"
-        ? jsonWithCookies({ plan: "pro" }, plan.setCookies)
-        : jsonWithCookies({ plan: "free", remainingSeconds: plan.remaining }, plan.setCookies)
+      if (plan.plan === "pro") return jsonWithCookies({ plan: "pro" }, plan.setCookies)
+      if (plan.plan === "member") return jsonWithCookies({ plan: "member" }, plan.setCookies)
+      return jsonWithCookies(
+        { plan: "free", remainingSeconds: plan.remaining, paymentsEnabled: paymentsEnabled() },
+        plan.setCookies,
+      )
     }).pipe(
       Effect.catchTag("StripeError", (e) =>
         Effect.logError(`billing status failed: ${e.message}`).pipe(

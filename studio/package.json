@@ -22,7 +22,8 @@
     "jose": "^6.2.3",
     "livekit-server-sdk": "^2.16.0",
     "marked": "^18.0.6",
-    "solid-js": "^1.9.13"
+    "solid-js": "^1.9.13",
+    "twilio": "^6.0.2"
   },
   "devDependencies": {
     "@solidjs/vite-plugin-nitro-2": "0.3.0",

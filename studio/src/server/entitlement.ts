@@ -20,6 +20,9 @@ import { jwtVerify, SignJWT } from "jose"
 export const FREE_SECONDS = 60
 export const METER_COOKIE = "studio_meter"
 export const SUB_COOKIE = "studio_sub"
+/** Phone-verified identity (carries only the HMAC pseudonym, never the number). */
+export const UID_COOKIE = "studio_uid"
+export const UID_MAX_AGE = 180 * 24 * 60 * 60
 /** Re-check the subscription with Stripe at most this often. */
 export const SUB_REVERIFY_SECONDS = 6 * 60 * 60
 /** Cookie lifetimes: meter ~1 year, sub claim ~35 days (a billing cycle + slack). */
@@ -98,6 +101,19 @@ export async function subFromRequest(request: Request, secret: string): Promise<
   // Clamp: a future `ver` must not be able to defer re-verification.
   const ver = typeof claims.ver === "number" ? Math.min(claims.ver, now) : 0
   return { cus: claims.cus, sub: claims.sub, ver }
+}
+
+export interface UidClaims {
+  readonly pid: string
+}
+
+/** Phone-verified identity from the signed cookie, or null. */
+export async function uidFromRequest(request: Request, secret: string): Promise<UidClaims | null> {
+  const jar = parseCookies(request.headers.get("cookie"))
+  const raw = jar[UID_COOKIE]
+  if (!raw) return null
+  const claims = await readState<Partial<UidClaims>>(raw, secret)
+  return typeof claims?.pid === "string" && claims.pid.length > 0 ? { pid: claims.pid } : null
 }
 
 /** True when the request arrived over HTTPS (directly or via a proxy header). */

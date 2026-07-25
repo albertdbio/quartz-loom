@@ -10,6 +10,7 @@ import {
   SUB_MAX_AGE,
   SUB_REVERIFY_SECONDS,
   subFromRequest,
+  uidFromRequest,
 } from "./entitlement"
 
 /**
@@ -33,8 +34,17 @@ import {
  */
 export const OWNER_SUB = "owner"
 
+/**
+ * Payments switch. While OFF (the MVP default) a phone-verified account is the
+ * entitlement — sign-in, not a card, is what unlocks unlimited use. Flipping it
+ * ON activates the Stripe paths that are already built and tested; nothing else
+ * needs to change.
+ */
+export const paymentsEnabled = (): boolean => process.env["PAYMENTS_ENABLED"] === "true"
+
 export type ResolvedPlan =
   | { readonly plan: "pro"; readonly cus: string; readonly sub: string; readonly setCookies: ReadonlyArray<string> }
+  | { readonly plan: "member"; readonly pid: string; readonly setCookies: ReadonlyArray<string> }
   | { readonly plan: "free"; readonly used: number; readonly remaining: number; readonly setCookies: ReadonlyArray<string> }
 
 export const resolvePlan = (request: Request): Effect.Effect<ResolvedPlan, StripeError, Billing> =>
@@ -81,6 +91,14 @@ export const resolvePlan = (request: Request): Effect.Effect<ResolvedPlan, Strip
         remaining: Math.max(0, FREE_SECONDS - meter.used),
         setCookies: [cookieHeader(SUB_COOKIE, "", 0, secure)],
       } as const
+    }
+
+    // Phone-verified member. With payments off this IS the paid tier; with
+    // payments on it still beats the anonymous meter, so members never fall
+    // back to a 60-second stranger.
+    const uid = yield* Effect.promise(() => uidFromRequest(request, secret))
+    if (uid && !paymentsEnabled()) {
+      return { plan: "member", pid: uid.pid, setCookies: [] } as const
     }
 
     const meter = yield* Effect.promise(() => meterFromRequest(request, secret))

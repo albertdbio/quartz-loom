@@ -21,3 +21,4 @@ android/
 # Pre-upscale generation intermediates (finals are committed)
 post/promo/*-raw.mp4
 post/promo/*-result.json
+.data/

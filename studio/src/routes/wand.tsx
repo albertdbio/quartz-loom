@@ -1,5 +1,6 @@
 import { createSignal, For, onCleanup, onMount, Show } from "solid-js"
 import WandOnboarding from "~/components/wand-onboarding"
+import SmsSignIn from "~/components/sms-signin"
 import {
   loadProfile,
   rankSpells,
@@ -32,9 +33,11 @@ export default function Wand() {
   const [err, setErr] = createSignal("")
   const [spell, setSpell] = createSignal(0)
   const [recording, setRecording] = createSignal(false)
-  const [plan, setPlan] = createSignal<"loading" | "free" | "pro">("loading")
+  const [plan, setPlan] = createSignal<"loading" | "free" | "pro" | "member">("loading")
+  const [payments, setPayments] = createSignal(false)
   const [freeLeft, setFreeLeft] = createSignal<number | null>(null)
   const [showPaywall, setShowPaywall] = createSignal(false)
+  const [paywallReason, setPaywallReason] = createSignal<"exhausted" | "time-up">("exhausted")
   // Raw-camera PiP is OFF by default: on iOS WKWebView a <video> playing a
   // local capture stream composites ABOVE other video layers regardless of
   // z-index, burying the generated stream. The magic reads better without it
@@ -63,7 +66,11 @@ export default function Wand() {
   onMount(() => {
     void fetch("/api/billing/status")
       .then((r) => (r.ok ? r.json() : null))
-      .then((s: { plan: "free" | "pro" } | null) => s && setPlan(s.plan))
+      .then((s: { plan: "free" | "pro" | "member"; paymentsEnabled?: boolean } | null) => {
+        if (!s) return
+        setPlan(s.plan)
+        setPayments(s.paymentsEnabled === true)
+      })
       .catch(() => {})
     const saved = loadProfile()
     if (saved) setProfile(saved)
@@ -98,6 +105,7 @@ export default function Wand() {
       setFreeLeft(left)
       if (left <= 0) {
         stop()
+        setPaywallReason("time-up")
         setShowPaywall(true)
       }
     }, 1000)
@@ -122,12 +130,13 @@ export default function Wand() {
       const model = models.realtime("lucy-2.5")
       const res = await fetch("/api/decart/token", { method: "POST" })
       if (res.status === 402) {
+        setPaywallReason("exhausted")
         setShowPaywall(true)
         setStatus("idle")
         return
       }
       if (!res.ok) throw new Error(`could not start (${res.status})`)
-      const minted = (await res.json()) as { apiKey: string; plan?: string; freeSeconds?: number }
+      const minted = (await res.json()) as { apiKey: string; plan?: "free" | "pro" | "member"; freeSeconds?: number }
 
       // Rear camera by default — magic wand is a walk-around-and-touch toy.
       stream = await navigator.mediaDevices.getUserMedia({
@@ -160,8 +169,8 @@ export default function Wand() {
       if (minted.plan === "free") {
         setPlan("free")
         startCountdown(minted.freeSeconds ?? 60)
-      } else if (minted.plan === "pro") {
-        setPlan("pro")
+      } else if (minted.plan === "pro" || minted.plan === "member") {
+        setPlan(minted.plan)
       }
     } catch (e) {
       const name = e instanceof Error ? e.name : ""
@@ -258,8 +267,8 @@ export default function Wand() {
       <div class="top">
         <h1>
           magic wand <span class="sparkle">✨</span>
-          <Show when={plan() === "pro"}>
-            <span class="pro">PRO</span>
+          <Show when={plan() === "pro" || plan() === "member"}>
+            <span class="pro">{plan() === "pro" ? "PRO" : "✓"}</span>
           </Show>
         </h1>
         <div class="top-right">
@@ -328,7 +337,18 @@ export default function Wand() {
         </Show>
       </div>
 
-      <Show when={showPaywall()}>
+      <Show when={showPaywall() && !payments()}>
+        <SmsSignIn
+          reason={paywallReason()}
+          onDismiss={() => setShowPaywall(false)}
+          onDone={() => {
+            setShowPaywall(false)
+            setPlan("member")
+            void fetch("/api/billing/status")
+          }}
+        />
+      </Show>
+      <Show when={showPaywall() && payments()}>
         <div class="pw-backdrop" onClick={(e) => e.target === e.currentTarget && setShowPaywall(false)}>
           <div class="pw" role="dialog" aria-modal="true" aria-label="Studio Pro">
             <h2>Your free minute of magic is up ✨</h2>

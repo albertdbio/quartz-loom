@@ -2,6 +2,7 @@ import "dotenv/config"
 import { Layer, ManagedRuntime } from "effect"
 import { Billing } from "./billing"
 import { DecartRealtime } from "./decart"
+import { Sms } from "./sms"
 
 /**
  * Server-only Effect runtime for studio: Decart realtime-token minting plus
@@ -9,7 +10,7 @@ import { DecartRealtime } from "./decart"
  * (DECART_API_KEY / STRIPE_SECRET_KEY / STRIPE_PRICE_ID) only fails the routes
  * that need it, not the whole runtime. `dotenv/config` loads `.env` in dev.
  */
-const AppLayer = Layer.mergeAll(DecartRealtime.layer, Billing.layer)
+const AppLayer = Layer.mergeAll(DecartRealtime.layer, Billing.layer, Sms.layer)
 
 export const runtime = ManagedRuntime.make(AppLayer)
 
