@@ -7,8 +7,11 @@
     "orientation": "portrait",
     "userInterfaceStyle": "dark",
     "backgroundColor": "#07070d",
+    "icon": "./assets/icon.png",
     "splash": {
-      "backgroundColor": "#07070d"
+      "image": "./assets/splash-icon.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#0a0714"
     },
     "ios": {
       "bundleIdentifier": "video.realtime.magicwand",
@@ -29,7 +32,8 @@
         "android.permission.MODIFY_AUDIO_SETTINGS"
       ],
       "adaptiveIcon": {
-        "backgroundColor": "#07070d"
+        "foregroundImage": "./assets/adaptive-icon.png",
+        "backgroundColor": "#0a0714"
       }
     },
     "extra": {
