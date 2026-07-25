@@ -1,0 +1,68 @@
+#cloud-config
+# Magic Wand studio box — a thin control plane.
+#
+# It mints Decart tokens, sends sign-in codes, and serves the app. The GPU work
+# happens at Decart, so this box stays small on purpose (see the workspace rule:
+# control planes scale horizontally, never vertically). The ONE thing it holds
+# that can't be rebuilt is the sqlite subscriber/usage file, which is why this
+# is a box with a disk and not a serverless function.
+package_update: true
+package_upgrade: false
+
+packages:
+  - curl
+  - ca-certificates
+  - debian-keyring
+  - debian-archive-keyring
+  - apt-transport-https
+  - git
+  - ufw
+
+users:
+  - name: wand
+    groups: [sudo]
+    shell: /bin/bash
+    sudo: ["ALL=(ALL) NOPASSWD:ALL"]
+    ssh_authorized_keys:
+      - SSH_KEY_PLACEHOLDER
+
+write_files:
+  - path: /etc/systemd/system/wand.service
+    content: |
+      [Unit]
+      Description=Magic Wand studio
+      After=network-online.target
+      Wants=network-online.target
+
+      [Service]
+      Type=simple
+      User=wand
+      WorkingDirectory=/home/wand/app
+      EnvironmentFile=/home/wand/app/.env
+      # Nitro's node-server build; PORT is read from the environment.
+      ExecStart=/usr/bin/node /home/wand/app/.output/server/index.mjs
+      Restart=always
+      RestartSec=3
+      # The sqlite file is the only precious state on this box.
+      ReadWritePaths=/home/wand/app/.data
+
+      [Install]
+      WantedBy=multi-user.target
+
+runcmd:
+  # Node 22 (node:sqlite needs >= 22.5)
+  - curl -fsSL https://deb.nodesource.com/setup_22.x | bash -
+  - apt-get install -y nodejs
+  - npm install -g pnpm@10.17.1
+  # Caddy: automatic Let's Encrypt certs, no cert plumbing to get wrong
+  - curl -1sLf 'https://dl.cloudsmith.io/public/caddy/stable/gpg.key' | gpg --dearmor -o /usr/share/keyrings/caddy-stable-archive-keyring.gpg
+  - curl -1sLf 'https://dl.cloudsmith.io/public/caddy/stable/debian.deb.txt' | tee /etc/apt/sources.list.d/caddy-stable.list
+  - apt-get update
+  - apt-get install -y caddy
+  # Only 22/80/443 reach the internet; the app itself listens on loopback.
+  - ufw allow 22/tcp
+  - ufw allow 80/tcp
+  - ufw allow 443/tcp
+  - ufw --force enable
+  - mkdir -p /home/wand/app/.data
+  - chown -R wand:wand /home/wand
