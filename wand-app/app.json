@@ -3,7 +3,7 @@
     "name": "Magic Wand",
     "slug": "magic-wand",
     "version": "1.0.0",
-    "description": "Touch anything, transform it. Point your camera at the real world and watch whatever you touch turn to gold, ice, pixels, or paint — live.",
+    "description": "Touch anything, transform it. Point your camera at the real world and watch whatever you touch turn to gold, ice, pixels, or paint \u2014 live.",
     "orientation": "portrait",
     "userInterfaceStyle": "dark",
     "backgroundColor": "#07070d",
@@ -38,7 +38,7 @@
       }
     },
     "extra": {
-      "wandUrl": "https://studio-wand.vercel.app/wand"
+      "wandUrl": "https://5-78-89-215.sslip.io/wand"
     }
   }
 }
