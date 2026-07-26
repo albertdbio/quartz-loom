@@ -14,7 +14,7 @@ import {
 } from "~/lib/transforms"
 
 /**
- * mochiverse ✨ — touch anything, transform it.
+ * Mochiverse ✨ — touch anything, transform it.
  *
  * A product skin over the realtime restyle engine (Decart Lucy 2.5): the
  * camera streams full-screen, and a "transform" prompt instructs the model to
@@ -68,7 +68,7 @@ export default function App() {
   // Mochi stands in the scene. Position is a percentage of the stage so she
   // stays put across rotations and resizes; tapping re-places her, which is
   // what makes her feel present rather than pasted on.
-  const [mochiOn, setMochiOn] = createSignal(true)
+  const [mochiOn, setMochiOn] = createSignal(false)
   const [mochiPos, setMochiPos] = createSignal({ x: 78, y: 62 })
   const [mochiMood, setMochiMood] = createSignal<MochiMood>("idle")
   let moodTimer: ReturnType<typeof setTimeout> | null = null
@@ -383,7 +383,7 @@ export default function App() {
       {/* top chrome — floats over the stage, inset out of the notch */}
       <div class="top">
         <h1>
-          mochiverse <span class="sparkle">✨</span>
+          Mochiverse <span class="sparkle">✨</span>
           <Show when={plan() === "pro" || plan() === "member"}>
             <span class="pro">
               {plan() === "pro"
@@ -424,7 +424,7 @@ export default function App() {
       {/* idle / connecting takeover */}
       <Show when={status() !== "live"}>
         <div class="overlay">
-          <Show when={status() !== "connecting"} fallback={<p class="conn">summoning…</p>}>
+          <Show when={status() !== "connecting"} fallback={<p class="conn">warming up…</p>}>
             <h2 class="pitch">Touch anything.<br />Transform it.</h2>
             <p class="howto">
               Point the camera at the world, hold out your hand — or grab a pencil —

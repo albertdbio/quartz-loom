@@ -51,7 +51,7 @@ export default function AppOnboarding(props: Props) {
   }
 
   return (
-    <div class="wonb" role="dialog" aria-modal="true" aria-label="welcome to mochiverse">
+    <div class="wonb" role="dialog" aria-modal="true" aria-label="welcome to Mochiverse">
       <style>{CSS}</style>
 
       <button class="wonb-skip" onClick={() => props.onDone()}>

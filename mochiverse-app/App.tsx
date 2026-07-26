@@ -90,7 +90,7 @@ export default function App() {
       <StatusBar hidden />
       {failed ? (
         <View style={styles.center}>
-          <Text style={styles.title}>mochiverse ✨</Text>
+          <Text style={styles.title}>Mochiverse ✨</Text>
           <Text style={styles.err}>{failed}</Text>
           <Text style={styles.hint} onPress={() => setFailed(null)}>
             tap to retry
