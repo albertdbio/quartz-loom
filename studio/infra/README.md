@@ -1,6 +1,6 @@
 # Deploy
 
-Production runs on a Hetzner **CPX11** (`wand-vm-01`, `hil`) behind Caddy for
+Production runs on a Hetzner **CPX11** (`mochiverse-vm-01`, `hil`) behind Caddy for
 automatic Let's Encrypt certs.
 
 Caddy is already configured for `mochiverse.io` and `whatisthemochiverse.com`;
@@ -23,17 +23,23 @@ able to take that down.
 
 ## Layout
 
-- `wand.service` — systemd unit running the Nitro build as the `wand` user
-- `/home/wand/app/.env` — production secrets, `chmod 600`
-- `/home/wand/app/.data/subscribers.db` — the only precious state on the box
+- `mochiverse.service` — systemd unit running the Nitro build as the `mochiverse` user
+- `/home/mochiverse/app/.env` — production secrets, `chmod 600`
+- `/home/mochiverse/app/.data/subscribers.db` — the only precious state on the box
 - Caddy listens on 80/443; the app binds loopback only; ufw allows 22/80/443
 
 ## Deploy a new version
 
+`CI=true` is not optional. Without a TTY pnpm aborts with
+`ERR_PNPM_ABORTED_REMOVE_MODULES_DIR_NO_TTY` rather than recreating
+`node_modules` — and piping that through `tail` masks its exit code, so the
+deploy happily copies a STALE `.output` and reports success. This shipped a
+build that was 30 minutes old and passed every check except the artifact grep.
+
 ```bash
-ssh wand@5.78.89.215
+ssh mochiverse@5.78.89.215
 cd ~/src && git pull --ff-only        # MUST fail loud, never warn-and-continue
-cd studio && pnpm install && pnpm build
+cd studio && CI=true pnpm install --frozen-lockfile && CI=true pnpm build
 # REPLACE the tree — do not `cp -r` onto the old one. Asset filenames are
 # content-hashed, so copying layers new bundles beside stale ones forever:
 # the app still serves the right hash, but every grep-based artifact check
@@ -41,13 +47,13 @@ cd studio && pnpm install && pnpm build
 rm -rf ~/app/.output.new && cp -r ~/src/studio/.output ~/app/.output.new
 rm -rf ~/app/.output.old && mv ~/app/.output ~/app/.output.old \
   && mv ~/app/.output.new ~/app/.output
-sudo systemctl restart wand && rm -rf ~/app/.output.old
+sudo systemctl restart mochiverse && rm -rf ~/app/.output.old
 ```
 
 Then verify the ARTIFACT changed, not just that the command exited 0:
 
 ```bash
-ssh wand@5.78.89.215 'cd ~/src && git rev-parse HEAD'   # == origin/main
+ssh mochiverse@5.78.89.215 'cd ~/src && git rev-parse HEAD'   # == origin/main
 curl -s https://5-78-89-215.sslip.io/api/billing/status  # answers
 grep -rho "<a string only the new code emits>" ~/app/.output/ | wc -l
 ```

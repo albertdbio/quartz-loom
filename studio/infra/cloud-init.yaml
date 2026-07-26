@@ -1,5 +1,5 @@
 #cloud-config
-# Magic Wand studio box — a thin control plane.
+# Mochiverse studio box — a thin control plane.
 #
 # It mints Decart tokens, sends sign-in codes, and serves the app. The GPU work
 # happens at Decart, so this box stays small on purpose (see the workspace rule:
@@ -19,7 +19,7 @@ packages:
   - ufw
 
 users:
-  - name: wand
+  - name: mochiverse
     groups: [sudo]
     shell: /bin/bash
     sudo: ["ALL=(ALL) NOPASSWD:ALL"]
@@ -27,24 +27,24 @@ users:
       - SSH_KEY_PLACEHOLDER
 
 write_files:
-  - path: /etc/systemd/system/wand.service
+  - path: /etc/systemd/system/mochiverse.service
     content: |
       [Unit]
-      Description=Magic Wand studio
+      Description=Mochiverse studio
       After=network-online.target
       Wants=network-online.target
 
       [Service]
       Type=simple
-      User=wand
-      WorkingDirectory=/home/wand/app
-      EnvironmentFile=/home/wand/app/.env
+      User=mochiverse
+      WorkingDirectory=/home/mochiverse/app
+      EnvironmentFile=/home/mochiverse/app/.env
       # Nitro's node-server build; PORT is read from the environment.
-      ExecStart=/usr/bin/node /home/wand/app/.output/server/index.mjs
+      ExecStart=/usr/bin/node /home/mochiverse/app/.output/server/index.mjs
       Restart=always
       RestartSec=3
       # The sqlite file is the only precious state on this box.
-      ReadWritePaths=/home/wand/app/.data
+      ReadWritePaths=/home/mochiverse/app/.data
 
       [Install]
       WantedBy=multi-user.target
@@ -64,5 +64,5 @@ runcmd:
   - ufw allow 80/tcp
   - ufw allow 443/tcp
   - ufw --force enable
-  - mkdir -p /home/wand/app/.data
-  - chown -R wand:wand /home/wand
+  - mkdir -p /home/mochiverse/app/.data
+  - chown -R mochiverse:mochiverse /home/mochiverse
