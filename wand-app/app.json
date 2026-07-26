@@ -1,9 +1,9 @@
 {
   "expo": {
-    "name": "Magic Wand",
-    "slug": "magic-wand",
+    "name": "Mochiverse",
+    "slug": "mochiverse",
     "version": "1.0.0",
-    "description": "Touch anything, transform it. Point your camera at the real world and watch whatever you touch turn to gold, ice, pixels, or paint \u2014 live.",
+    "description": "Touch anything and watch it transform. Point your camera at the real world, reach out, and whatever you touch turns to gold, ice, pixels, or flowers \u2014 live.",
     "orientation": "portrait",
     "userInterfaceStyle": "dark",
     "backgroundColor": "#07070d",
@@ -14,10 +14,10 @@
       "backgroundColor": "#0a0714"
     },
     "ios": {
-      "bundleIdentifier": "video.realtime.magicwand",
+      "bundleIdentifier": "io.mochiverse.app",
       "infoPlist": {
-        "NSCameraUsageDescription": "Magic Wand uses the camera so the things you touch can transform live.",
-        "NSMicrophoneUsageDescription": "Magic Wand can use the microphone for voice-cast spells.",
+        "NSCameraUsageDescription": "Mochiverse uses the camera so the things you touch can transform live.",
+        "NSMicrophoneUsageDescription": "Mochiverse can use the microphone for voice-cast transforms.",
         "NSAppTransportSecurity": {
           "NSAllowsLocalNetworking": true
         }
@@ -25,7 +25,7 @@
       "appleTeamId": "THRN2A465Z"
     },
     "android": {
-      "package": "video.realtime.magicwand",
+      "package": "io.mochiverse.app",
       "permissions": [
         "android.permission.CAMERA",
         "android.permission.RECORD_AUDIO",
@@ -39,6 +39,7 @@
     },
     "extra": {
       "wandUrl": "https://5-78-89-215.sslip.io/wand"
-    }
+    },
+    "scheme": "mochiverse"
   }
 }

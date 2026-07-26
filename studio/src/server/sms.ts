@@ -6,7 +6,7 @@ import twilio from "twilio"
  * mochi/core uses, with its own FROM number.
  *
  * A separate sender number (not mochi's) is deliberate: replies to mochi's
- * number are answered by mochi's agent, so sharing it would route a Magic Wand
+ * number are answered by mochi's agent, so sharing it would route a Mochiverse
  * user's "STOP" or "huh?" into a conversation with a different product. Twilio
  * handles STOP/HELP on the number automatically, which is why v1 needs no
  * inbound webhook at all — the code is typed into the app, never replied to.
@@ -63,4 +63,4 @@ export class Sms extends Context.Service<Sms>()("studio/Sms", {
 
 /** The one message this app sends. Kept short — carriers dislike long OTPs. */
 export const otpMessage = (code: string): string =>
-  `${code} is your Magic Wand code. It expires in 10 minutes.`
+  `${code} is your Mochiverse code. It expires in 10 minutes.`

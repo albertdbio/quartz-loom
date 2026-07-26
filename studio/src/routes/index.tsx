@@ -1,2 +1,2 @@
-// The studio (real-time video editing) is the landing page.
-export { default } from "./studio"
+// mochiverse.io lands straight on the experience.
+export { default } from "./wand"

@@ -6,7 +6,7 @@ import { useCameraPermissions } from "expo-camera"
 import { WebView } from "react-native-webview"
 
 /**
- * Magic Wand — the native shell.
+ * Mochiverse — the native shell.
  *
  * The product itself is the mobile-first /wand web app (realtime touch-to-
  * transform over Decart Lucy 2.5, first minute free then Studio Pro). This
@@ -46,7 +46,7 @@ export default function App() {
       <StatusBar hidden />
       {failed ? (
         <View style={styles.center}>
-          <Text style={styles.title}>magic wand ✨</Text>
+          <Text style={styles.title}>mochiverse ✨</Text>
           <Text style={styles.err}>{failed}</Text>
           <Text style={styles.hint} onPress={() => setFailed(null)}>
             tap to retry
@@ -81,7 +81,7 @@ export default function App() {
             }
             return true
           }}
-          onError={(e) => setFailed(`could not reach the studio (${e.nativeEvent.description ?? "network error"})`)}
+          onError={(e) => setFailed(`could not reach the mochiverse (${e.nativeEvent.description ?? "network error"})`)}
           startInLoadingState
           renderLoading={() => (
             <View style={[styles.center, StyleSheet.absoluteFill]}>

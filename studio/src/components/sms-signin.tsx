@@ -108,7 +108,7 @@ export default function SmsSignIn(props: Props) {
             <input type="checkbox" checked={consent()} onChange={(e) => setConsent(e.currentTarget.checked)} />
             <span>
               <b>Optional — not required to sign in.</b> Text me new spells and tips from
-              <b>Magic Wand</b> (about 2–4 messages a month).
+              <b>Mochiverse</b> (about 2–4 messages a month).
             </span>
           </label>
           <button class="sms-cta" disabled={busy() || phone().replace(/\D/g, "").length < 7} onClick={() => void sendCode()}>

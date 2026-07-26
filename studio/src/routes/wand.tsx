@@ -322,7 +322,7 @@ export default function Wand() {
       {/* top chrome — floats over the stage, inset out of the notch */}
       <div class="top">
         <h1>
-          magic wand <span class="sparkle">✨</span>
+          mochiverse <span class="sparkle">✨</span>
           <Show when={plan() === "pro" || plan() === "member"}>
             <span class="pro">
               {plan() === "pro"

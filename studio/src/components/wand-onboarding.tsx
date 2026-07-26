@@ -11,7 +11,7 @@ import {
 } from "~/lib/spells"
 
 /**
- * wand-onboarding — first-run flow for Magic Wand.
+ * wand-onboarding — first-run flow for Mochiverse.
  *
  * Four beats: the promise → what you make → what you want to make → a
  * personalized starter spell. The two answers are load-bearing, not a survey:
@@ -63,7 +63,7 @@ export default function WandOnboarding(props: Props) {
         <Show when={step() === 0}>
           <div class="wonb-step has-cta">
             <div class="wonb-art" aria-hidden="true">✨</div>
-            <h1>Magic Wand</h1>
+            <h1>Mochiverse</h1>
             <p class="wonb-sub">Unlock your creative potential.</p>
             <p class="wonb-lede">
               Point your camera at the real world, reach out, and <b>touch something</b>.
