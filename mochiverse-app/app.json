@@ -17,7 +17,7 @@
       "bundleIdentifier": "io.mochiverse.app",
       "infoPlist": {
         "NSCameraUsageDescription": "Mochiverse uses the camera so the things you touch can transform live.",
-        "NSMicrophoneUsageDescription": "Mochiverse can use the microphone for voice-cast transforms.",
+        "NSMicrophoneUsageDescription": "Mochiverse can use the microphone for voice transforms.",
         "NSAppTransportSecurity": {
           "NSAllowsLocalNetworking": true
         }

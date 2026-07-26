@@ -2,6 +2,7 @@ import { createSignal, For, onCleanup, onMount, Show } from "solid-js"
 import AppOnboarding from "~/components/app-onboarding"
 import SmsSignIn from "~/components/sms-signin"
 import Mochi, { type MochiMood } from "~/components/mochi"
+import { alreadyAsked, isNative, markAsked, notificationStatus, requestNotifications } from "~/lib/native"
 import {
   loadProfile,
   rankTransforms,
@@ -48,6 +49,22 @@ export default function App() {
   const [paywallReason, setPaywallReason] = createSignal<"exhausted" | "time-up">("exhausted")
   const [memberLeft, setMemberLeft] = createSignal<number | null>(null)
   const [quotaSpent, setQuotaSpent] = createSignal(false)
+  // The notification pitch rides on the out-of-minutes sheet rather than a
+  // modal of its own: iOS allows one system prompt per install, so it is worth
+  // spending only at the moment "tell me when they reset" is actually useful.
+  const [canNotify, setCanNotify] = createSignal(false)
+  const [notifyOn, setNotifyOn] = createSignal(false)
+
+  async function maybeOfferNotify() {
+    if (!isNative() || alreadyAsked()) return
+    setCanNotify((await notificationStatus()) === "undetermined")
+  }
+
+  async function optInNotify() {
+    markAsked()
+    setCanNotify(false)
+    setNotifyOn((await requestNotifications()) === "granted")
+  }
   // Mochi stands in the scene. Position is a percentage of the stage so she
   // stays put across rotations and resizes; tapping re-places her, which is
   // what makes her feel present rather than pasted on.
@@ -159,7 +176,10 @@ export default function App() {
         stop()
         if (plan() === "member") {
           // a session ended; whether they can start another is the balance's call
-          if ((memberLeft() ?? 0) <= 0) setQuotaSpent(true)
+          if ((memberLeft() ?? 0) <= 0) {
+            setQuotaSpent(true)
+            void maybeOfferNotify()
+          }
         } else {
           setPaywallReason("time-up")
           setShowPaywall(true)
@@ -458,6 +478,14 @@ export default function App() {
               You've used your minutes for the month. They reset on the 1st — and
               we're working on more.
             </p>
+            <Show when={canNotify()}>
+              <button class="cta" onClick={() => void optInNotify()}>
+                Notify me when they reset
+              </button>
+            </Show>
+            <Show when={notifyOn()}>
+              <p class="fine">We'll let you know the moment your minutes are back.</p>
+            </Show>
             <button class="dismiss" onClick={() => setQuotaSpent(false)}>ok</button>
           </div>
         </div>
