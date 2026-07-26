@@ -1,6 +1,7 @@
 import { createSignal, For, onCleanup, onMount, Show } from "solid-js"
 import WandOnboarding from "~/components/wand-onboarding"
 import SmsSignIn from "~/components/sms-signin"
+import Mochi, { type MochiMood } from "~/components/mochi"
 import {
   loadProfile,
   rankSpells,
@@ -47,6 +48,31 @@ export default function Wand() {
   const [paywallReason, setPaywallReason] = createSignal<"exhausted" | "time-up">("exhausted")
   const [memberLeft, setMemberLeft] = createSignal<number | null>(null)
   const [quotaSpent, setQuotaSpent] = createSignal(false)
+  // Mochi stands in the scene. Position is a percentage of the stage so she
+  // stays put across rotations and resizes; tapping re-places her, which is
+  // what makes her feel present rather than pasted on.
+  const [mochiOn, setMochiOn] = createSignal(true)
+  const [mochiPos, setMochiPos] = createSignal({ x: 78, y: 62 })
+  const [mochiMood, setMochiMood] = createSignal<MochiMood>("idle")
+  let moodTimer: ReturnType<typeof setTimeout> | null = null
+
+  function reactMochi(mood: MochiMood) {
+    if (moodTimer) clearTimeout(moodTimer)
+    setMochiMood(mood)
+    moodTimer = setTimeout(() => setMochiMood("idle"), 900)
+  }
+
+  function placeMochi(e: MouseEvent | TouchEvent) {
+    const host = e.currentTarget as HTMLElement
+    const r = host.getBoundingClientRect()
+    const pt = "touches" in e ? e.touches[0] : (e as MouseEvent)
+    if (!pt) return
+    setMochiPos({
+      x: Math.min(92, Math.max(8, ((pt.clientX - r.left) / r.width) * 100)),
+      y: Math.min(88, Math.max(20, ((pt.clientY - r.top) / r.height) * 100)),
+    })
+    reactMochi("wow")
+  }
   // Raw-camera PiP is OFF by default: on iOS WKWebView a <video> playing a
   // local capture stream composites ABOVE other video layers regardless of
   // z-index, burying the generated stream. The magic reads better without it
@@ -257,6 +283,7 @@ export default function Wand() {
 
   async function castSpell(i: number) {
     setSpell(i)
+    reactMochi("happy")
     if (!rt) return
     try {
       await rt.set({ prompt: deck()[i]!.prompt })
@@ -316,8 +343,22 @@ export default function Wand() {
       </Show>
 
       {/* the stage: generated stream, edge to edge */}
-      <video ref={outputVideo} class="stage" autoplay playsinline muted />
+      <video
+        ref={outputVideo}
+        class="stage"
+        autoplay
+        playsinline
+        muted
+        onClick={placeMochi}
+      />
       <video ref={pipVideo} class="pip" classList={{ hidden: !showPip() }} autoplay playsinline muted />
+
+      {/* Mochi stands in the scene, anchored in stage space */}
+      <Show when={mochiOn()}>
+        <div class="mochi-anchor" style={{ left: `${mochiPos().x}%`, top: `${mochiPos().y}%` }}>
+          <Mochi size={116} mood={mochiMood()} />
+        </div>
+      </Show>
 
       {/* top chrome — floats over the stage, inset out of the notch */}
       <div class="top">
@@ -337,6 +378,13 @@ export default function Wand() {
           </Show>
         </h1>
         <div class="top-right">
+          <button
+            class={`chip ${mochiOn() ? "on" : ""}`}
+            onClick={() => setMochiOn(!mochiOn())}
+            title={mochiOn() ? "hide Mochi" : "show Mochi"}
+          >
+            {mochiOn() ? "🫧" : "🫥"}
+          </button>
           <Show when={freeLeft() !== null}>
             <span class={`chip countdown ${(freeLeft() ?? 0) <= 10 ? "low" : ""}`}>
               {Math.floor((freeLeft() ?? 0) / 60)}:{String((freeLeft() ?? 0) % 60).padStart(2, "0")}
@@ -457,6 +505,11 @@ const CSS = `
     bottom:calc(190px + env(safe-area-inset-bottom)); opacity:.92; z-index:3;
     box-shadow:0 10px 30px rgba(0,0,0,.5); }
   .wand .pip.hidden { display:none; }
+  /* Mochi is anchored in stage space and never eats taps meant for the video. */
+  .wand .mochi-anchor { position:absolute; z-index:3; transform:translate(-50%,-50%);
+    pointer-events:none; transition:left .45s cubic-bezier(.34,1.3,.64,1),
+    top .45s cubic-bezier(.34,1.3,.64,1); }
+  .wand .chip.on { border-color:var(--accent); color:var(--accent); }
 
   /* floating chrome */
   .wand .top { position:absolute; top:0; left:0; right:0; z-index:6;
