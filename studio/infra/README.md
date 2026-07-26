@@ -1,7 +1,12 @@
 # Deploy
 
-Production runs on a Hetzner **CPX11** (`wand-vm-01`, `hil`) at
-`https://5-78-89-215.sslip.io`, behind Caddy for automatic Let's Encrypt certs.
+Production runs on a Hetzner **CPX11** (`wand-vm-01`, `hil`) behind Caddy for
+automatic Let's Encrypt certs.
+
+Caddy is already configured for `mochiverse.io` and `whatisthemochiverse.com`;
+both issue certs automatically once their A records point at `5.78.89.215`.
+Until then the box answers on `https://5-78-89-215.sslip.io`, which stays
+configured so existing installs keep working through the switch.
 
 ## Why a box and not serverless
 
@@ -29,7 +34,14 @@ able to take that down.
 ssh wand@5.78.89.215
 cd ~/src && git pull --ff-only        # MUST fail loud, never warn-and-continue
 cd studio && pnpm install && pnpm build
-cp -r .output ~/app/ && sudo systemctl restart wand
+# REPLACE the tree — do not `cp -r` onto the old one. Asset filenames are
+# content-hashed, so copying layers new bundles beside stale ones forever:
+# the app still serves the right hash, but every grep-based artifact check
+# (including the one below) reports the OLD code as present.
+rm -rf ~/app/.output.new && cp -r ~/src/studio/.output ~/app/.output.new
+rm -rf ~/app/.output.old && mv ~/app/.output ~/app/.output.old \
+  && mv ~/app/.output.new ~/app/.output
+sudo systemctl restart wand && rm -rf ~/app/.output.old
 ```
 
 Then verify the ARTIFACT changed, not just that the command exited 0:
