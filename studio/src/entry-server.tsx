@@ -7,7 +7,7 @@ export default createHandler(() => (
       <html lang="en">
         <head>
           <meta charset="utf-8" />
-          {/* viewport-fit=cover lets the full-screen wand run edge-to-edge under
+          {/* viewport-fit=cover lets the full-screen app run edge-to-edge under
               the notch/home indicator; its floating controls inset themselves
               with env(safe-area-inset-*). user-scalable=no keeps a two-finger
               pinch from breaking the fixed camera stage. */}

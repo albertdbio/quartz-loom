@@ -8,22 +8,22 @@ import { WebView } from "react-native-webview"
 /**
  * Mochiverse — the native shell.
  *
- * The product itself is the mobile-first /wand web app (realtime touch-to-
+ * The product itself is the mobile-first web app (realtime touch-to-
  * transform over Decart Lucy 2.5, first minute free then Studio Pro). This
  * shell wraps it in a camera-enabled WebView: WKWebView/Chromium support
  * getUserMedia + WebRTC in-page (iOS 14.3+/Android), so the whole realtime
  * pipeline runs unchanged. Native WebRTC (à la opentxt's LiveKit dev build)
  * is the later upgrade path if we outgrow the WebView.
  *
- * Point the shell at a deployment with EXPO_PUBLIC_WAND_URL (dev: an https
+ * Point the shell at a deployment with EXPO_PUBLIC_APP_URL (dev: an https
  * tunnel or your Mac's localhost from the iOS simulator) or app.json's
- * `extra.wandUrl` (production). getUserMedia requires a secure context —
+ * `extra.appUrl` (production). getUserMedia requires a secure context —
  * https or localhost; a bare LAN IP over http will NOT get a camera.
  */
-const WAND_URL: string =
-  process.env.EXPO_PUBLIC_WAND_URL ??
-  (Constants.expoConfig?.extra?.["wandUrl"] as string | undefined) ??
-  "http://localhost:3000/wand"
+const APP_URL: string =
+  process.env.EXPO_PUBLIC_APP_URL ??
+  (Constants.expoConfig?.extra?.["appUrl"] as string | undefined) ??
+  "http://localhost:3000/"
 
 export default function App() {
   const webref = useRef<WebView>(null)
@@ -39,7 +39,7 @@ export default function App() {
   }, [permission, requestPermission])
 
   return (
-    // Edge-to-edge on purpose: the wand page is a full-screen camera stage and
+    // Edge-to-edge on purpose: the page is a full-screen camera stage and
     // insets its own floating controls with env(safe-area-inset-*), so a
     // SafeAreaView here would letterbox the video instead of protecting it.
     <View style={styles.root}>
@@ -55,7 +55,7 @@ export default function App() {
       ) : (
         <WebView
           ref={webref}
-          source={{ uri: WAND_URL }}
+          source={{ uri: APP_URL }}
           style={styles.web}
           // Camera/mic inside the page: grant without a second native prompt.
           mediaCapturePermissionGrantType="grant"

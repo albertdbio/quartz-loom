@@ -82,7 +82,7 @@ export default function SmsSignIn(props: Props) {
                 onKeyDown={(e) => e.key === "Enter" && void verify()}
               />
               <button class="sms-cta" disabled={busy() || code().length < 6} onClick={() => void verify()}>
-                {busy() ? "checking…" : "Start casting ✨"}
+                {busy() ? "checking…" : "Start transforming ✨"}
               </button>
               <button class="sms-link" onClick={() => setStep("phone")}>
                 ← use a different number
@@ -90,9 +90,9 @@ export default function SmsSignIn(props: Props) {
             </>
           }
         >
-          <h2>{props.reason === "time-up" ? "Your free minute is up ⏱" : "Keep the magic going"}</h2>
+          <h2>{props.reason === "time-up" ? "Your free minute is up ⏱" : "Keep transforming"}</h2>
           <p class="sms-sub">
-            Sign in with your phone for unlimited casting. No password, no card.
+            Sign in with your phone for unlimited transforms. No password, no card.
           </p>
           <input
             class="sms-input"
@@ -107,7 +107,7 @@ export default function SmsSignIn(props: Props) {
           <label class="sms-consent">
             <input type="checkbox" checked={consent()} onChange={(e) => setConsent(e.currentTarget.checked)} />
             <span>
-              <b>Optional — not required to sign in.</b> Text me new spells and tips from
+              <b>Optional — not required to sign in.</b> Text me new transforms and tips from
               <b>Mochiverse</b> (about 2–4 messages a month).
             </span>
           </label>

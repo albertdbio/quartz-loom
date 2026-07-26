@@ -38,7 +38,7 @@
       }
     },
     "extra": {
-      "wandUrl": "https://mochiverse.io/"
+      "appUrl": "https://mochiverse.io/"
     },
     "scheme": "mochiverse"
   }

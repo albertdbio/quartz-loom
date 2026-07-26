@@ -28,7 +28,7 @@ export async function POST(event: APIEvent): Promise<Response> {
  * therefore spend) is untouched, so the convenience wins.
  */
 export async function GET(event: APIEvent): Promise<Response> {
-  const headers = new Headers({ Location: "/wand?signedout=1" })
+  const headers = new Headers({ Location: "/?signedout=1" })
   for (const c of clearedCookies(event.request)) headers.append("Set-Cookie", c)
   return new Response(null, { status: 302, headers })
 }

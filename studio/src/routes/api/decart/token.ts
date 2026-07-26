@@ -75,7 +75,7 @@ export async function POST(event: APIEvent): Promise<Response> {
                 paywall: true,
               }
             : {
-                error: "your free minute is used up — sign in with your phone to keep casting",
+                error: "your free minute is used up — sign in with your phone to keep transforming",
                 signin: true,
               },
           plan.setCookies,

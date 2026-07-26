@@ -14,7 +14,7 @@ import {
 let dir: string
 
 beforeEach(() => {
-  dir = mkdtempSync(join(tmpdir(), "wand-subs-"))
+  dir = mkdtempSync(join(tmpdir(), "mochiverse-subs-"))
   resetSubscribersDbForTests()
   subscribersDb(join(dir, "test.db"))
 })

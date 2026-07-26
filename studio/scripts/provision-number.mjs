@@ -58,7 +58,7 @@ const pick = available[0]
 console.log(`\nbuying ${pick.phoneNumber} …`)
 const purchased = await client.incomingPhoneNumbers.create({
   phoneNumber: pick.phoneNumber,
-  friendlyName: "Magic Wand — sign-in",
+  friendlyName: "Mochiverse — sign-in",
   // Deliberately no smsUrl: outbound-only. An inbound webhook here would be
   // the only way a reply could land in another product's agent.
 })

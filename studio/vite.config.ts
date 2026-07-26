@@ -22,7 +22,7 @@ export default defineConfig({
     port: 3000,
     // Allow quick-tunnel hostnames (cloudflared) so a physical phone can reach
     // the dev server over HTTPS — getUserMedia needs a secure context, so
-    // device testing of /wand goes through a tunnel, never a bare LAN IP.
+    // device testing goes through a tunnel, never a bare LAN IP.
     allowedHosts: [".trycloudflare.com"],
   },
 })

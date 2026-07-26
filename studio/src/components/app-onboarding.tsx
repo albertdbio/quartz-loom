@@ -3,19 +3,19 @@ import {
   CRAFTS,
   GOALS,
   personalLine,
-  rankSpells,
-  SPELLS,
+  rankTransforms,
+  TRANSFORMS,
   type Craft,
   type Goal,
-  type WandProfile,
-} from "~/lib/spells"
+  type UserProfile,
+} from "~/lib/transforms"
 
 /**
- * wand-onboarding — first-run flow for Mochiverse.
+ * app-onboarding — first-run flow for Mochiverse.
  *
  * Four beats: the promise → what you make → what you want to make → a
- * personalized starter spell. The two answers are load-bearing, not a survey:
- * they re-rank the spell deck and pre-select the opening spell, so the last
+ * personalized starter transform. The two answers are load-bearing, not a survey:
+ * they re-rank the transform deck and pre-select the opening transform, so the last
  * screen visibly reflects what the user just said.
  *
  * Full-screen (not a card) because the app itself is a full-screen stage and
@@ -23,15 +23,15 @@ import {
  * (and users) punish walls in front of the value.
  */
 type Props = {
-  onDone: (profile?: WandProfile) => void
+  onDone: (profile?: UserProfile) => void
 }
 
-export default function WandOnboarding(props: Props) {
+export default function AppOnboarding(props: Props) {
   const [step, setStep] = createSignal(0)
   const [craft, setCraft] = createSignal<Craft | null>(null)
   const [goal, setGoal] = createSignal<Goal | null>(null)
 
-  const ranked = () => (goal() ? rankSpells(SPELLS, goal()!) : SPELLS)
+  const ranked = () => (goal() ? rankTransforms(TRANSFORMS, goal()!) : TRANSFORMS)
   const starter = () => ranked()[0]!
 
   function pickCraft(c: Craft) {
@@ -51,7 +51,7 @@ export default function WandOnboarding(props: Props) {
   }
 
   return (
-    <div class="wonb" role="dialog" aria-modal="true" aria-label="welcome to magic wand">
+    <div class="wonb" role="dialog" aria-modal="true" aria-label="welcome to mochiverse">
       <style>{CSS}</style>
 
       <button class="wonb-skip" onClick={() => props.onDone()}>
@@ -70,9 +70,9 @@ export default function WandOnboarding(props: Props) {
               Whatever you touch transforms — live, as you watch.
             </p>
             {/* the middle of a hero screen is prime real estate: show the range
-                of spells so the product sells itself before we ask anything */}
+                of transforms so the product sells itself before we ask anything */}
             <div class="wonb-preview" aria-hidden="true">
-              <For each={SPELLS}>
+              <For each={TRANSFORMS}>
                 {(s) => (
                   <span class="wonb-pchip">
                     <span class="wonb-pemoji">{s.emoji}</span>
@@ -112,7 +112,7 @@ export default function WandOnboarding(props: Props) {
           <div class="wonb-step">
             <p class="wonb-eyebrow">Step 2 of 2</p>
             <h2>What do you want to create?</h2>
-            <p class="wonb-hint">We'll put the right spells first.</p>
+            <p class="wonb-hint">We'll put the right transforms first.</p>
             <div class="wonb-grid">
               <For each={GOALS}>
                 {(g) => (
@@ -128,11 +128,11 @@ export default function WandOnboarding(props: Props) {
           </div>
         </Show>
 
-        {/* 3 — the payoff: their deck, their starter spell */}
+        {/* 3 — the payoff: their deck, their starter transform */}
         <Show when={step() === 3}>
           <div class="wonb-step has-cta">
             <div class="wonb-art big" aria-hidden="true">{starter().emoji}</div>
-            <h2>Your starter spell: {starter().name}</h2>
+            <h2>Your starter transform: {starter().name}</h2>
             <p class="wonb-lede">
               {craft() && goal() ? personalLine(craft()!, goal()!, starter().name) : ""}
             </p>
@@ -146,7 +146,7 @@ export default function WandOnboarding(props: Props) {
               </For>
             </div>
             <button class="wonb-cta" onClick={finish}>
-              Start casting ✨
+              Start transforming ✨
             </button>
             <p class="wonb-fine">Your first minute is free — no account needed.</p>
           </div>

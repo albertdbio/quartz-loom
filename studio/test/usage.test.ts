@@ -11,7 +11,7 @@ const SESSION = 120 // 2 minutes per grant
 let dir: string
 
 beforeEach(() => {
-  dir = mkdtempSync(join(tmpdir(), "wand-usage-"))
+  dir = mkdtempSync(join(tmpdir(), "mochiverse-usage-"))
   resetSubscribersDbForTests()
   resetUsageTableForTests()
   subscribersDb(join(dir, "test.db"))

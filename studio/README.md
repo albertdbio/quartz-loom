@@ -85,7 +85,7 @@ Uncapped members were the single largest exposure with payments off: the engine
 bills per second of active generation, so "unlimited" meant an unbounded bill
 with no revenue against it.
 
-The wand runs **`lucy-restyle-2`**, not `lucy-2.5` — same vendor and quality
+Mochiverse runs **`lucy-restyle-2`**, not `lucy-2.5` — same vendor and quality
 tier, literally the "realtime style transfer" model, at half the per-second
 price. Verify any model swap against the pricing page: the realtime and batch
 rates differ, and the batch number is the one that looks authoritative.
@@ -123,7 +123,7 @@ campaign**:
 
 What this app needs is its **own sender number attached to that same campaign**.
 Both existing numbers are already answering as mochi personas and their inbound
-webhooks point at mochi's agent, so sharing one would route a Magic Wand user's
+webhooks point at mochi's agent, so sharing one would route a Mochiverse user's
 "STOP" into a conversation with a different product. This app is outbound-only
 (the code is typed into the app, never replied to), so it needs no inbound
 webhook at all — Twilio answers STOP/HELP on the number itself.
@@ -153,14 +153,14 @@ https://<host>/api/billing/owner?key=<OWNER_KEY>
 ```
 
 It plants a signed `owner` entitlement cookie (1 year, renewable by
-re-visiting) and redirects into the wand. Owner claims are honored **without
+re-visiting) and redirects into the app. Owner claims are honored **without
 any Stripe call** — there's no subscription behind them — and are HMAC-signed
 and expiry-bound like every other claim. A wrong key, or an unset `OWNER_KEY`,
 returns a plain 404 so the endpoint is indistinguishable from absent; attempts
 are IP rate-limited (5/min) and the comparison is constant-time.
 
-For the native app, point that personal build's `EXPO_PUBLIC_WAND_URL` at the
-redeem URL — the 302 lands on `/wand` and seeds the app's own cookie jar.
+For the native app, point that personal build's `EXPO_PUBLIC_APP_URL` at the
+redeem URL — the 302 lands on `/` and seeds the app's own cookie jar.
 Never ship a store build with the key baked in.
 
 State is carried entirely in HMAC-signed cookies (`jose`, HS256) — no

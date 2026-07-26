@@ -14,7 +14,7 @@ const notFound = (): Response => new Response("not found", { status: 404 })
 /**
  * Operator self-service: GET /api/billing/owner?key=<OWNER_KEY> plants a
  * signed owner entitlement cookie (unlimited sessions, no Stripe) on this
- * browser, then lands in the wand. 404 on a wrong/missing key OR when
+ * browser, then lands in the app. 404 on a wrong/missing key OR when
  * OWNER_KEY isn't configured — the endpoint is indistinguishable from absent.
  */
 export async function GET(event: APIEvent): Promise<Response> {
@@ -36,7 +36,7 @@ export async function GET(event: APIEvent): Promise<Response> {
           OWNER_MAX_AGE,
         ),
       )
-      const headers = new Headers({ Location: "/wand?owner=1" })
+      const headers = new Headers({ Location: "/?owner=1" })
       headers.append(
         "Set-Cookie",
         cookieHeader(SUB_COOKIE, jwt, OWNER_MAX_AGE, requestIsSecure(event.request)),
