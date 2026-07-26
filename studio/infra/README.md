@@ -26,6 +26,13 @@ able to take that down.
 - `mochiverse.service` — systemd unit running the Nitro build as the `mochiverse` user
 - `/home/mochiverse/app/.env` — production secrets, `chmod 600`
 - `/home/mochiverse/app/.data/subscribers.db` — the only precious state on the box
+
+`.env` holds ABSOLUTE paths (`SUBSCRIBERS_DB`). Moving the app between homes
+silently breaks the app unless `.env` moves with it *and is rewritten* — the
+process keeps booting, the site keeps returning 200, and only the routes that
+touch sqlite fail. A home-directory migration missed this and every session
+mint 500'd (`EACCES … mkdir '/home/wand/app/.data'`) while the homepage looked
+perfectly healthy.
 - Caddy listens on 80/443; the app binds loopback only; ufw allows 22/80/443
 
 ## Deploy a new version
@@ -54,7 +61,10 @@ Then verify the ARTIFACT changed, not just that the command exited 0:
 
 ```bash
 ssh mochiverse@5.78.89.215 'cd ~/src && git rev-parse HEAD'   # == origin/main
-curl -s https://5-78-89-215.sslip.io/api/billing/status  # answers
+curl -s https://mochiverse.io/api/billing/status              # answers
+# and exercise a route that WRITES: a 200 here proves sqlite is reachable,
+# which a homepage 200 does not.
+curl -s -X POST https://mochiverse.io/api/decart/token -d '{}' -H 'content-type: application/json'
 grep -rho "<a string only the new code emits>" ~/app/.output/ | wc -l
 ```
 
