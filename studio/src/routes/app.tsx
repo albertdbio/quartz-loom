@@ -167,7 +167,13 @@ export default function App() {
       }
     }
     try {
-      const mic = await navigator.mediaDevices.getUserMedia({ audio: true })
+      // A wedged permission prompt leaves getUserMedia pending forever, which
+      // the user experiences as a dead button. A deadline turns that into an
+      // answer.
+      const mic = await Promise.race([
+        navigator.mediaDevices.getUserMedia({ audio: true }),
+        new Promise<never>((_, reject) => setTimeout(() => reject(new Error("mic timeout")), 8000)),
+      ])
       mic.getTracks().forEach((tr) => tr.stop())
     } catch {
       setErr("microphone access is off — enable it in Settings to use voice")
