@@ -3,6 +3,7 @@ import { ActivityIndicator, Linking, Platform, StyleSheet, Text, View } from "re
 import { StatusBar } from "expo-status-bar"
 import Constants from "expo-constants"
 import { useCameraPermissions, useMicrophonePermissions } from "expo-camera"
+import { ExpoSpeechRecognitionModule, useSpeechRecognitionEvent } from "expo-speech-recognition"
 import { getPushToken, getStatus, registerToken, request } from "./notifications"
 import { WebView } from "react-native-webview"
 
@@ -31,7 +32,7 @@ const APP_URL: string =
  * affordances (the notification opt-in) and stay a plain website in a browser.
  */
 const ANNOUNCE_NATIVE = `
-  window.__mochiverseNative = { version: 1 };
+  window.__mochiverseNative = { version: 2, speech: true };
   true;
 `
 
@@ -39,6 +40,9 @@ export default function App() {
   const webref = useRef<WebView>(null)
   const [permission, requestPermission] = useCameraPermissions()
   const [, requestMicPermission] = useMicrophonePermissions()
+  // Whether the page currently wants transcripts. Events fire globally from
+  // the module, so this ref is what keeps a stopped session silent.
+  const speechWanted = useRef(false)
   const [failed, setFailed] = useState<string | null>(null)
 
   // Replies to the page. Values are JSON-encoded rather than interpolated so
@@ -50,6 +54,23 @@ export default function App() {
       )}})); true;`,
     )
   }
+
+  useSpeechRecognitionEvent("result", (ev) => {
+    if (!speechWanted.current) return
+    const text = ev.results?.[0]?.transcript ?? ""
+    if (text) reply({ type: ev.isFinal ? "speech:final" : "speech:interim", text })
+  })
+  useSpeechRecognitionEvent("error", (ev) => {
+    if (!speechWanted.current) return
+    speechWanted.current = false
+    reply({ type: "speech:error", reason: ev.error ?? "unknown" })
+  })
+  useSpeechRecognitionEvent("end", () => {
+    if (!speechWanted.current) return
+    // The page owns restarts: iOS ends sessions on its own schedule, and the
+    // page knows whether the user still wants to be heard.
+    reply({ type: "speech:end" })
+  })
 
   async function onBridgeMessage(raw: string) {
     let msg: { type?: string }
@@ -73,6 +94,36 @@ export default function App() {
         reply({ type: "mic:result", status: res.granted ? "granted" : res.canAskAgain ? "undetermined" : "denied" })
       } catch {
         reply({ type: "mic:result", status: "denied" })
+      }
+      return
+    }
+
+    if (msg.type === "speech:start") {
+      try {
+        const perm = await ExpoSpeechRecognitionModule.requestPermissionsAsync()
+        if (!perm.granted) {
+          reply({ type: "speech:error", reason: "not-allowed" })
+          return
+        }
+        speechWanted.current = true
+        ExpoSpeechRecognitionModule.start({
+          lang: "en-US",
+          interimResults: true,
+          continuous: true,
+        })
+      } catch {
+        speechWanted.current = false
+        reply({ type: "speech:error", reason: "start-failed" })
+      }
+      return
+    }
+
+    if (msg.type === "speech:stop") {
+      speechWanted.current = false
+      try {
+        ExpoSpeechRecognitionModule.stop()
+      } catch {
+        // stopping a dead session is fine
       }
       return
     }

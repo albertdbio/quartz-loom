@@ -4,7 +4,17 @@ import SmsSignIn from "~/components/sms-signin"
 import Mochi, { type MochiMood } from "~/components/mochi"
 import { startVoicePrompt, voiceSupported, type VoiceSession } from "~/lib/voice-prompt"
 import { cropSpriteToContent } from "~/lib/sprite"
-import { alreadyAsked, isNative, markAsked, notificationStatus, requestNativeMic, requestNotifications } from "~/lib/native"
+import {
+  alreadyAsked,
+  isNative,
+  markAsked,
+  nativeSpeechAvailable,
+  notificationStatus,
+  requestNativeMic,
+  requestNotifications,
+  startNativeSpeech,
+  type NativeSpeechSession,
+} from "~/lib/native"
 import {
   loadProfile,
   rankTransforms,
@@ -91,6 +101,7 @@ export default function App() {
   const [fusionActive, setFusionActive] = createSignal(false)
   const [voiceHeard, setVoiceHeard] = createSignal("")
   let voiceSession: VoiceSession | null = null
+  let nativeVoice: NativeSpeechSession | null = null
 
   function loadCharacter() {
     try {
@@ -148,8 +159,17 @@ export default function App() {
     if (voiceOn()) {
       voiceSession?.stop()
       voiceSession = null
+      nativeVoice?.stop()
+      nativeVoice = null
       setVoiceOn(false)
       setVoiceHeard("")
+      return
+    }
+
+    // The shell's native recognizer comes first: WKWebView has no Web Speech
+    // API, so in the app this is not a preference but the only path.
+    if (nativeSpeechAvailable()) {
+      startNativeVoice()
       return
     }
     if (!voiceSupported()) {
@@ -191,6 +211,32 @@ export default function App() {
       },
     })
     if (voiceSession) setVoiceOn(true)
+  }
+
+  function startNativeVoice() {
+    nativeVoice = startNativeSpeech({
+      onInterim: (t) => setVoiceHeard(t),
+      onFinal: (t) => {
+        setVoiceHeard(t)
+        void speakTransform(t)
+      },
+      onEnd: (reason) => {
+        nativeVoice = null
+        if (reason === "not-allowed") {
+          setErr("microphone access is off — enable it in Settings to use voice")
+          setVoiceOn(false)
+        } else if (reason) {
+          setErr("voice hit a snag — tap the mic to try again")
+          setVoiceOn(false)
+        } else if (voiceOn()) {
+          // iOS ends sessions on its own schedule; the user still wants to be
+          // heard, so listening resumes — same auto-restart the web engine has.
+          startNativeVoice()
+        }
+      },
+    })
+    if (nativeVoice) setVoiceOn(true)
+    else setErr("voice isn't available here yet")
   }
 
   /** A spoken phrase becomes the live prompt, styled like the deck's prompts. */
@@ -535,6 +581,7 @@ export default function App() {
 
   onCleanup(() => {
     voiceSession?.stop()
+    nativeVoice?.stop()
     stop()
   })
 

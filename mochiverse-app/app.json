@@ -20,7 +20,8 @@
         "NSMicrophoneUsageDescription": "Mochiverse can use the microphone for voice transforms.",
         "NSAppTransportSecurity": {
           "NSAllowsLocalNetworking": true
-        }
+        },
+        "NSSpeechRecognitionUsageDescription": "Mochiverse uses speech recognition so you can change the scene by talking to it."
       },
       "appleTeamId": "THRN2A465Z"
     },
@@ -40,6 +41,9 @@
     "extra": {
       "appUrl": "https://mochiverse.io/"
     },
-    "scheme": "mochiverse"
+    "scheme": "mochiverse",
+    "plugins": [
+      "expo-speech-recognition"
+    ]
   }
 }

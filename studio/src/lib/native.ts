@@ -14,6 +14,8 @@ export type NotificationStatus = "granted" | "denied" | "undetermined" | "unsupp
 
 interface NativeBridge {
   readonly version: number
+  /** Shell can transcribe speech natively (WKWebView has no Web Speech API). */
+  readonly speech?: boolean
 }
 
 interface NativeWindow extends Window {
@@ -82,6 +84,61 @@ export function requestNotifications(): Promise<NotificationStatus> {
  */
 export function requestNativeMic(): Promise<NotificationStatus> {
   return ask("mic:request", "mic:result")
+}
+
+/** True when the shell can transcribe speech natively. */
+export function nativeSpeechAvailable(): boolean {
+  const w = nativeWindow()
+  return isNative() && w?.__mochiverseNative?.speech === true
+}
+
+export type NativeSpeechCallbacks = {
+  onInterim: (text: string) => void
+  onFinal: (text: string) => void
+  /** Session died (permission, engine, or iOS ending it); the caller decides on restarts. */
+  onEnd: (reason: string | null) => void
+}
+
+export type NativeSpeechSession = { stop(): void }
+
+/**
+ * Speech through the shell: SFSpeechRecognizer on the other side of the
+ * bridge, surfaced with the same shape as the Web Speech session so the
+ * caller cannot tell which engine is listening.
+ */
+export function startNativeSpeech(cb: NativeSpeechCallbacks): NativeSpeechSession | null {
+  const w = nativeWindow()
+  if (!nativeSpeechAvailable() || !w) return null
+
+  let stopped = false
+  const onEvent = (event: MessageEvent<string>) => {
+    if (stopped) return
+    try {
+      const msg = JSON.parse(event.data) as { type?: string; text?: string; reason?: string }
+      if (msg.type === "speech:interim" && msg.text) cb.onInterim(msg.text)
+      else if (msg.type === "speech:final" && msg.text) cb.onFinal(msg.text)
+      else if (msg.type === "speech:error") finish(msg.reason ?? "error")
+      else if (msg.type === "speech:end") finish(null)
+    } catch {
+      // not ours
+    }
+  }
+  const finish = (reason: string | null) => {
+    if (stopped) return
+    stopped = true
+    w.removeEventListener("mochiverse:native", onEvent as EventListener)
+    cb.onEnd(reason)
+  }
+  w.addEventListener("mochiverse:native", onEvent as EventListener)
+  w.ReactNativeWebView?.postMessage(JSON.stringify({ v: 1, type: "speech:start" }))
+  return {
+    stop() {
+      if (stopped) return
+      stopped = true
+      w.removeEventListener("mochiverse:native", onEvent as EventListener)
+      w.ReactNativeWebView?.postMessage(JSON.stringify({ v: 1, type: "speech:stop" }))
+    },
+  }
 }
 
 /** Remembers that we already made our pitch, so it is never shown twice. */
