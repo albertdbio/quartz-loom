@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from "react"
 import { ActivityIndicator, Linking, Platform, StyleSheet, Text, View } from "react-native"
 import { StatusBar } from "expo-status-bar"
 import Constants from "expo-constants"
-import { useCameraPermissions } from "expo-camera"
+import { useCameraPermissions, useMicrophonePermissions } from "expo-camera"
 import { getPushToken, getStatus, registerToken, request } from "./notifications"
 import { WebView } from "react-native-webview"
 
@@ -38,6 +38,7 @@ const ANNOUNCE_NATIVE = `
 export default function App() {
   const webref = useRef<WebView>(null)
   const [permission, requestPermission] = useCameraPermissions()
+  const [, requestMicPermission] = useMicrophonePermissions()
   const [failed, setFailed] = useState<string | null>(null)
 
   // Replies to the page. Values are JSON-encoded rather than interpolated so
@@ -60,6 +61,19 @@ export default function App() {
 
     if (msg.type === "notifications:status") {
       reply({ type: "notifications:result", status: await getStatus() })
+      return
+    }
+
+    if (msg.type === "mic:request") {
+      // Native OS mic prompt, on the page's schedule (the voice button).
+      // Camera is pre-prompted at launch because the camera IS the product;
+      // the mic waits until someone actually wants to talk.
+      try {
+        const res = await requestMicPermission()
+        reply({ type: "mic:result", status: res.granted ? "granted" : res.canAskAgain ? "undetermined" : "denied" })
+      } catch {
+        reply({ type: "mic:result", status: "denied" })
+      }
       return
     }
 

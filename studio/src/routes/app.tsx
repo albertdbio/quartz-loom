@@ -4,7 +4,7 @@ import SmsSignIn from "~/components/sms-signin"
 import Mochi, { type MochiMood } from "~/components/mochi"
 import { startVoicePrompt, voiceSupported, type VoiceSession } from "~/lib/voice-prompt"
 import { cropSpriteToContent } from "~/lib/sprite"
-import { alreadyAsked, isNative, markAsked, notificationStatus, requestNotifications } from "~/lib/native"
+import { alreadyAsked, isNative, markAsked, notificationStatus, requestNativeMic, requestNotifications } from "~/lib/native"
 import {
   loadProfile,
   rankTransforms,
@@ -144,12 +144,33 @@ export default function App() {
     }
   }
 
-  function toggleVoice() {
+  async function toggleVoice() {
     if (voiceOn()) {
       voiceSession?.stop()
       voiceSession = null
       setVoiceOn(false)
       setVoiceHeard("")
+      return
+    }
+    if (!voiceSupported()) {
+      setErr("voice isn't available here yet — it works in Safari")
+      return
+    }
+    // Ask BEFORE listening, at both layers. In the shell, the OS prompt is
+    // native; everywhere, an explicit getUserMedia makes denial a catchable
+    // error instead of a recognition engine that silently never hears.
+    if (isNative()) {
+      const nat = await requestNativeMic()
+      if (nat === "denied") {
+        setErr("microphone access is off — enable it in Settings to use voice")
+        return
+      }
+    }
+    try {
+      const mic = await navigator.mediaDevices.getUserMedia({ audio: true })
+      mic.getTracks().forEach((tr) => tr.stop())
+    } catch {
+      setErr("microphone access is off — enable it in Settings to use voice")
       return
     }
     voiceSession = startVoicePrompt({
@@ -565,10 +586,10 @@ export default function App() {
           <button class="chip" onClick={() => setFriendOpen(true)} title="create a friend">
             ✨
           </button>
-          <Show when={status() === "live" && voiceSupported()}>
+          <Show when={status() === "live"}>
             <button
               class={`chip ${voiceOn() ? "on" : ""}`}
-              onClick={toggleVoice}
+              onClick={() => void toggleVoice()}
               title={voiceOn() ? "stop voice control" : "speak to change the scene"}
             >
               🎙

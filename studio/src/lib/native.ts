@@ -33,10 +33,10 @@ export function isNative(): boolean {
 
 /**
  * Round-trips one request to the shell. Resolves "unsupported" rather than
- * rejecting on timeout: a notification opt-in must never be able to wedge the
+ * rejecting on timeout: a permission opt-in must never be able to wedge the
  * UI that called it.
  */
-function ask(type: string, timeoutMs = 30_000): Promise<NotificationStatus> {
+function ask(type: string, resultType: string, timeoutMs = 30_000): Promise<NotificationStatus> {
   const w = nativeWindow()
   if (!isNative() || !w) return Promise.resolve("unsupported")
 
@@ -53,7 +53,7 @@ function ask(type: string, timeoutMs = 30_000): Promise<NotificationStatus> {
     const onReply = (event: MessageEvent<string>) => {
       try {
         const msg = JSON.parse(event.data) as { type?: string; status?: NotificationStatus }
-        if (msg.type === "notifications:result" && msg.status) finish(msg.status)
+        if (msg.type === resultType && msg.status) finish(msg.status)
       } catch {
         // a malformed reply is not worth breaking the page over
       }
@@ -67,12 +67,21 @@ function ask(type: string, timeoutMs = 30_000): Promise<NotificationStatus> {
 
 /** Current permission state, without raising the OS prompt. */
 export function notificationStatus(): Promise<NotificationStatus> {
-  return ask("notifications:status", 5_000)
+  return ask("notifications:status", "notifications:result", 5_000)
 }
 
 /** Raises the OS prompt. Only call this after the user has opted in on our side. */
 export function requestNotifications(): Promise<NotificationStatus> {
-  return ask("notifications:request")
+  return ask("notifications:request", "notifications:result")
+}
+
+/**
+ * The OS-level microphone prompt, raised natively. The WebView's own
+ * getUserMedia grant is separate — callers still do that — but without the
+ * OS grant first, iOS fails the in-page request with no prompt at all.
+ */
+export function requestNativeMic(): Promise<NotificationStatus> {
+  return ask("mic:request", "mic:result")
 }
 
 /** Remembers that we already made our pitch, so it is never shown twice. */
