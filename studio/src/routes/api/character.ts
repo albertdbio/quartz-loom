@@ -14,11 +14,15 @@ import { runtime } from "~/server/runtime"
  */
 export async function POST(event: APIEvent): Promise<Response> {
   if (!rateLimit(`character:${clientIp(event.request)}`, 3, 60_000)) {
+    console.warn("character: rate limited")
     return errorJson(429, "a new friend needs a moment — try again shortly")
   }
 
   const key = process.env["FAL_API_KEY"]
-  if (!key) return errorJson(503, "character creation is not available right now")
+  if (!key) {
+    console.error("character: FAL_API_KEY missing")
+    return errorJson(503, "character creation is not available right now")
+  }
 
   return runtime.runPromise(
     Effect.gen(function* () {
@@ -39,7 +43,9 @@ export async function POST(event: APIEvent): Promise<Response> {
       return json({ sprite })
     }).pipe(
       Effect.catchTag("BadRequest", () =>
-        Effect.succeed(errorJson(400, "describe your friend in a few words (3-120 characters)")),
+        Effect.logWarning("character: bad request body").pipe(
+          Effect.as(errorJson(400, "describe your friend in a few words (3-120 characters)")),
+        ),
       ),
     ),
   )

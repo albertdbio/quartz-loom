@@ -107,8 +107,15 @@ export default function App() {
   }
 
   async function makeFriend() {
+    // dismiss the iOS keyboard first: with it open, the visual viewport is
+    // shifted and a fixed-position sheet's hit regions drift from the pixels
+    if (typeof document !== "undefined") (document.activeElement as HTMLElement | null)?.blur?.()
     const desc = friendPrompt().trim()
-    if (desc.length < 3 || friendBusy()) return
+    if (friendBusy()) return
+    if (desc.length < 3) {
+      setFriendErr("a few more letters — who are they?")
+      return
+    }
     setFriendBusy(true)
     setFriendErr("")
     try {
@@ -735,7 +742,7 @@ const CSS = `
     overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
   .mochiverse .friend-input { width:100%; box-sizing:border-box; margin:6px 0 12px;
     background:rgba(10,8,20,.6); color:var(--text); border:1px solid rgba(255,255,255,.2);
-    border-radius:12px; padding:12px 14px; font:inherit; font-size:15px; }
+    border-radius:12px; padding:12px 14px; font:inherit; font-size:16px; }
   .mochiverse .friend-input:focus { outline:none; border-color:var(--accent); }
 
   /* floating chrome */
