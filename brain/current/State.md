@@ -434,12 +434,25 @@ this track builds repeatable measurements and hands them off.
 
 ## Operational state
 
-- The prior session-20 browser release remains banked, but dedicated pod
-  `4ddf7fhj9bdbam` is **EXITED** and cannot restart because its host has no free
-  GPU. The loopback server is gone and the frozen volume is unreachable. Do not
-  reconnect, retry a start, reprovision the pod, or rebuild that frozen stack on
-  another host. This session used only local MPS/CPU measurement and did not
-  touch any pod.
+- **RunPod is decommissioned to one stopped pod (2026-07-27).** Every trained
+  checkpoint that existed only on pod volumes is rescued to local disk,
+  sha256-verified both ends: the lambda-sweep finals (`lam0p05`/`lam0p2`
+  step-50) and the Fisher-norm final, all in
+  `~/Downloads/real-time-video-gpu-assets/` with a provenance README. Pods
+  `4ddf7fhj9bdbam`, `ooprxl8l5c7c59`, `s9fsifozhnl9nv`, `3c4b2kbk0agcfc`,
+  `9k4f2dkql73t77` are TERMINATED (contents verified redundant or rescued
+  first). Only `openstudio-l40s` (`7ldq4tgshzu4eh`) remains, EXITED, $0.30/day
+  volume — it holds the working sd-turbo serve chain. Burn went ~$31/day →
+  $0.30/day. See [[Gotcha-Stopping-A-Pod-Releases-Its-GPU]] before ever
+  stopping a pod that holds unretrieved data.
+- **The product track shipped the fused-character feature (2026-07-28).**
+  mochiverse.io now generates characters (fal flux/schnell → rembg), anchors
+  them via the scaffold, and while live composites them INTO the outbound
+  stream, where lucy-restyle re-renders them as scene content (verified:
+  restyled with the scene through a live Midas switch, moved on tap). Two
+  experiments (~$2.30) established the architecture: prompt-insertion works
+  but re-hallucinates per frame; composited characters persist BECAUSE the
+  input re-asserts them. PLAN.md progress entry 49 has the full record.
 - No new RunPod amount is entered because an exact billed total for this
   sequence is not available. Do not infer spend from elapsed estimates.
 - The only new known review spend entered in the ledger is **$0.417366** for
