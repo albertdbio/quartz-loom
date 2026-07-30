@@ -2,6 +2,8 @@ import { createSignal, For, onCleanup, onMount, Show } from "solid-js"
 import AppOnboarding from "~/components/app-onboarding"
 import SmsSignIn from "~/components/sms-signin"
 import Mochi, { type MochiMood } from "~/components/mochi"
+import { startVoicePrompt, voiceSupported, type VoiceSession } from "~/lib/voice-prompt"
+import { cropSpriteToContent } from "~/lib/sprite"
 import { alreadyAsked, isNative, markAsked, notificationStatus, requestNotifications } from "~/lib/native"
 import {
   loadProfile,
@@ -69,6 +71,104 @@ export default function App() {
   // stays put across rotations and resizes; tapping re-places her, which is
   // what makes her feel present rather than pasted on.
   const [mochiOn, setMochiOn] = createSignal(false)
+  // A generated friend replaces Mochi inside the same scaffold. The sprite is
+  // a data URL in localStorage: characters should survive reloads without a
+  // media store, and 300KB of PNG is cheap against a 5MB quota.
+  const CHARACTER_KEY = "mochiverse.character.v1"
+  const [sprite, setSprite] = createSignal<string | null>(null)
+  const [friendOpen, setFriendOpen] = createSignal(false)
+  const [friendPrompt, setFriendPrompt] = createSignal("")
+  const [friendBusy, setFriendBusy] = createSignal(false)
+  const [friendErr, setFriendErr] = createSignal("")
+  // Voice: spoken words become the live prompt. The insertion experiment
+  // showed the model re-hallucinates entities per frame, so voice is framed as
+  // "changing the weather", not "commanding characters" — the overlay owns
+  // the character.
+  const [voiceOn, setVoiceOn] = createSignal(false)
+  // True while the friend is riding INSIDE the outbound stream (the model
+  // re-renders them as scene content). The DOM overlay hides for the
+  // duration — otherwise the friend appears twice.
+  const [fusionActive, setFusionActive] = createSignal(false)
+  const [voiceHeard, setVoiceHeard] = createSignal("")
+  let voiceSession: VoiceSession | null = null
+
+  function loadCharacter() {
+    try {
+      const raw = localStorage.getItem(CHARACTER_KEY)
+      if (!raw) return
+      const c = JSON.parse(raw) as { sprite?: string }
+      if (typeof c.sprite === "string" && c.sprite.startsWith("data:image/")) {
+        setSprite(c.sprite)
+        setMochiOn(true)
+      }
+    } catch {
+      // corrupted entry — the friend can be re-made
+    }
+  }
+
+  async function makeFriend() {
+    const desc = friendPrompt().trim()
+    if (desc.length < 3 || friendBusy()) return
+    setFriendBusy(true)
+    setFriendErr("")
+    try {
+      const res = await fetch("/api/character", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ prompt: desc }),
+      })
+      const body = (await res.json()) as { sprite?: string; error?: string }
+      if (!res.ok || !body.sprite) throw new Error(body.error ?? "could not create your friend")
+      // crop to opaque content so the scaffold renders honest pixels
+      const cropped = await cropSpriteToContent(body.sprite).catch(() => body.sprite!)
+      setSprite(cropped)
+      setMochiOn(true)
+      setFriendOpen(false)
+      try {
+        localStorage.setItem(CHARACTER_KEY, JSON.stringify({ sprite: cropped, prompt: desc, at: Date.now() }))
+      } catch {
+        // quota/private mode — the friend lives for this session only
+      }
+      reactMochi("wow")
+    } catch (e) {
+      setFriendErr(e instanceof Error ? e.message : String(e))
+    } finally {
+      setFriendBusy(false)
+    }
+  }
+
+  function toggleVoice() {
+    if (voiceOn()) {
+      voiceSession?.stop()
+      voiceSession = null
+      setVoiceOn(false)
+      setVoiceHeard("")
+      return
+    }
+    voiceSession = startVoicePrompt({
+      onInterim: (t) => setVoiceHeard(t),
+      onFinal: (t) => {
+        setVoiceHeard(t)
+        void speakTransform(t)
+      },
+      onUnavailable: (reason) => {
+        setErr(reason)
+        setVoiceOn(false)
+      },
+    })
+    if (voiceSession) setVoiceOn(true)
+  }
+
+  /** A spoken phrase becomes the live prompt, styled like the deck's prompts. */
+  async function speakTransform(text: string) {
+    if (!rt) return
+    reactMochi("happy")
+    try {
+      await rt.set({ prompt: { text, enhance: true } })
+    } catch {
+      // a dropped set is invisible; the next utterance retries naturally
+    }
+  }
   const [mochiPos, setMochiPos] = createSignal({ x: 78, y: 62 })
   const [mochiMood, setMochiMood] = createSignal<MochiMood>("idle")
   let moodTimer: ReturnType<typeof setTimeout> | null = null
@@ -144,6 +244,7 @@ export default function App() {
     const saved = loadProfile()
     if (saved) setProfile(saved)
     else setShowOnboarding(true)
+    loadCharacter()
   })
 
   function finishOnboarding(p?: UserProfile) {
@@ -246,12 +347,57 @@ export default function App() {
         },
         audio: false,
       })
+
+      // FUSION (dev flag ?fusion=1): draw the friend INTO the outbound frames
+      // so the model re-renders character and scene together — the experiment
+      // that decides whether "in the world" can beat "on the glass". Kept off
+      // the shipped path until the evidence says otherwise.
+      let sendStream = stream
+      // Fusion is the default whenever a friend exists — the experiment showed
+      // the model preserves a composited character, restyles it WITH the scene
+      // (8-bit made him pixel art; Midas turned him gold), and the per-frame
+      // re-compositing is itself the persistence mechanism. `?nofusion` keeps
+      // an escape hatch for debugging.
+      if (sprite() && !new URLSearchParams(window.location.search).has("nofusion")) {
+        const spriteImg = new Image()
+        spriteImg.src = sprite()!
+        const raw = document.createElement("video")
+        raw.srcObject = stream
+        raw.muted = true
+        await raw.play().catch(() => {})
+        const canvas = document.createElement("canvas")
+        canvas.width = model.width
+        canvas.height = model.height
+        const ctx = canvas.getContext("2d")!
+        const draw = () => {
+          if (!stream) return
+          ctx.drawImage(raw, 0, 0, canvas.width, canvas.height)
+          if (spriteImg.complete && spriteImg.naturalWidth > 0) {
+            // mirror the on-screen anchor: position as % of frame, ~28% tall,
+            // with a slow bob so the model renders someone alive, not a decal
+            const h = canvas.height * 0.28
+            const w = h * (spriteImg.naturalWidth / spriteImg.naturalHeight)
+            const bob = Math.sin(performance.now() / 650) * canvas.height * 0.008
+            ctx.drawImage(
+              spriteImg,
+              (mochiPos().x / 100) * canvas.width - w / 2,
+              (mochiPos().y / 100) * canvas.height - h * 0.9 + bob,
+              w,
+              h,
+            )
+          }
+          requestAnimationFrame(draw)
+        }
+        draw()
+        sendStream = canvas.captureStream(Number(model.fps) || 25)
+        setFusionActive(true)
+      }
       if (pipVideo && showPip()) {
         pipVideo.srcObject = stream
         void pipVideo.play().catch(() => {})
       }
       const client = createDecartClient({ apiKey: minted.apiKey })
-      rt = await client.realtime.connect(stream, {
+      rt = await client.realtime.connect(sendStream, {
         model,
         mirror: false,
         onRemoteStream: (edited: MediaStream) => {
@@ -345,6 +491,7 @@ export default function App() {
       // best-effort teardown
     }
     rt = null
+    setFusionActive(false)
     stopCountdown()
     stream?.getTracks().forEach((t) => t.stop())
     stream = null
@@ -352,7 +499,10 @@ export default function App() {
     if (status() === "live") setStatus("idle")
   }
 
-  onCleanup(stop)
+  onCleanup(() => {
+    voiceSession?.stop()
+    stop()
+  })
 
   return (
     <main class="mochiverse">
@@ -374,9 +524,9 @@ export default function App() {
       <video ref={pipVideo} class="pip" classList={{ hidden: !showPip() }} autoplay playsinline muted />
 
       {/* Mochi stands in the scene, anchored in stage space */}
-      <Show when={mochiOn()}>
+      <Show when={mochiOn() && !(status() === "live" && fusionActive())}>
         <div class="mochi-anchor" style={{ left: `${mochiPos().x}%`, top: `${mochiPos().y}%` }}>
-          <Mochi size={116} mood={mochiMood()} />
+          <Mochi size={sprite() ? 172 : 116} mood={mochiMood()} sprite={sprite() ?? undefined} />
         </div>
       </Show>
 
@@ -401,10 +551,22 @@ export default function App() {
           <button
             class={`chip ${mochiOn() ? "on" : ""}`}
             onClick={() => setMochiOn(!mochiOn())}
-            title={mochiOn() ? "hide Mochi" : "show Mochi"}
+            title={mochiOn() ? "hide your friend" : "show your friend"}
           >
             {mochiOn() ? "🫧" : "🫥"}
           </button>
+          <button class="chip" onClick={() => setFriendOpen(true)} title="create a friend">
+            ✨
+          </button>
+          <Show when={status() === "live" && voiceSupported()}>
+            <button
+              class={`chip ${voiceOn() ? "on" : ""}`}
+              onClick={toggleVoice}
+              title={voiceOn() ? "stop voice control" : "speak to change the scene"}
+            >
+              🎙
+            </button>
+          </Show>
           <Show when={freeLeft() !== null}>
             <span class={`chip countdown ${(freeLeft() ?? 0) <= 10 ? "low" : ""}`}>
               {Math.floor((freeLeft() ?? 0) / 60)}:{String((freeLeft() ?? 0) % 60).padStart(2, "0")}
@@ -469,6 +631,34 @@ export default function App() {
           </div>
         </Show>
       </div>
+
+      <Show when={voiceOn() && voiceHeard()}>
+        <p class="voice-heard">“{voiceHeard()}”</p>
+      </Show>
+
+      <Show when={friendOpen()}>
+        <div class="pw-backdrop" onClick={(e) => e.target === e.currentTarget && setFriendOpen(false)}>
+          <div class="pw" role="dialog" aria-modal="true" aria-label="create a friend">
+            <h2>Dream up a friend ✨</h2>
+            <p>Describe anyone — they'll appear in your world.</p>
+            <input
+              class="friend-input"
+              placeholder="a tiny dragon in pajamas"
+              maxlength="120"
+              value={friendPrompt()}
+              onInput={(e) => setFriendPrompt(e.currentTarget.value)}
+              onKeyDown={(e) => e.key === "Enter" && void makeFriend()}
+            />
+            <Show when={friendErr()}>
+              <p class="err inline">{friendErr()}</p>
+            </Show>
+            <button class="cta" disabled={friendBusy()} onClick={() => void makeFriend()}>
+              {friendBusy() ? "dreaming…" : "bring them to life"}
+            </button>
+            <button class="dismiss" onClick={() => setFriendOpen(false)}>not now</button>
+          </div>
+        </div>
+      </Show>
 
       <Show when={quotaSpent()}>
         <div class="pw-backdrop" onClick={(e) => e.target === e.currentTarget && setQuotaSpent(false)}>
@@ -538,6 +728,15 @@ const CSS = `
     pointer-events:none; transition:left .45s cubic-bezier(.34,1.3,.64,1),
     top .45s cubic-bezier(.34,1.3,.64,1); }
   .mochiverse .chip.on { border-color:var(--accent); color:var(--accent); }
+  .mochiverse .voice-heard { position:absolute; left:50%; bottom:118px; transform:translateX(-50%);
+    z-index:6; margin:0; max-width:80%; color:var(--accent); font-size:13px; text-align:center;
+    background:rgba(10,8,20,.6); border-radius:999px; padding:6px 14px;
+    backdrop-filter:blur(8px); -webkit-backdrop-filter:blur(8px);
+    overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  .mochiverse .friend-input { width:100%; box-sizing:border-box; margin:6px 0 12px;
+    background:rgba(10,8,20,.6); color:var(--text); border:1px solid rgba(255,255,255,.2);
+    border-radius:12px; padding:12px 14px; font:inherit; font-size:15px; }
+  .mochiverse .friend-input:focus { outline:none; border-color:var(--accent); }
 
   /* floating chrome */
   .mochiverse .top { position:absolute; top:0; left:0; right:0; z-index:6;

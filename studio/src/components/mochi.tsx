@@ -21,6 +21,13 @@ export default function Mochi(props: {
   mood?: MochiMood
   /** Soft contact shadow — the cue that sells "standing in the scene". */
   shadow?: boolean
+  /**
+   * A generated character (transparent PNG data URL) takes Mochi's place but
+   * keeps her whole scaffold — anchor, contact shadow, idle bob, hop, wow.
+   * The scaffold is what makes ANY sprite read as "standing there";
+   * the art only decides who is doing the standing.
+   */
+  sprite?: string | undefined
 }) {
   const size = () => props.size ?? 96
   const mood = () => props.mood ?? "idle"
@@ -49,7 +56,9 @@ export default function Mochi(props: {
           </radialGradient>
         </defs>
 
-        <circle cx="50" cy="52" r="46" fill="url(#mochiGlow)" />
+        <Show when={!props.sprite}>
+          <circle cx="50" cy="52" r="46" fill="url(#mochiGlow)" />
+        </Show>
 
         <Show when={props.shadow !== false}>
           {/* One broad pool reads as a halo around her lower body. Weight comes
@@ -62,6 +71,26 @@ export default function Mochi(props: {
           </g>
         </Show>
 
+        <Show when={props.sprite} fallback={<MochiArt />}>
+          <g class="mochi-body">
+            <image
+              href={props.sprite}
+              x="8"
+              y="-14"
+              width="84"
+              height="100"
+              preserveAspectRatio="xMidYMax meet"
+            />
+          </g>
+        </Show>
+      </svg>
+    </div>
+  )
+}
+
+/** The procedural Mochi herself — the default resident of the scaffold. */
+function MochiArt() {
+  return (
         <g class="mochi-body">
           {/* wings — capsules at the body's equator, mirroring the 3D rig */}
           <rect x="4" y="46" width="16" height="8" rx="4" fill="#4a90e2" transform="rotate(-14 12 50)" />
@@ -90,8 +119,6 @@ export default function Mochi(props: {
           <path class="mochi-mouth" d="M45 62 Q50 66 55 62" stroke="#111" stroke-width="2"
             fill="none" stroke-linecap="round" />
         </g>
-      </svg>
-    </div>
   )
 }
 
