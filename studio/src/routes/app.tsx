@@ -72,9 +72,22 @@ export default function App() {
     setCanNotify((await notificationStatus()) === "undetermined")
   }
 
+  /**
+   * The opt-in used to live only on the out-of-minutes sheet, which owners and
+   * pro members never see — so the people most likely to want notifications
+   * were the only ones who could not switch them on. A bell offers it directly,
+   * and disappears once the one iOS prompt has been spent either way.
+   */
+  const [bellOffered, setBellOffered] = createSignal(false)
+  async function offerBell() {
+    if (!isNative() || alreadyAsked()) return
+    setBellOffered((await notificationStatus()) === "undetermined")
+  }
+
   async function optInNotify() {
     markAsked()
     setCanNotify(false)
+    setBellOffered(false)
     setNotifyOn((await requestNotifications()) === "granted")
   }
   // Mochi stands in the scene. Position is a percentage of the stage so she
@@ -325,6 +338,7 @@ export default function App() {
     if (saved) setProfile(saved)
     else setShowOnboarding(true)
     loadCharacter()
+    void offerBell()
   })
 
   function finishOnboarding(p?: UserProfile) {
@@ -639,6 +653,11 @@ export default function App() {
           <button class="chip" onClick={() => setFriendOpen(true)} title="create a friend">
             ✨
           </button>
+          <Show when={bellOffered()}>
+            <button class="chip" onClick={() => void optInNotify()} title="get notified when your minutes reset">
+              🔔
+            </button>
+          </Show>
           <Show when={status() === "live"}>
             <button
               class={`chip ${voiceOn() ? "on" : ""}`}
