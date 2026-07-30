@@ -74,3 +74,41 @@ Point an A record at `5.78.89.215`, add the name to `/etc/caddy/Caddyfile`
 alongside the sslip.io host, and `systemctl reload caddy` — Caddy issues the
 cert automatically. Update `PUBLIC_BASE_URL` in `.env` and restart, since
 Stripe redirect URLs are built from it.
+
+## Push notifications (APNs, direct)
+
+The box talks to Apple directly over HTTP/2 token auth — no relay service.
+Device tokens are collected by `/api/push/register` into the sqlite file.
+
+**The one manual step** (requires the Apple account, ~2 minutes): create an
+APNs Auth Key at developer.apple.com → Certificates, Identifiers & Profiles →
+Keys → "+" → enable "Apple Push Notifications service (APNs)". Download
+`AuthKey_<KEYID>.p8` (downloadable ONCE — keep it), then:
+
+```bash
+scp AuthKey_<KEYID>.p8 mochiverse@5.78.89.215:~/app/.data/apns-key.p8
+ssh mochiverse@5.78.89.215 'chmod 600 ~/app/.data/apns-key.p8 && cat >> ~/app/.env <<ENV
+APNS_KEY_PATH=/home/mochiverse/app/.data/apns-key.p8
+APNS_KEY_ID=<KEYID>
+ENV
+sudo systemctl restart mochiverse'
+```
+
+Verify with a real send (the response carries APNs' own per-token answer):
+
+```bash
+curl -s -X POST https://mochiverse.io/api/push/send \
+  -H "x-owner-key: $OWNER_KEY" -H "content-type: application/json" \
+  -d '{"audience":"all","title":"Mochiverse","body":"push is alive ✨"}'
+```
+
+`InvalidProviderToken` = wrong key/team; `BadDeviceToken` on both gateways =
+stale token (auto-forgotten); `sent: N` = it worked. Note the two `.p8` files
+in ~/Downloads are NOT APNs keys — both were probed against APNs on
+2026-07-31 and rejected with InvalidProviderToken (they're App Store Connect
+keys). A fresh APNs key is required.
+
+`mochiverse-push-reset.timer` fires on the 1st (00:10 UTC) and broadcasts the
+minutes-reset notice via the same endpoint. Dev-signed builds get pushes via
+the sandbox gateway automatically (production first, sandbox on
+BadDeviceToken).

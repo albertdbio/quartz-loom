@@ -93,3 +93,11 @@ export function forgetPushToken(token: string): void {
 export function resetPushTableForTests(): void {
   ready = false
 }
+
+/** Every registered device — the audience for a broadcast. */
+export function allPushTokens(): ReadonlyArray<{ token: string; platform: PushPlatform }> {
+  const rows = table()
+    .prepare("SELECT token, platform FROM push_tokens")
+    .all() as Array<{ token: string; platform: string }>
+  return rows.map((r) => ({ token: r.token, platform: r.platform as PushPlatform }))
+}
